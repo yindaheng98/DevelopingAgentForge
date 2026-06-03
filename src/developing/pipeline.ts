@@ -49,21 +49,23 @@ export function parseDevelopingArgs(
   });
 
   if (
-    [config, planPath, overviewPath, responsePath, responseArchivePath].some(
-      (value) => value === undefined,
-    )
+    config === undefined ||
+    planPath === undefined ||
+    overviewPath === undefined ||
+    responsePath === undefined ||
+    responseArchivePath === undefined
   ) {
     throw new Error(USAGE);
   }
 
   return {
-    configPaths: config!,
+    configPaths: config,
     runningOptions: {
       targetPath: targetPath ?? ".",
-      planPath: planPath!,
-      overviewPath: overviewPath!,
-      responsePath: responsePath!,
-      responseArchivePath: responseArchivePath!,
+      planPath,
+      overviewPath,
+      responsePath,
+      responseArchivePath,
       maxRounds: Number(maxRounds ?? 10),
     },
   };
@@ -87,7 +89,7 @@ export async function developing(
       ? (await readFile(options.responsePath, "utf8")).trim()
       : "";
 
-    console.log(`\n# Developing round ${round}\n`);
+    console.log(`\n# Developing round ${String(round)}\n`);
 
     const response = (
       await team.runStreamed(
@@ -109,7 +111,7 @@ export async function developing(
 
     await mkdir(path.dirname(options.responsePath), { recursive: true });
     await writeFile(options.responsePath, `${response}\n`, "utf8");
-    console.log(`\n# Saved response ${round} to ${options.responsePath}\n`);
+    console.log(`\n# Saved response to ${options.responsePath}\n`);
 
     await mkdir(options.responseArchivePath, { recursive: true });
     const archiveFile = path.join(
@@ -117,11 +119,11 @@ export async function developing(
       `${new Date().toISOString().replace(/[:.]/g, "-")}.md`,
     );
     await writeFile(archiveFile, `${response}\n`, "utf8");
-    console.log(`\n# Archived response ${round} to ${archiveFile}\n`);
+    console.log(`\n# Archived response to ${archiveFile}\n`);
   }
 
   throw new Error(
-    `Reached --max-rounds ${options.maxRounds} before the agent returned Finished.`,
+    `Reached --max-rounds ${String(options.maxRounds)} before the agent returned Finished.`,
   );
 }
 

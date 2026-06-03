@@ -14,10 +14,7 @@ export type DeveloperConstants = {
   workspacePath: string;
 };
 
-export class DeveloperAgent extends Agent<
-  DeveloperVariables,
-  DeveloperConstants
-> {
+export class DeveloperAgent extends Agent<DeveloperVariables, DeveloperConstants> {
   constructor(thread: Thread, constants: Readonly<DeveloperConstants>) {
     const workspacePath = path.resolve(constants.workspacePath);
 
