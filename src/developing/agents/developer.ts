@@ -33,12 +33,8 @@ export class DeveloperAgent extends Agent<DeveloperVariables, DeveloperConstants
     const absoluteTargetPath = path.isAbsolute(variables.targetPath)
       ? path.resolve(variables.targetPath)
       : path.resolve(workspacePath, variables.targetPath);
-    const absolutePlanPath = path.isAbsolute(variables.planPath)
-      ? path.resolve(variables.planPath)
-      : path.resolve(workspacePath, variables.planPath);
-    const absoluteOverviewPath = path.isAbsolute(variables.overviewPath)
-      ? path.resolve(variables.overviewPath)
-      : path.resolve(workspacePath, variables.overviewPath);
+    const absolutePlanPath = path.resolve(variables.planPath);
+    const absoluteOverviewPath = path.resolve(variables.overviewPath);
 
     if (!statSync(absolutePlanPath).isFile()) {
       throw new Error(`planPath must be a file: ${absolutePlanPath}`);
