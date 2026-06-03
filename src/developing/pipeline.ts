@@ -20,7 +20,7 @@ export type DevelopingOptions = {
 };
 
 const USAGE =
-  "Usage: npm run developing-loop -- --config <path> --coding-plan-path <path> --code-overview-path <path> --response-path <path> --response-archive-path <folder> [--target-path <folder>] [--max-rounds <positive-integer>]";
+  "Usage: npm run developing -- --config <path> --coding-plan-path <path> --code-overview-path <path> --response-path <path> --response-archive-path <folder> [--target-path <folder>] [--max-rounds <positive-integer>]";
 
 export function parseDevelopingArgs(
   args: readonly string[],
