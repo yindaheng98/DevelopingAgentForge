@@ -6,26 +6,21 @@ import {
 } from "./types.js";
 
 export type DeveloperVariables = DevelopingAgentVariables & {
-  currentTaskPath: string;
-  previousFeedbackPath?: string;
+  currentTask: string;
+  previousFeedback?: string;
 };
 
 export type DeveloperConstants = DevelopingAgentConstants;
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
-  private optionalWorkspaceRelativePath(filePath: string | undefined): string {
-    return filePath === undefined ? "(none)" : this.workspaceRelativePath(filePath);
-  }
-
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
-    const currentTaskPath = this.workspaceRelativePath(variables.currentTaskPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
     const overviewPath = this.workspaceRelativePath(variables.overviewPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
-    const previousFeedbackPath = this.optionalWorkspaceRelativePath(variables.previousFeedbackPath);
     const statePath = this.workspaceRelativePath(variables.statePath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
+    const previousFeedback = variables.previousFeedback ?? "(none)";
 
     return `
 ${DEVELOPING_CONTRACT}
@@ -39,8 +34,12 @@ Read:
 - coding plan: ${codingPlanPath}
 - code overview: ${overviewPath}
 - implementation state: ${statePath}
-- current task: ${currentTaskPath}
-- previous next-task handoff, if present: ${previousFeedbackPath}
+
+Current task:
+${variables.currentTask}
+
+Previous next-task handoff, if present:
+${previousFeedback}
 
 Implement exactly the task described in current_task.md.
 Do not choose a different task.
