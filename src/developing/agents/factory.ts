@@ -1,11 +1,11 @@
 import type { AgentFactoryMap } from "coding-agent-forge";
 
-import { ExperimentContractAuditorAgent } from "./auditor.js";
-import { DeveloperAgent } from "./developer.js";
 import { CodingPlanInterpreterAgent } from "./interpreter.js";
-import { IntegrationManagerAgent } from "./manager.js";
-import { CodeReviewerAgent } from "./reviewer.js";
+import { DeveloperAgent } from "./developer.js";
 import { HarnessEngineerAgent } from "./harness.js";
+import { CodeReviewerAgent } from "./reviewer.js";
+import { ExperimentContractAuditorAgent } from "./auditor.js";
+import { IntegrationManagerAgent } from "./manager.js";
 
 export const agentFactories: AgentFactoryMap = {
   "coding-plan-interpreter": (thread, constants) =>
