@@ -3,9 +3,10 @@ set -euo pipefail
 
 npm run developing -- \
   --config "agent-forge.yaml" \
-  --target-path "." \
+  --target-path "output/codebase" \
+  --artifact-dir "output/developing" \
+  --artifact-archive-dir "output/developing-archives" \
+  --paper-blueprint-path "output/paper_blueprint.md" \
+  --experiment-plan-path "output/experiment_plan.md" \
   --coding-plan-path "output/coding_plan.md" \
-  --code-overview-path "output/code_overview.md" \
-  --response-path "output/developing-response.md" \
-  --response-archive-path "output/developing-response-archive" \
-  --max-rounds "10"
+  --max-iterations "10"
