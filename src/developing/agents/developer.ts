@@ -50,7 +50,7 @@ If the current task is already fully implemented, do not modify code; report the
 If tests fail due to unrelated pre-existing failures, isolate and report them.
 
 Do not update ${overviewPath}; IntegrationManager owns it.
-Do not return Finished. Output the complete developer_report.md contents.
+Do not return Finished. Output the developer report content in your response; the pipeline will save and pass it to later agents.
 
 ${REPORT_HEADER}
 `;
