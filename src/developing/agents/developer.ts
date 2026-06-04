@@ -32,7 +32,7 @@ ${DEVELOPING_CONTRACT}
 
 Implement the selected developing task.
 Paths are relative to the configured workspace path.
-Work in the codebase at ${targetPath}.
+Work in the codebase at ${targetPath}/.
 Read:
 - paper blueprint: ${paperBlueprintPath}
 - experiment plan: ${experimentPlanPath}
