@@ -7,8 +7,6 @@ export type DevelopingAgentVariables = {
   targetPath: string;
   overviewPath: string;
   statePath: string;
-  artifactDir: string;
-  artifactrAchiveDir: string;
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;
