@@ -41,10 +41,10 @@ ${variables.currentTask}
 Previous next-task handoff, if present:
 ${previousFeedback}
 
-Implement exactly the task described in current_task.md.
+Implement exactly the task described in current task.
 Do not choose a different task.
-Do not redo verified work from implementation_state.md.
-Do not modify metric definitions, claim mapping, or freeze rules unless current_task.md explicitly requires it.
+Do not redo verified work from ${statePath}.
+Do not modify metric definitions, claim mapping, or freeze rules unless Current task explicitly requires it.
 Keep testing and harness code separate.
 If the current task is already fully implemented, do not modify code; report the evidence.
 If tests fail due to unrelated pre-existing failures, isolate and report them.

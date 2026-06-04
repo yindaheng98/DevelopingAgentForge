@@ -59,16 +59,16 @@ Update these files directly:
 - ${overviewPath}
 - ${nextDeveloperTaskPath}
 
-implementation_state.md must keep stable task IDs, status, claim/experiment/metric linkage, files, acceptance commands, and verification evidence.
-code_overview.md must describe modules, CLI, tests, harness, raw result layout, and freeze protocol when known.
-next_developer_task.md must contain a concrete next selected task unless the work is finished.
+${statePath} must keep stable task IDs, status, claim/experiment/metric linkage, files, acceptance commands, and verification evidence.
+${overviewPath} must describe modules, CLI, tests, harness, raw result layout, and freeze protocol when known.
+${nextDeveloperTaskPath} must contain a concrete next selected task unless the work is finished.
 
 Return exactly:
 Finished
 
-only when all required coding_plan work is verified or explicitly waived, unit/fixture/CLI smoke checks pass or are waived with reason, harness smoke emits parseable raw results or is waived with reason, and contract_audit.md has no blocking issue.
+only when all required work from the coding plan at ${codingPlanPath} is verified or explicitly waived, unit/fixture/CLI smoke checks pass or are waived with reason, harness smoke emits parseable raw results or is waived with reason, and Contract audit has no blocking issue.
 
-Otherwise return a concise developing-response.md handoff that names the next task and any blockers. Developer does not decide Finished; only you do.
+Otherwise return a concise response handoff that names the next task and any blockers. Developer does not decide Finished; only you do.
 `;
   }
 }
