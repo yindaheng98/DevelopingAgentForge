@@ -4,7 +4,6 @@ import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 export type CodeReviewerVariables = DevelopingAgentVariables & {
   currentTask: string;
   developerReport: string;
-  testReport: string;
   harnessReport: string;
 };
 
@@ -39,9 +38,6 @@ ${variables.currentTask}
 
 Developer report:
 ${variables.developerReport}
-
-Test report:
-${variables.testReport}
 
 Harness report:
 ${variables.harnessReport}

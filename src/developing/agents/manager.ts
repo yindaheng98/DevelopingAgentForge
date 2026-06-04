@@ -4,7 +4,6 @@ import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 export type IntegrationManagerVariables = DevelopingAgentVariables & {
   currentTask: string;
   developerReport: string;
-  testReport: string;
   harnessReport: string;
   review: string;
   audit: string;
@@ -41,9 +40,6 @@ ${variables.currentTask}
 
 Developer report:
 ${variables.developerReport}
-
-Test report:
-${variables.testReport}
 
 Harness report:
 ${variables.harnessReport}
