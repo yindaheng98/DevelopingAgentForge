@@ -1,4 +1,4 @@
-import type { Thread } from "coding-agent-forge";
+import type { PromptConstants, Thread } from "coding-agent-forge";
 import { Agent } from "coding-agent-forge/agent";
 import { statSync } from "node:fs";
 import path from "node:path";
@@ -24,12 +24,16 @@ export abstract class DevelopingAgent<Variables extends DevelopingAgentVariables
 > {
   protected readonly workspacePath: string;
 
-  constructor(thread: Thread, constants: Readonly<DevelopingAgentConstants>) {
+  constructor(thread: Thread, constants: Readonly<PromptConstants>) {
+    if (!constants.workspacePath) {
+      throw new Error("Developing agent constants.workspacePath must be configured.");
+    }
+
     const workspacePath = path.resolve(constants.workspacePath);
     if (!statSync(workspacePath).isDirectory()) {
       throw new Error(`workspacePath must be a directory: ${workspacePath}`);
     }
-    super(thread, { ...constants, workspacePath });
+    super(thread, { workspacePath });
     this.workspacePath = workspacePath;
   }
 
