@@ -1,74 +1,59 @@
-import type { Thread } from "coding-agent-forge";
-import { Agent } from "coding-agent-forge/agent";
-import { statSync } from "node:fs";
-import path from "node:path";
+import { DEVELOPING_CONTRACT, REPORT_HEADER } from "./prompts.js";
+import {
+  DevelopingAgent,
+  type DevelopingAgentConstants,
+  type DevelopingAgentVariables,
+} from "./types.js";
 
-export type DeveloperVariables = {
-  targetPath: string;
-  planPath: string;
-  overviewPath: string;
-  previousResponse: string;
+export type DeveloperVariables = DevelopingAgentVariables & {
+  currentTaskPath: string;
+  previousFeedbackPath?: string;
 };
 
-export type DeveloperConstants = {
-  workspacePath: string;
-};
+export type DeveloperConstants = DevelopingAgentConstants;
 
-export class DeveloperAgent extends Agent<DeveloperVariables, DeveloperConstants> {
-  constructor(thread: Thread, constants: Readonly<DeveloperConstants>) {
-    const workspacePath = path.resolve(constants.workspacePath);
-
-    if (!statSync(workspacePath).isDirectory()) {
-      throw new Error(`workspacePath must be a directory: ${workspacePath}`);
-    }
-
-    super(thread, { ...constants, workspacePath });
+export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
+  private optionalWorkspaceRelativePath(filePath: string | undefined): string {
+    return filePath === undefined ? "(none)" : this.workspaceRelativePath(filePath);
   }
 
-  protected buildPrompt(
-    variables: Readonly<DeveloperVariables>,
-    constants: Readonly<DeveloperConstants>,
-  ): string {
-    const workspacePath = constants.workspacePath;
-    const absoluteTargetPath = path.isAbsolute(variables.targetPath)
-      ? path.resolve(variables.targetPath)
-      : path.resolve(workspacePath, variables.targetPath);
-    const absolutePlanPath = path.resolve(variables.planPath);
-    const absoluteOverviewPath = path.resolve(variables.overviewPath);
-
-    if (!statSync(absolutePlanPath).isFile()) {
-      throw new Error(`planPath must be a file: ${absolutePlanPath}`);
-    }
-    if (!statSync(absoluteOverviewPath).isFile()) {
-      throw new Error(`overviewPath must be a file: ${absoluteOverviewPath}`);
-    }
-
-    const targetPath = path.relative(workspacePath, absoluteTargetPath);
-    const planPath = path.relative(workspacePath, absolutePlanPath);
-    const overviewPath = path.relative(workspacePath, absoluteOverviewPath);
-    const previousResponse = variables.previousResponse.trim();
-    const taskInstruction = previousResponse
-      ? `The previous response from the last round is below:
-
-${previousResponse}
-
-Treat the previous response as the handoff from the last round. It may contain completed work, remaining work, implementation notes, caveats, and suggested next steps.
-Reconcile that handoff with the current code, the coding plan, and the code overview. Then choose and implement one important unfinished feature from the coding plan.
-Do not redo work that is already implemented unless it is necessary to fix or complete it.`
-      : "Implement one core unfinished feature from the coding plan.";
+  protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
+    const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
+    const currentTaskPath = this.workspaceRelativePath(variables.currentTaskPath);
+    const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
+    const overviewPath = this.workspaceRelativePath(variables.overviewPath);
+    const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
+    const previousFeedbackPath = this.optionalWorkspaceRelativePath(variables.previousFeedbackPath);
+    const statePath = this.workspaceRelativePath(variables.statePath);
+    const targetPath = this.workspaceRelativePath(variables.targetPath);
 
     return `
+${DEVELOPING_CONTRACT}
+
+Implement the selected developing task.
+Paths are relative to the configured workspace path.
 Work in the codebase at ${targetPath}.
-Read the coding plan at ${planPath}, the code overview at ${overviewPath}, and the current codebase.
+Read:
+- paper blueprint: ${paperBlueprintPath}
+- experiment plan: ${experimentPlanPath}
+- coding plan: ${codingPlanPath}
+- code overview: ${overviewPath}
+- implementation state: ${statePath}
+- current task: ${currentTaskPath}
+- previous next-task handoff, if present: ${previousFeedbackPath}
 
-${taskInstruction}
+Implement exactly the task described in current_task.md.
+Do not choose a different task.
+Do not redo verified work from implementation_state.md.
+Do not modify metric definitions, claim mapping, or freeze rules unless current_task.md explicitly requires it.
+Keep testing and harness code separate.
+If the current task is already fully implemented, do not modify code; report the evidence.
+If tests fail due to unrelated pre-existing failures, isolate and report them.
 
-Update the code overview concisely. Besides modifying or adding descriptions of implemented behavior, explain how the implemented feature can support future features. Future plans may not predict the simplest and clearest code design, so revise unreasonable future-feature notes when needed.
+Do not update ${overviewPath}; IntegrationManager owns it.
+Do not return Finished. Output the complete developer_report.md contents.
 
-At the end, if there are no more features from the coding plan left to implement, your final response must be exactly:
-Finished
-
-Otherwise, briefly state what is now implemented and what should be implemented next.
+${REPORT_HEADER}
 `;
   }
 }
