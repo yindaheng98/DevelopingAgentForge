@@ -3,7 +3,7 @@ import { Agent } from "coding-agent-forge/agent";
 import { statSync } from "node:fs";
 import path from "node:path";
 
-export type DevelopingCommonVariables = {
+export type DevelopingAgentVariables = {
   targetPath: string;
   overviewPath: string;
   statePath: string;
@@ -18,7 +18,7 @@ export type DevelopingAgentConstants = {
   workspacePath: string;
 };
 
-export abstract class DevelopingAgent<Variables extends DevelopingCommonVariables> extends Agent<
+export abstract class DevelopingAgent<Variables extends DevelopingAgentVariables> extends Agent<
   Variables,
   DevelopingAgentConstants
 > {
@@ -26,11 +26,9 @@ export abstract class DevelopingAgent<Variables extends DevelopingCommonVariable
 
   constructor(thread: Thread, constants: Readonly<DevelopingAgentConstants>) {
     const workspacePath = path.resolve(constants.workspacePath);
-
     if (!statSync(workspacePath).isDirectory()) {
       throw new Error(`workspacePath must be a directory: ${workspacePath}`);
     }
-
     super(thread, { ...constants, workspacePath });
     this.workspacePath = workspacePath;
   }
