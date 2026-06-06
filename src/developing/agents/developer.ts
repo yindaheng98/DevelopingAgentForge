@@ -1,58 +1,43 @@
-import { DEVELOPING_CONTRACT, REPORT_HEADER } from "./prompts.js";
-import {
-  DevelopingAgent,
-  type DevelopingAgentConstants,
-  type DevelopingAgentVariables,
-} from "./types.js";
+import { excellentRepoSkillInstruction } from "./prompts.js";
+import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type DeveloperVariables = DevelopingAgentVariables & {
+  excellentRepoSkillPath: string;
   currentTask: string;
-  previousFeedback?: string;
+  reviewFeedback?: string;
 };
-
-export type DeveloperConstants = DevelopingAgentConstants;
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
+    const excellentRepoSkillPath = this.workspaceRelativePath(variables.excellentRepoSkillPath);
+    const targetPath = this.workspaceRelativePath(variables.targetPath);
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
-    const overviewPath = this.workspaceRelativePath(variables.overviewPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
-    const statePath = this.workspaceRelativePath(variables.statePath);
-    const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const previousFeedback = variables.previousFeedback ?? "(none)";
+    const reviewFeedback = variables.reviewFeedback ?? "(none)";
+    const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
 
     return `
-${DEVELOPING_CONTRACT}
+${excellentRepoSkillInstructionText}
 
-Implement the selected developing task.
-Paths are relative to the configured workspace path.
-Work in the codebase at ${targetPath}/.
+Work only in the target repository at ${targetPath}/.
+
 Read:
 - paper blueprint: ${paperBlueprintPath}
 - experiment plan: ${experimentPlanPath}
 - coding plan: ${codingPlanPath}
-- code overview: ${overviewPath}
-- implementation state: ${statePath}
 
-Current task:
+Current developer task:
 ${variables.currentTask}
 
-Previous next-task handoff, if present:
-${previousFeedback}
+Review feedback to address:
+${reviewFeedback}
 
-Implement exactly the task described in current task.
-Do not choose a different task.
-Do not redo verified work from ${statePath}.
-Do not modify metric definitions, claim mapping, or freeze rules unless Current task explicitly requires it.
-Keep testing and harness code separate.
-If the current task is already fully implemented, do not modify code; report the evidence.
-If tests fail due to unrelated pre-existing failures, isolate and report them.
+Modify the target repository code for the current task. If review feedback is present, update the code according to that feedback.
 
-Do not update ${overviewPath}; IntegrationManager owns it.
-Do not return Finished. Output the developer report content in your response; the pipeline will save and pass it to later agents.
+Do not modify files outside ${targetPath}/.
 
-${REPORT_HEADER}
+Output a concise developer report with the main changes.
 `;
   }
 }
