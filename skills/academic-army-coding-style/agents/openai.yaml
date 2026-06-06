@@ -1,7 +1,0 @@
-interface:
-  display_name: "Academic Army Coding Style"
-  short_description: "Consistent minimal direct code style"
-  default_prompt: "Use $academic-army-coding-style to write or revise this code in the Academic Army style."
-
-policy:
-  allow_implicit_invocation: true
