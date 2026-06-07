@@ -159,7 +159,7 @@ export async function developing(
     }
 
     let reviewerReport = "";
-    let developerReport = "";
+    const revisionReports: string[] = [];
 
     for (let revision = 1; revision <= options.maxRevisionIterations; revision++) {
       console.log(`\n# Review revision ${String(revision)}\n`);
@@ -172,11 +172,12 @@ export async function developing(
         developerVariables.reviewerReport = reviewerReport;
       }
 
-      developerReport = (await developer.runStreamed(developerVariables, logRecord)).trim();
+      const developerReport = (await developer.runStreamed(developerVariables, logRecord)).trim();
       await writeText(
         path.join(archiveDir, `developer_report_${String(revision).padStart(3, "0")}.md`),
         developerReport,
       );
+      revisionReports.push(`Developer report ${String(revision)}:\n${developerReport}`);
 
       const review = (
         await codeReviewer.runStreamed(
@@ -193,13 +194,21 @@ export async function developing(
         path.join(archiveDir, `code_review_${String(revision).padStart(3, "0")}.md`),
         review,
       );
+      revisionReports.push(`Reviewer report ${String(revision)}:\n${review}`);
 
       if (review.trim() === ACCEPT_MARK) {
+        revisionReports.push("Reviewer accepted the changes.");
         break;
       }
 
+      if (revision === options.maxRevisionIterations) {
+        revisionReports.push("Reviewer did not accept the changes before max revision iterations.");
+      }
       reviewerReport = review;
     }
+
+    const revisionReport = revisionReports.join("\n\n");
+    await writeText(path.join(archiveDir, "revision_report.md"), revisionReport);
 
     const todoUpdateReport = (
       await codingManager.runStreamed(
@@ -209,7 +218,7 @@ export async function developing(
           finishMark: FINISH_MARK,
           phase: "update",
           currentTask,
-          developerReport,
+          revisionReport,
         },
         logRecord,
       )

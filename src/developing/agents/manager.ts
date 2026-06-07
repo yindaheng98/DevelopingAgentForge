@@ -1,13 +1,21 @@
 import { excellentRepoSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
-export type CodingManagerVariables = DevelopingAgentVariables & {
+type SelectCodingManagerVariables = DevelopingAgentVariables & {
   todoPath: string;
   finishMark: string;
-  phase: "select" | "update";
-  currentTask?: string;
-  developerReport?: string;
+  phase: "select";
 };
+
+type UpdateCodingManagerVariables = DevelopingAgentVariables & {
+  todoPath: string;
+  finishMark: string;
+  phase: "update";
+  currentTask: string;
+  revisionReport: string;
+};
+
+export type CodingManagerVariables = SelectCodingManagerVariables | UpdateCodingManagerVariables;
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
@@ -20,9 +28,6 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
 
     if (variables.phase === "update") {
-      const currentTask = variables.currentTask ?? "(none)";
-      const developerReport = variables.developerReport ?? "(none)";
-
       return `
 ${excellentRepoSkillInstructionText}
 
@@ -35,10 +40,12 @@ Read:
 - coding plan: ${codingPlanPath}
 
 Current developer task:
-${currentTask}
+${variables.currentTask}
 
-Developer report:
-${developerReport}
+Revision report:
+${variables.revisionReport}
+
+The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
 
 Update ${todoPath} so completed work and future developer tasks match the current repository. If you find a better future plan, update the future plan in ${todoPath}.
 `;
