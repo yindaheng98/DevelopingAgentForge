@@ -2,6 +2,7 @@ import { excellentRepoSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
+  acceptMark: string;
   currentTask: string;
   developerReport: string;
 };
@@ -34,7 +35,7 @@ Developer report:
 ${variables.developerReport}
 
 If the code for the current task is complete and needs no more changes, output exactly:
-ACCEPT
+${variables.acceptMark}
 
 Otherwise output the revision feedback for the Developer.
 `
