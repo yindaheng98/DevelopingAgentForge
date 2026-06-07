@@ -28,6 +28,31 @@ export type DevelopingOptions = {
   codingPlanPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
+  hooks?: DevelopingHooks;
+};
+
+export type DevelopingHooks = {
+  beforeRevisionLoop?: (
+    iteration: number,
+    agentVariables: DevelopingAgentVariables,
+    currentTask: string,
+  ) => Promise<void> | void;
+  afterRevision?: (
+    iteration: number,
+    revision: number,
+    agentVariables: DevelopingAgentVariables,
+    currentTask: string,
+    developerReport: string,
+    reviewerReport: string,
+    revisionReports: readonly string[],
+  ) => Promise<void> | void;
+  afterTodoUpdate?: (
+    iteration: number,
+    agentVariables: DevelopingAgentVariables,
+    currentTask: string,
+    revisionReport: string,
+    todoUpdateReport: string,
+  ) => Promise<void> | void;
 };
 
 const USAGE = [
@@ -159,8 +184,10 @@ export async function developing(
       return;
     }
 
-    let reviewerReport = "";
+    let previousReviewerReport = "";
     const revisionReports: string[] = [];
+
+    await options.hooks?.beforeRevisionLoop?.(iteration, agentVariables, currentTask);
 
     for (let revision = 1; revision <= options.maxRevisionIterations; revision++) {
       console.log(`\n# Review revision ${String(revision)}\n`);
@@ -169,8 +196,8 @@ export async function developing(
         ...agentVariables,
         currentTask,
       };
-      if (reviewerReport) {
-        developerVariables.reviewerReport = reviewerReport;
+      if (previousReviewerReport) {
+        developerVariables.reviewerReport = previousReviewerReport;
       }
 
       const developerReport = (await developer.runStreamed(developerVariables, logRecord)).trim();
@@ -180,7 +207,7 @@ export async function developing(
       );
       revisionReports.push(`Developer report ${String(revision)}:\n${developerReport}`);
 
-      const review = (
+      const reviewerReport = (
         await codeReviewer.runStreamed(
           {
             ...agentVariables,
@@ -193,19 +220,32 @@ export async function developing(
       ).trim();
       await writeText(
         path.join(archiveDir, `code_review_${String(revision).padStart(3, "0")}.md`),
-        review,
+        reviewerReport,
       );
-      revisionReports.push(`Reviewer report ${String(revision)}:\n${review}`);
+      revisionReports.push(`Reviewer report ${String(revision)}:\n${reviewerReport}`);
 
-      if (review.trim() === ACCEPT_MARK) {
+      const accepted = reviewerReport.trim() === ACCEPT_MARK;
+      if (accepted) {
         revisionReports.push("Reviewer accepted the changes.");
-        break;
       }
 
-      if (revision === options.maxRevisionIterations) {
+      if (!accepted && revision === options.maxRevisionIterations) {
         revisionReports.push("Reviewer did not accept the changes before max revision iterations.");
       }
-      reviewerReport = review;
+
+      await options.hooks?.afterRevision?.(
+        iteration,
+        revision,
+        agentVariables,
+        currentTask,
+        developerReport,
+        reviewerReport,
+        revisionReports,
+      );
+      if (accepted) {
+        break;
+      }
+      previousReviewerReport = reviewerReport;
     }
 
     const revisionReport = revisionReports.join("\n\n");
@@ -225,6 +265,14 @@ export async function developing(
       )
     ).trim();
     await writeText(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport);
+
+    await options.hooks?.afterTodoUpdate?.(
+      iteration,
+      agentVariables,
+      currentTask,
+      revisionReport,
+      todoUpdateReport,
+    );
   }
 
   throw new Error(
