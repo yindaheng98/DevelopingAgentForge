@@ -16,16 +16,16 @@ TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../READM
 
 ## 主流程
 
-[`pipeline.ts`](pipeline.ts) 负责解析 CLI 参数、准备干净目标 repo，并重复运行外层 coding-manager 选任务循环和内层 developer/reviewer 修复循环。
+[`pipeline.ts`](pipeline.ts) 负责解析 CLI 参数，并重复运行外层 coding-manager 选任务循环和内层 developer/reviewer 修复循环。
 
 每轮迭代执行以下步骤：
 
 1. `coding-manager` 扫描当前 repo 和配置的 TODO 文件，然后选择一个 developer task。
-2. `developer` 加载 `skills/academic-army-excellent-repo/SKILL.md`，修改 repo，并报告自己改了哪些内容给 reviewer。
+2. `developer` 加载配置的 excellent repo skill，修改 repo，并报告自己改了哪些内容给 reviewer。
 3. `code-reviewer` 阅读代码和 developer report，返回严格的 `ACCEPT` 或 revision feedback。
 4. 如果 reviewer 返回 feedback，`developer` 继续修同一个任务，然后 `code-reviewer` 再审。
 5. review 循环结束后，pipeline 归档 task 和 reports，然后让 `coding-manager` 更新 TODO 文件。
-6. 当 `coding-manager` 返回 `Finished` 或达到 `--max-iterations` 时停止。
+6. 当 `coding-manager` 返回 `FINISHED` 或达到 `--max-iterations` 时停止。
 
 ## 重要文件
 

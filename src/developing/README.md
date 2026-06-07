@@ -16,16 +16,16 @@ For the overall TypeScript pipeline usage and entry points, see [`src/README.md`
 
 ## Main Flow
 
-[`pipeline.ts`](pipeline.ts) parses CLI options, prepares a clean target repository, and repeats an outer coding-manager task loop with an inner developer/reviewer repair loop.
+[`pipeline.ts`](pipeline.ts) parses CLI options and repeats an outer coding-manager task loop with an inner developer/reviewer repair loop.
 
 Each iteration does the following:
 
 1. `coding-manager` scans the current repository and the configured TODO file, then chooses one developer task.
-2. `developer` loads `skills/academic-army-excellent-repo/SKILL.md`, edits the repository, and reports what changed for review.
+2. `developer` loads the configured excellent repo skill, edits the repository, and reports what changed for review.
 3. `code-reviewer` reads the code and developer report, then returns exactly `ACCEPT` or revision feedback.
 4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
 5. After the review loop ends, the pipeline archives the task and reports, then asks `coding-manager` to update the TODO file.
-6. The pipeline stops when `coding-manager` returns `Finished` or `--max-iterations` is reached.
+6. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
 
 ## Important Files
 
