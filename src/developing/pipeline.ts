@@ -33,12 +33,10 @@ export type DevelopingOptions = {
 
 export type DevelopingHooks = {
   beforeRevisionLoop?: (
-    iteration: number,
     agentVariables: DevelopingAgentVariables,
     currentTask: string,
   ) => Promise<void> | void;
   afterRevision?: (
-    iteration: number,
     revision: number,
     agentVariables: DevelopingAgentVariables,
     currentTask: string,
@@ -47,7 +45,6 @@ export type DevelopingHooks = {
     revisionReports: readonly string[],
   ) => Promise<void> | void;
   afterTodoUpdate?: (
-    iteration: number,
     agentVariables: DevelopingAgentVariables,
     currentTask: string,
     revisionReport: string,
@@ -187,7 +184,7 @@ export async function developing(
     let previousReviewerReport = "";
     const revisionReports: string[] = [];
 
-    await options.hooks?.beforeRevisionLoop?.(iteration, agentVariables, currentTask);
+    await options.hooks?.beforeRevisionLoop?.(agentVariables, currentTask);
 
     for (let revision = 1; revision <= options.maxRevisionIterations; revision++) {
       console.log(`\n# Review revision ${String(revision)}\n`);
@@ -234,7 +231,6 @@ export async function developing(
       }
 
       await options.hooks?.afterRevision?.(
-        iteration,
         revision,
         agentVariables,
         currentTask,
@@ -267,7 +263,6 @@ export async function developing(
     await writeText(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport);
 
     await options.hooks?.afterTodoUpdate?.(
-      iteration,
       agentVariables,
       currentTask,
       revisionReport,
