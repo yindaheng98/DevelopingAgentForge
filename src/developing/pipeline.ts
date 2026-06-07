@@ -195,7 +195,6 @@ export async function developing(
       );
 
       if (review.trim() === ACCEPT_MARK) {
-        await writeText(path.join(archiveDir, "accepted_task.md"), currentTask);
         break;
       }
 
@@ -209,7 +208,7 @@ export async function developing(
           todoPath,
           finishMark: FINISH_MARK,
           phase: "update",
-          acceptedTask: currentTask,
+          currentTask,
           developerReport,
         },
         logRecord,

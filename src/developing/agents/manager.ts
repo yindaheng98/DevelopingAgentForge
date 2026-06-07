@@ -5,7 +5,7 @@ export type CodingManagerVariables = DevelopingAgentVariables & {
   todoPath: string;
   finishMark: string;
   phase: "select" | "update";
-  acceptedTask?: string;
+  currentTask?: string;
   developerReport?: string;
 };
 
@@ -20,13 +20,13 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
 
     if (variables.phase === "update") {
-      const acceptedTask = variables.acceptedTask ?? "(none)";
+      const currentTask = variables.currentTask ?? "(none)";
       const developerReport = variables.developerReport ?? "(none)";
 
       return `
 ${excellentRepoSkillInstructionText}
 
-Update the TODO file after an accepted developer task.
+Update the TODO file after a developer task.
 Work only in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
 
 Read:
@@ -34,8 +34,8 @@ Read:
 - experiment plan: ${experimentPlanPath}
 - coding plan: ${codingPlanPath}
 
-Accepted developer task:
-${acceptedTask}
+Current developer task:
+${currentTask}
 
 Developer report:
 ${developerReport}
