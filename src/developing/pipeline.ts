@@ -27,7 +27,7 @@ export type DevelopingOptions = {
   experimentPlanPath: string;
   codingPlanPath: string;
   maxIterations: number;
-  reviewRevisions: number;
+  maxRevisionIterations: number;
 };
 
 const USAGE = [
@@ -41,7 +41,7 @@ const USAGE = [
   "--experiment-plan-path <path>",
   "--coding-plan-path <path>",
   "[--max-iterations <positive-integer>]",
-  "[--review-revisions <positive-integer>]",
+  "[--max-revision-iterations <positive-integer>]",
 ].join(" ");
 
 const FINISH_MARK = "FINISHED";
@@ -61,7 +61,7 @@ export function parseDevelopingArgs(
       "experiment-plan-path": experimentPlanPath,
       "coding-plan-path": codingPlanPath,
       "max-iterations": maxIterations,
-      "review-revisions": reviewRevisions,
+      "max-revision-iterations": maxRevisionIterations,
     },
   } = parseArgs({
     args: [...args],
@@ -75,7 +75,7 @@ export function parseDevelopingArgs(
       "experiment-plan-path": { type: "string" },
       "coding-plan-path": { type: "string" },
       "max-iterations": { type: "string" },
-      "review-revisions": { type: "string" },
+      "max-revision-iterations": { type: "string" },
     },
   });
 
@@ -103,7 +103,7 @@ export function parseDevelopingArgs(
       experimentPlanPath,
       codingPlanPath,
       maxIterations: Number(maxIterations ?? 10),
-      reviewRevisions: Number(reviewRevisions ?? 3),
+      maxRevisionIterations: Number(maxRevisionIterations ?? 3),
     },
   };
 }
@@ -161,7 +161,7 @@ export async function developing(
     let reviewerReport = "";
     let developerReport = "";
 
-    for (let revision = 1; revision <= options.reviewRevisions; revision++) {
+    for (let revision = 1; revision <= options.maxRevisionIterations; revision++) {
       console.log(`\n# Review revision ${String(revision)}\n`);
 
       const developerVariables: DeveloperVariables = {
