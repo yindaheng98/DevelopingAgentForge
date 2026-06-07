@@ -1,41 +1,51 @@
 import { AgentTeam, type RecordCallback } from "coding-agent-forge";
 import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { definePipeline, type ParsedPipelineArgs } from "../pipeline.js";
 import {
   agentFactories,
-  type CodingPlanInterpreterVariables,
-  type DeveloperVariables,
-  type HarnessEngineerVariables,
+  type CodingManagerVariables,
   type CodeReviewerVariables,
-  type ExperimentContractAuditorVariables,
-  type IntegrationManagerVariables,
+  type DeveloperVariables,
 } from "./agents/index.js";
 import type { DevelopingAgentVariables } from "./agents/types.js";
 
 export type DevelopingAgentVariablesByName = {
-  "coding-plan-interpreter": CodingPlanInterpreterVariables;
+  "coding-manager": CodingManagerVariables;
   developer: DeveloperVariables;
-  "harness-engineer": HarnessEngineerVariables;
   "code-reviewer": CodeReviewerVariables;
-  "experiment-contract-auditor": ExperimentContractAuditorVariables;
-  "integration-manager": IntegrationManagerVariables;
 };
 
 export type DevelopingOptions = {
   targetPath: string;
-  artifactDir: string;
-  artifactrAchiveDir: string;
+  achiveDir: string;
+  todoPath: string;
+  excellentRepoSkillPath: string;
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;
   maxIterations: number;
+  reviewRevisions: number;
 };
 
-const USAGE =
-  "Usage: npm run developing -- --config <path> --target-path <folder> --artifact-dir <folder> --artifact-archive-dir <folder> --paper-blueprint-path <path> --experiment-plan-path <path> --coding-plan-path <path> [--max-iterations <positive-integer>]";
+const USAGE = [
+  "Usage: npm run developing --",
+  "--config <path>",
+  "--target-path <folder>",
+  "--achive-dir <folder>",
+  "--todo-path <path>",
+  "--excellent-repo-skill-path <path>",
+  "--paper-blueprint-path <path>",
+  "--experiment-plan-path <path>",
+  "--coding-plan-path <path>",
+  "[--max-iterations <positive-integer>]",
+  "[--review-revisions <positive-integer>]",
+].join(" ");
+
+const FINISH_MARK = "FINISHED";
+const ACCEPT_MARK = "ACCEPT";
 
 export function parseDevelopingArgs(
   args: readonly string[],
@@ -44,32 +54,37 @@ export function parseDevelopingArgs(
     values: {
       config,
       "target-path": targetPath,
-      "artifact-dir": artifactDir,
-      "artifact-archive-dir": artifactrAchiveDir,
+      "achive-dir": achiveDir,
+      "todo-path": todoPath,
+      "excellent-repo-skill-path": excellentRepoSkillPath,
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
       "coding-plan-path": codingPlanPath,
       "max-iterations": maxIterations,
+      "review-revisions": reviewRevisions,
     },
   } = parseArgs({
     args: [...args],
     options: {
       config: { type: "string", multiple: true },
       "target-path": { type: "string" },
-      "artifact-dir": { type: "string" },
-      "artifact-archive-dir": { type: "string" },
+      "achive-dir": { type: "string" },
+      "todo-path": { type: "string" },
+      "excellent-repo-skill-path": { type: "string" },
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
       "coding-plan-path": { type: "string" },
       "max-iterations": { type: "string" },
+      "review-revisions": { type: "string" },
     },
   });
 
   if (
     config === undefined ||
     targetPath === undefined ||
-    artifactDir === undefined ||
-    artifactrAchiveDir === undefined ||
+    achiveDir === undefined ||
+    todoPath === undefined ||
+    excellentRepoSkillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
     codingPlanPath === undefined
@@ -81,12 +96,14 @@ export function parseDevelopingArgs(
     configPaths: config,
     runningOptions: {
       targetPath,
-      artifactDir,
-      artifactrAchiveDir,
+      achiveDir,
+      todoPath,
+      excellentRepoSkillPath,
       paperBlueprintPath,
       experimentPlanPath,
       codingPlanPath,
       maxIterations: Number(maxIterations ?? 10),
+      reviewRevisions: Number(reviewRevisions ?? 3),
     },
   };
 }
@@ -99,147 +116,116 @@ export async function developing(
     console.log(thread.recordToPrettyString(record));
   };
 
-  const artifactDir = path.resolve(options.artifactDir);
-  const artifactrAchiveDir = path.resolve(options.artifactrAchiveDir);
+  const achiveDir = path.resolve(options.achiveDir);
+  const todoPath = path.resolve(options.todoPath);
   const agentVariables: DevelopingAgentVariables = {
     targetPath: path.resolve(options.targetPath),
-    overviewPath: path.join(artifactDir, "code_overview.md"),
-    statePath: path.join(artifactDir, "implementation_state.md"),
+    excellentRepoSkillPath: path.resolve(options.excellentRepoSkillPath),
     paperBlueprintPath: path.resolve(options.paperBlueprintPath),
     experimentPlanPath: path.resolve(options.experimentPlanPath),
     codingPlanPath: path.resolve(options.codingPlanPath),
   };
-  const responsePath = path.join(artifactDir, "developer_response.md");
-  const nextDeveloperTaskPath = path.join(artifactDir, "next_developer_task.md");
-  await mkdir(artifactDir, { recursive: true });
 
-  if (!existsSync(agentVariables.overviewPath)) {
-    await mkdir(path.dirname(agentVariables.overviewPath), { recursive: true });
-    await writeFile(agentVariables.overviewPath, "# Code Overview\n", "utf8");
+  await mkdir(achiveDir, { recursive: true });
+  if (!existsSync(todoPath)) {
+    await writeText(todoPath, "# TODO");
   }
-
-  if (!existsSync(agentVariables.statePath)) {
-    await writeFile(
-      agentVariables.statePath,
-      "# Implementation State\n\nNo tasks recorded yet.\n",
-      "utf8",
-    );
-  }
-
-  let previousReview = "";
-  let previousAudit = "";
-  let previousHarnessReport = "";
 
   for (let iteration = 1; iteration <= options.maxIterations; iteration++) {
     console.log(`\n# Developing iteration ${String(iteration)}\n`);
-    const archiveDir = path.join(
-      artifactrAchiveDir,
-      new Date().toISOString().replace(/[:.]/g, "-"),
-    );
+    const archiveDir = path.join(achiveDir, new Date().toISOString().replace(/[:.]/g, "-"));
     await mkdir(archiveDir, { recursive: true });
 
-    const interpreterVariables: CodingPlanInterpreterVariables = { ...agentVariables };
-    if (previousReview) interpreterVariables.previousReview = previousReview;
-    if (previousAudit) interpreterVariables.previousAudit = previousAudit;
-    if (previousHarnessReport) interpreterVariables.previousHarnessReport = previousHarnessReport;
+    const codingManager = await team.createAgent("coding-manager");
+    const developer = await team.createAgent("developer");
+    const codeReviewer = await team.createAgent("code-reviewer");
 
-    const task = (
-      await team.runStreamed("coding-plan-interpreter", interpreterVariables, logRecord)
-    ).trim();
-    await writeFile(path.join(archiveDir, "current_task.md"), `${task}\n`, "utf8");
-
-    const developerVariables: DeveloperVariables = {
-      ...agentVariables,
-      currentTask: task,
-    };
-    if (existsSync(nextDeveloperTaskPath)) {
-      developerVariables.previousFeedback = (await readFile(nextDeveloperTaskPath, "utf8")).trim();
-    }
-
-    const developerReport = (
-      await team.runStreamed("developer", developerVariables, logRecord)
-    ).trim();
-    await writeFile(path.join(archiveDir, "developer_report.md"), `${developerReport}\n`, "utf8");
-
-    const harnessReport = (
-      await team.runStreamed(
-        "harness-engineer",
+    const currentTask = (
+      await codingManager.runStreamed(
         {
           ...agentVariables,
-          currentTask: task,
-          developerReport,
+          todoPath,
+          finishMark: FINISH_MARK,
+          phase: "select",
         },
         logRecord,
       )
     ).trim();
-    await writeFile(path.join(archiveDir, "harness_report.md"), `${harnessReport}\n`, "utf8");
+    await writeText(path.join(archiveDir, "current_task.md"), currentTask);
 
-    const [review, audit] = await Promise.all([
-      team.runStreamed(
-        "code-reviewer",
-        {
-          ...agentVariables,
-          currentTask: task,
-          developerReport,
-          harnessReport,
-        },
-        logRecord,
-      ),
-      team.runStreamed(
-        "experiment-contract-auditor",
-        {
-          ...agentVariables,
-          currentTask: task,
-          developerReport,
-          harnessReport,
-        },
-        logRecord,
-      ),
-    ]);
-    const reviewText = review.trim();
-    const auditText = audit.trim();
-    await writeFile(path.join(archiveDir, "review.md"), `${reviewText}\n`, "utf8");
-    await writeFile(path.join(archiveDir, "contract_audit.md"), `${auditText}\n`, "utf8");
-
-    const decision = (
-      await team.runStreamed(
-        "integration-manager",
-        {
-          ...agentVariables,
-          currentTask: task,
-          developerReport,
-          harnessReport,
-          review: reviewText,
-          audit: auditText,
-          nextDeveloperTaskPath,
-        },
-        logRecord,
-      )
-    ).trim();
-
-    await writeFile(path.join(archiveDir, "release_decision.md"), `${decision}\n`, "utf8");
-    await writeFile(responsePath, `${decision}\n`, "utf8");
-    if (decision !== "Finished") {
-      await writeFile(nextDeveloperTaskPath, `${decision}\n`, "utf8");
-    }
-    console.log(`\n# Saved response to ${responsePath}\n`);
-    const archiveFile = path.join(archiveDir, "developing-response.md");
-    await writeFile(archiveFile, `${decision}\n`, "utf8");
-    console.log(`\n# Archived response to ${archiveFile}\n`);
-
-    if (decision === "Finished") {
-      console.log("\n# Finished\n");
+    if (currentTask.trim() === FINISH_MARK) {
+      console.log(`\n# ${FINISH_MARK}\n`);
       return;
     }
 
-    previousReview = reviewText;
-    previousAudit = auditText;
-    previousHarnessReport = harnessReport;
+    let reviewerReport = "";
+    let developerReport = "";
+
+    for (let revision = 1; revision <= options.reviewRevisions; revision++) {
+      console.log(`\n# Review revision ${String(revision)}\n`);
+
+      const developerVariables: DeveloperVariables = {
+        ...agentVariables,
+        currentTask,
+      };
+      if (reviewerReport) {
+        developerVariables.reviewerReport = reviewerReport;
+      }
+
+      developerReport = (await developer.runStreamed(developerVariables, logRecord)).trim();
+      await writeText(
+        path.join(archiveDir, `developer_report_${String(revision).padStart(3, "0")}.md`),
+        developerReport,
+      );
+
+      const review = (
+        await codeReviewer.runStreamed(
+          {
+            ...agentVariables,
+            acceptMark: ACCEPT_MARK,
+            currentTask,
+            developerReport,
+          },
+          logRecord,
+        )
+      ).trim();
+      await writeText(
+        path.join(archiveDir, `code_review_${String(revision).padStart(3, "0")}.md`),
+        review,
+      );
+
+      if (review.trim() === ACCEPT_MARK) {
+        await writeText(path.join(archiveDir, "accepted_task.md"), currentTask);
+        break;
+      }
+
+      reviewerReport = review;
+    }
+
+    const todoUpdateReport = (
+      await codingManager.runStreamed(
+        {
+          ...agentVariables,
+          todoPath,
+          finishMark: FINISH_MARK,
+          phase: "update",
+          acceptedTask: currentTask,
+          developerReport,
+        },
+        logRecord,
+      )
+    ).trim();
+    await writeText(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport);
   }
 
   throw new Error(
-    `Reached --max-iterations ${String(options.maxIterations)} before the agent returned Finished.`,
+    `Reached --max-iterations ${String(options.maxIterations)} before the coding-manager returned ${FINISH_MARK}.`,
   );
+}
+
+async function writeText(filePath: string, content: string): Promise<void> {
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, `${content.trimEnd()}\n`, "utf8");
 }
 
 export const developingPipeline = definePipeline({

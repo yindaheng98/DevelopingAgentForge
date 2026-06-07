@@ -3,7 +3,7 @@ import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type DeveloperVariables = DevelopingAgentVariables & {
   currentTask: string;
-  reviewFeedback?: string;
+  reviewerReport?: string;
 };
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
@@ -13,7 +13,7 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
-    const reviewFeedback = variables.reviewFeedback ?? "(none)";
+    const reviewerReport = variables.reviewerReport ?? "(none)";
     const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
 
     return `
@@ -29,10 +29,10 @@ Read:
 Current developer task:
 ${variables.currentTask}
 
-Review feedback to address:
-${reviewFeedback}
+Reviewer report:
+${reviewerReport}
 
-Modify the target repository code for the current task. If review feedback is present, update the code according to that feedback.
+Modify the target repository code for the current task. If a reviewer report is present, update the code according to that report.
 
 Do not modify files outside ${targetPath}/.
 
