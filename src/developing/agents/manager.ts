@@ -1,70 +1,64 @@
-import { DEVELOPING_CONTRACT } from "./prompts.js";
+import { excellentRepoSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
-export type IntegrationManagerVariables = DevelopingAgentVariables & {
-  currentTask: string;
-  developerReport: string;
-  harnessReport: string;
-  review: string;
-  audit: string;
-  nextDeveloperTaskPath: string;
+export type CodingManagerVariables = DevelopingAgentVariables & {
+  todoPath: string;
+  finishMark: string;
+  phase: "select" | "update";
+  acceptedTask?: string;
+  developerReport?: string;
 };
 
-export class IntegrationManagerAgent extends DevelopingAgent<IntegrationManagerVariables> {
-  protected buildPrompt(variables: Readonly<IntegrationManagerVariables>): string {
+export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
+  protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
+    const excellentRepoSkillPath = this.workspaceRelativePath(variables.excellentRepoSkillPath);
+    const targetPath = this.workspaceRelativePath(variables.targetPath);
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
-    const nextDeveloperTaskPath = this.workspaceRelativePath(variables.nextDeveloperTaskPath);
-    const overviewPath = this.workspaceRelativePath(variables.overviewPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
-    const statePath = this.workspaceRelativePath(variables.statePath);
-    const targetPath = this.workspaceRelativePath(variables.targetPath);
+    const todoPath = this.workspaceRelativePath(variables.todoPath);
+    const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
 
-    return `
-${DEVELOPING_CONTRACT}
+    if (variables.phase === "update") {
+      const acceptedTask = variables.acceptedTask ?? "(none)";
+      const developerReport = variables.developerReport ?? "(none)";
 
-Integrate the reports, update developing state, and decide whether the loop is finished.
-Paths are relative to the configured workspace path.
-You own state and handoff artifacts. Do not modify source code, tests, harness code, configs, or package files.
+      return `
+${excellentRepoSkillInstructionText}
+
+Update the TODO file after an accepted developer task.
+Work only in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
 
 Read:
-- target codebase: ${targetPath}
-- coding plan: ${codingPlanPath}
 - paper blueprint: ${paperBlueprintPath}
 - experiment plan: ${experimentPlanPath}
-- implementation state: ${statePath}
-- code overview: ${overviewPath}
+- coding plan: ${codingPlanPath}
 
-Current task:
-${variables.currentTask}
+Accepted developer task:
+${acceptedTask}
 
 Developer report:
-${variables.developerReport}
+${developerReport}
 
-Harness report:
-${variables.harnessReport}
+Update ${todoPath} so completed work and future developer tasks match the current repository. If you find a better future plan, update the future plan in ${todoPath}.
+`;
+    }
 
-Review:
-${variables.review}
+    return `
+${excellentRepoSkillInstructionText}
 
-Contract audit:
-${variables.audit}
+Select the next developer task for the target repository.
+Scan the target repository at ${targetPath}/ and the TODO file at ${todoPath}.
 
-Update these files directly:
-- ${statePath}
-- ${overviewPath}
-- ${nextDeveloperTaskPath}
+Read:
+- paper blueprint: ${paperBlueprintPath}
+- experiment plan: ${experimentPlanPath}
+- coding plan: ${codingPlanPath}
 
-${statePath} must keep stable task IDs, status, claim/experiment/metric linkage, files, acceptance commands, and verification evidence.
-${overviewPath} must describe modules, CLI, tests, harness, raw result layout, and freeze protocol when known.
-${nextDeveloperTaskPath} must contain a concrete next selected task unless the work is finished.
+Choose exactly one new bounded task for the Developer from ${todoPath}.
 
-Return exactly:
-Finished
-
-only when all required work from the coding plan at ${codingPlanPath} is verified or explicitly waived, unit/fixture/CLI smoke checks pass or are waived with reason, harness smoke emits parseable raw results or is waived with reason, and Contract audit has no blocking issue.
-
-Otherwise return a concise response handoff that names the next task and any blockers. Developer does not decide Finished; only you do.
+When no further developer task is needed, return exactly:
+${variables.finishMark}
 `;
   }
 }
