@@ -130,6 +130,7 @@ export async function developing(
   if (!existsSync(todoPath)) {
     await writeText(todoPath, "# TODO");
   }
+  await mkdir(agentVariables.targetPath, { recursive: true });
 
   for (let iteration = 1; iteration <= options.maxIterations; iteration++) {
     console.log(`\n# Developing iteration ${String(iteration)}\n`);
