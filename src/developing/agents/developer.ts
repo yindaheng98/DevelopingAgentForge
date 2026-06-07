@@ -34,8 +34,6 @@ ${reviewerReport}
 
 Modify the target repository code for the current task. If a reviewer report is present, update the code according to that report.
 
-Do not modify files outside ${targetPath}/.
-
 Output a concise developer report with the main changes.
 `;
   }

@@ -47,7 +47,7 @@ ${variables.revisionReport}
 
 The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
 
-Update ${todoPath} so completed work and future developer tasks match the current repository. If you find a better future plan, update the future plan in ${todoPath}.
+Update the TODO so completed work and future developer tasks match the current repository. If you find a better future plan, update it too.
 `;
     }
 
@@ -62,7 +62,7 @@ Read:
 - experiment plan: ${experimentPlanPath}
 - coding plan: ${codingPlanPath}
 
-Choose exactly one new bounded task for the Developer from ${todoPath}.
+Choose exactly one new bounded task for the Developer.
 
 When no further developer task is needed, return exactly:
 ${variables.finishMark}
