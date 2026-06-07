@@ -5,8 +5,7 @@ import path from "node:path";
 
 export type DevelopingAgentVariables = {
   targetPath: string;
-  overviewPath: string;
-  statePath: string;
+  excellentRepoSkillPath: string;
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;

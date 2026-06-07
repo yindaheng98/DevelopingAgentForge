@@ -2,7 +2,6 @@ import { excellentRepoSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
-  excellentRepoSkillPath: string;
   currentTask: string;
   developerReport: string;
 };
