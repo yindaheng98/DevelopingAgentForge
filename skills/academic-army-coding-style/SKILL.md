@@ -1,887 +1,915 @@
 ---
-name: academic-army-excellent-repo
+name: academic-army-coding-style
 description: >-
-  Create, complete, or improve a static, low-friction, maintainable research
-  code repository from an Academic Army paper blueprint, experiment plan,
-  coding plan, and user-specified repository path. Use when Codex must turn
-  upstream research planning artifacts into real repository files, directories,
-  code interfaces, harness entries, test entries, documentation, configuration,
-  and raw-result artifact contracts, or when Codex must revise an existing
-  research repository while preserving user work. Use
-  academic_army_mcp_tools.deepresearch for repository creation, substantial
-  redesign, stack or dependency choices, and external-code reuse decisions.
+  Maintain clean, local, low-coupling code trajectories in existing Academic
+  Army research repositories. Use when Codex writes or edits code, refactors
+  modules, implements features, harnesses, tests, methods, baselines, metrics,
+  result exports, or framework docs. This skill does not initialize template
+  repositories or generate full project scaffolds from empty directories.
 ---
 
-# Academic Army Excellent Repo
+# Academic Army Coding Style
 
 ## Mission
 
-Create or revise a real research code repository under the user-specified
-repository path. The repository should be static, orderly, low-friction,
-extensible, and maintainable. Treat repository structure quality and code shape
-quality as one target:
-
-- Carry forward the paper blueprint, experiment plan, and coding plan into
-  concrete files, directories, interfaces, harnesses, tests, and artifact
-  contracts.
-- Keep code short, direct, clearly named, low-state, low-conversion, and
-  minimally layered.
-- Preserve existing user files and make the smallest change that satisfies the
-  repository goal.
-
-This skill owns repository creation and static framework modification. It does
-not run installs, tests, harnesses, experiments, or full execution pipelines.
-
-## Task Modes
-
-Classify the request before changing files:
-
-- **Repository creation or substantial redesign**: build or revise the static
-  framework, choose or adjust stack structure, and update root documentation.
-  Use DeepResearch before choosing structure or dependencies.
-- **Explicit fixed scaffold**: when the user names an exact allowed file and
-  directory set, create only that set. Treat exclusions as stronger than the
-  general "enough real structure" preference. Do not add source trees,
-  dependency files, harness subfolders, tests, placeholders, or marker files
-  unless the user names them.
-- **Focused repository modification**: add or tighten a bounded contract,
-  interface, harness definition, test, document section, or small code path in
-  an existing repository. Read only the files needed for that change, follow the
-  repository's current layout, and do not redesign directories, tooling, or
-  documentation unless the focused task requires it.
-  If an edit creates an adjacent surface outside the requested scope, treat that
-  as a defect, not harmless extra progress. Remove the out-of-scope file, its
-  tests, public exports, root-doc mentions, and generated artifacts together.
-- **Documentation handoff repair**: create or update `README.md`,
-  `FRAMEWORK.md`, and `FRAMEWORK.zh-CN.md` from the current repository state
-  and upstream plans. Keep the change documentation-only unless the user
-  explicitly asks for source, harness, test, or artifact contract edits.
-- **Adjacent static contract**: add metadata that supports harnesses, result
-  export, method freeze, reproducibility, or paper-output derivation without
-  being a runnable harness itself. Keep it near the relevant workflow directory
-  when useful, but do not let it be accidentally discovered by existing harness
-  loaders or test collection patterns.
-- **Validation or test authoring**: add source-level validation code, schemas,
-  fixtures, or test files that future developers can run. Validate the existing
-  contracts as written and preserve declared identity fields without inventing
-  closed vocabularies. This skill may write those static files when requested,
-  but it must not execute the tests.
-- **Trajectory or TODO maintenance**: update planning/status files only when the
-  user asks for that, or when the workflow explicitly owns them. Do not mark
-  unrelated repository abilities complete just because they are visible during
-  a scan.
-- **Repository integrity blocker**: verify the target root, current filesystem
-  inventory, and version-control status before any normal source, test, docs, or
-  trajectory task proceeds. Restore only from a user-identified trusted source
-  or an actual versioned/archive baseline; otherwise report the blocker and
-  leave files unchanged.
-
-A focused task should end with the smallest coherent change. If the user asks
-for one test file, one harness contract, one export schema, or one config
-connection, do that directly and leave adjacent cleanup for a later bounded
-task.
-
-For documentation-only tasks, do not use the docs to backfill missing code.
-State what exists, what is explicitly reserved, and what remains a placeholder.
-Avoid adding commands, entrypoints, harness loops, test claims, dependencies, or
-result-artifact behavior that the repository cannot currently support. If a
-docs-only readback exposes a mismatch in a source file, harness definition, test,
-export contract, or TODO record, report it as a separate follow-up defect unless
-the current task explicitly authorizes editing that surface.
-
-## Repository Integrity
-
-For any existing repository, establish a small pre-edit inventory before
-writing:
-
-- list the task-relevant existing files and the fixed top-level paths that must
-  remain present
-- note which files are expected to be created, modified, or left untouched
-- distinguish filesystem presence from version-control state: an untracked file
-  or directory is present but untracked, not missing
-- report the relevant version-control root separately from the target repository
-  root when the target is a subfolder
-- for focused changes, treat any broad disappearance of source, tests, docs,
-  fixtures, or static markers as a blocker rather than an invitation to
-  reconstruct the repository
-
-If the target tree appears empty, partially missing, or inconsistent with a
-baseline read during a focused task, stop and verify the repository root. Do not
-recreate files from memory, prior reports, or nearby drafts unless the user
-explicitly asks for repository restoration and identifies the source of truth.
-Report the integrity blocker with a corrected inventory:
-
-- target root and version-control root
-- files and directories present on disk
-- expected paths that are missing on disk
-- tracked, untracked, and absent status for task-relevant paths
-- trusted restore sources checked and whether any contains the missing baseline
-
-Use prior developer reports, review notes, TODO files, and planning documents as
-status context only. They are not trustworthy restore sources for missing code
-or tests unless they include the actual file contents or identify a concrete
-baseline artifact.
-
-Before reporting completion, perform a deletion audit for focused changes:
-confirm that unrelated source files, tests, docs, fixtures, harness definitions,
-and static markers were not removed or rewritten. If a restore was explicitly
-requested, state the restore source and keep the follow-up change limited to the
-original task.
-
-For focused changes, keep a small scope ledger while editing:
-
-- files expected to be created
-- files expected to be modified
-- files expected to be deleted because review identified them as out of scope
-- files that must remain untouched
-
-Before reporting, verify that ledger against a fresh filesystem read, not a prior
-report or intended patch. When deleting an out-of-scope surface, check the exact
-paths, package exports, root docs, tests, and generated cache/build artifacts in
-the same pass. Do not report the deletion as complete until the exact paths are
-absent on disk.
-
-For new source or test files, use the target repository root as the anchor for
-every write and every verification. Before reporting, re-list the exact created
-paths from that root and read at least the public symbol/header area of each new
-file. A relative link, intended patch, import smoke, or prior report is not proof
-that a new file exists in the target tree.
-
-## Required Inputs
-
-Use the user-specified repository path as the root for all project files. Create,
-modify, and reference project files only inside that path. Use repository-relative
-paths inside generated documentation and final summaries.
-
-Use only task-relevant input scope:
-
-- Read user-provided paper blueprint, experiment plan, coding plan, and explicit
-  constraints.
-- If conventional upstream artifact names are present and the user does not
-  provide exact paths, locate the closest matching blueprint, experiment plan,
-  and coding plan.
-- Read existing repository files only when modifying an existing repository or
-  when a required input explicitly references them.
-- For focused modifications, read the target files, nearby tests, and the
-  minimum upstream plan sections needed to understand the contract. Do not scan
-  unrelated modules just to discover extra work.
-- Ignore unrelated drafts, old outputs, logs, notebooks, or nearby files unless
-  the user explicitly makes them part of the task.
-
-If an input is missing but a defensible repository skeleton can still be built,
-record the assumption in repository documentation and leave precise method or
-experiment details as extension points. Ask the user only when the missing fact
-would materially change the repository root, selected stack, data contracts, or
-research workflow.
-
-## Required DeepResearch
-
-Before creating a new repository, making a substantial repository redesign, or
-choosing a new stack, dependency, harness framework, or external code reuse
-route, run `academic_army_mcp_tools.deepresearch`.
-
-Do not run DeepResearch for a narrow edit inside an already-selected stack when
-the task does not change structure, dependencies, or external-code decisions.
-If the user explicitly requires DeepResearch for the current task, run it before
-the first structure, dependency, tooling, or layout edit even if the edit would
-otherwise be narrow.
-
-Use DeepResearch to choose the current stack and repository structure from the
-actual task. Do not hardcode a language, framework, package manager, test
-runner, source layout, config format, or public repository template into this
-skill or into generic tips.
-
-DeepResearch can also justify deferring stack, dependency, and external-code
-reuse decisions. If the task is an explicit fixed scaffold, use the research to
-set the boundary and keep the repository stack-agnostic; do not convert future
-tool recommendations into files.
-
-Research should cover:
-
-- high-quality related research repositories, official artifacts, benchmark
-  repositories, and paper code
-- installable tools with stable interfaces versus tools that are only useful as
-  design references
-- license and attribution implications when any code or pattern may be copied
-- current best practices for the selected language and framework: dependency
-  declaration, project structure, configuration, CLI or entrypoint design,
-  logging, typing, formatting, linting, testing, and result artifact management
-- which structures are ecosystem conventions, which are project-specific, and
-  which reduce or increase friction for this repository
-
-Use this prompt shape:
-
-```text
-You are supporting a research-code repository builder.
-
-Research brief:
-[paper goal, experiment requirements, coding plan, user constraints,
-candidate methods, baselines, datasets, metrics, harnesses, tests, and any
-existing repository facts]
-
-Return concise repository-building evidence:
-
-- Relevant high-quality repositories or official artifacts and what their
-  structure teaches about source layout, configs, harnesses, tests, result
-  exports, and documentation.
-- Stable installable tools that should be used as dependencies, with reasons.
-- Tools or repositories that should only be referenced or carefully reused,
-  including license and attribution notes when relevant.
-- Current best practices for the selected language and framework, including
-  dependency declaration, static quality tooling, entrypoints, configuration,
-  test discovery, and artifact organization.
-- Friction risks: hidden path assumptions, excessive config, complex build
-  steps, unnecessary aliases, repeated registration points, thin wrappers, or
-  test/harness calling overhead.
-- Repository decisions recommended for this specific paper workflow.
-- Source table with title, link, visible date/version/commit when available,
-  source role, evidence type, and affected repository decision.
-```
-
-When the user already specifies a stack, research best practices for that stack.
-When the stack is not specified, select one from the paper workflow, coding plan,
-and DeepResearch evidence.
-
-When DeepResearch affects the edit, include a short evidence basis in the
-developer report: what stack/layout/tooling decision it supported and why that
-decision fits the current repository. Do not put the DeepResearch workflow
-itself into repository docs.
-
-## Repository Layout Principles
-
-Use a hybrid layout:
-
-- Fixed research workflow top-level structure:
-  - `data/`: input datasets, traces, manifests, fixtures, or links
-  - `output/`: program-run outputs and intermediate artifacts
-  - `results/`: experiment result records intended for analysis
-  - `harness/`: research harnesses
-  - `test/`: functional tests
-  - `README.md`: concise repository entry
-  - `FRAMEWORK.md`: English framework handoff
-  - `FRAMEWORK.zh-CN.md`: Chinese framework handoff
-- Dynamic ecosystem structure:
-  - source directories, package names, dependency files, build files, config
-    files, quality-tool config, and entrypoint organization chosen from the
-    selected stack and DeepResearch evidence
-
-Coordinate the fixed research directories with the selected ecosystem structure.
-The repository should look natural for the chosen stack while preserving the
-research workflow top level.
-
-For new harness structures, create one semantic folder per harness. Each harness
-folder should identify its research goal, target module or replaceable method
-area, input protocol, metrics, result artifacts, and intended development loop.
-Create those subfolders only when harness definitions are in scope; a reserved
-top-level `harness/` directory is enough for a fixed scaffold task.
-
-For static harness definition tasks, treat the definition file as a contract
-index, not as a runnable harness. If the user limits the fields, include only
-those fields even when the general harness template would normally mention more.
-When a definition contains paper-output mappings, every mapping must reference
-only raw artifacts and metrics declared by that same definition. Cross-check the
-mapping against the experiment plan and coding plan derivation table before
-reporting completion; if a paper output needs lifecycle events or lifecycle
-rates, declare those top-level artifacts or metrics instead of leaving an
-unresolvable mapping. Do not add loaders, registries, tests, or result files
-just to make a static definition look complete unless existing discovery would
-otherwise ingest the file incorrectly.
-
-For non-harness static metadata that belongs near harness work, use
-contract-specific filenames or explicitly scoped discovery so existing
-`*/definition`-style loaders do not parse an incompatible schema. If the user
-suggests a generic name, choose the local pattern that preserves current loader
-semantics, or tighten the loader with a focused test before adding the new file.
-
-For new test structures, group tests by semantic capability when that matches
-the selected ecosystem and repository style. For focused changes in an existing
-repository, follow the local test layout and the user's requested path instead
-of reorganizing tests. Tests should cover functional correctness, interface
-contracts, data formats, config parsing, metrics, result export, entrypoints,
-and core module interactions using small fixtures or mock data. Keep tests
-separate from paper-goal harnesses.
-Create test subfolders or fixtures only when test authoring is in scope; a
-reserved top-level `test/` directory is enough for a fixed scaffold task.
-
-## Core Repository Content
-
-Create enough real structure that the repository is not an empty shell. Include
-only the amount of code needed to establish clear extension points and static
-contracts.
-
-For an explicit fixed scaffold, the requested directories and root handoff
-documents are the real structure. Do not add code, dependency declarations,
-schemas, configs, sample fixtures, or executable placeholders to make the
-repository look more complete.
-
-Prefer project-specific modules for:
-
-- configuration or parameter parsing
-- shared domain objects or schemas
-- replaceable method and baseline interfaces
-- dataset, workload, trace, or input adapters
-- metric computation boundaries
-- harness runner boundaries
-- raw-first result writing
-- static entrypoint semantics
-
-For workload coverage, replay-subset, and reproducibility manifests, validate
-identity metadata only. Keep dataset IDs, scene IDs, trace IDs, device profile
-IDs, split IDs, seed IDs, intended evidence outputs, and artifact-check names as
-stable contract values. Validate their presence and identifier shape unless the
-upstream plans or existing repository explicitly define a closed vocabulary. Do
-not resolve those IDs to real datasets, load trace files, execute replay,
-compute checksums from artifacts, or write result files unless a later
-execution-oriented task explicitly owns that behavior.
-
-For manifest-only workload normalization tasks, keep the layer in-memory and
-contract-shaped. Normalize fixture metadata into the existing workload and media
-contracts; preserve dataset, scene, sequence, viewport-trace, network-trace,
-device-profile, split, seed, workload-version, workload, and deterministic
-replay-subset identities; and apply only simple media-object dependency closure.
-Do not introduce filesystem resolution, asset lookup, real trace loading,
-device-profile parsing, CAGS asset access, substrate capability contracts,
-harness execution, artifact writers, or generated `output/` or `results/` files.
-Do not add substrate/CAGS-adjacent modules, tests, exports, or documentation
-claims during a manifest-only task. If a manifest-only task adds public symbols
-or a new module, update the root docs in the same change unless docs are
-explicitly excluded.
-
-Treat substrate/CAGS capability contracts as a separate task from manifest-only
-workload normalization. They may be a valid next static repository task when the
-upstream coding plan asks for substrate adapters, but they must start from the
-current clean repository state, use their own bounded source/test/docs scope, and
-avoid CAGS integration, asset resolution, runtime hooks, harness execution, and
-paper-result claims unless explicitly requested later.
-
-For explicit static substrate-adapter contract tasks, build a substrate surface
-matrix before editing and reconcile it after editing: enum symbols, record
-classes, schema registry names, source `__all__`, package exports, docs, and
-tests must list the same public surface. Include both layer and component enums,
-not only dataclass-like records. If the substrate module has its own schema
-registry and the domain package already exports another `SCHEMA_REGISTRY`, expose
-the substrate registry with a distinct name or keep it module-local and document
-that choice. Resource rates, throughput, timing, byte, count, frame, and cache
-capacity fields should be finite and non-negative unless the upstream contract
-explicitly permits signed values; tests named for negative validation must use
-actual negative inputs, not only `nan`, `inf`, or malformed types.
-
-Use placeholder implementations only when the downstream method logic is not yet
-owned by this skill. Make placeholders explicit and honest:
-
-- label method adapters, baselines, metrics, loaders, and harnesses as
-  placeholders when their algorithmic behavior is not implemented
-- state the interface contract and expected behavior
-- do not imply that a candidate method, baseline, metric, or experiment result
-  has already been implemented or validated
-
-For method-interface feasibility tasks, decide the public owner before editing:
-scan existing method modules, top-level exports, domain exports, tests, and root
-docs, then keep the authoritative implementation in the exact package requested
-by the task or already established by the accepted repository surface. If the
-task asks for a new package such as a method package, put the implementation
-there from the first revision. A legacy or domain-local module may remain only
-as a compatibility shim that re-exports the owner; do not invert the shim and
-the implementation. Public exports, docs, and tests should name the owner and
-label any shim as a shim.
-
-Method-interface tests should exercise the same public path that users will
-import. If a shim exists, include export-identity checks across the owner,
-top-level package, and shimmed package. Put feasibility checks in the owner, not
-only in a hidden legacy module: candidate ids must align with controller object
-ids, dependencies must be feasible under the provided candidate/state surface,
-and budget/deadline infeasible selections must be rejected before a
-schema-valid decision is returned.
-
-Keep method configuration contracts and fixtures in lockstep. Required config
-fields must either appear in every valid fixture or have explicit stable
-defaults in the configuration record. Missing or malformed configuration should
-raise the project method-configuration error, not raw constructor or type
-errors. Mock methods may return deterministic schema-valid decisions, but they
-should only probe interface shape, configuration validation, identity
-alignment, dependency feasibility, budget feasibility, and deadline feasibility;
-they are not greedy, knapsack, MPC, BOLA, oracle, learned, or baseline
-algorithms. For deadline checks, state the inequality in code or tests before
-implementing it, and include paired cases where a candidate is feasible and
-where the same candidate is expired or deadline-infeasible, so helper argument
-order cannot silently invert semantics.
-
-For shared contract tasks, make the contract surface self-consistent before
-reporting completion:
-
-- build a compact contract matrix from the coding plan before editing: contract
-  name, required fields, dataclass fields, schema keys, fixtures, public exports,
-  and any intentionally omitted fields with the reason
-- keep requested project-domain names as the primary surface; do not replace
-  them with generic aliases, unrelated draft names, or dict-only contracts
-- every claimed contract, schema, validation helper, and public export exists
-  in source
-- typed constructors, schema validation, dict helpers, package exports, and
-  tests all describe the same field names and enum names
-- tests and examples use the current contract field names, not older draft
-  names
-- validation hooks are attached to the contract type that owns them
-- immutable or normalized records validate without illegal mutation
-- required provenance is rejected when missing or empty if the task requires it
-- public schema vocabulary matches runtime validation semantics. If a registry
-  bucket says `required`, the validator rejects missing or empty values. If a
-  field is finite and non-negative but not timing, give it a non-negative
-  scalar bucket rather than a timing bucket. Do not leave stricter runtime
-  checks hidden behind weaker schema labels.
-- dependency checks cover unknown references and self-references when both are
-  invalid for that contract
-- focused invalid tests isolate the intended rule so an earlier validation
-  failure, such as a count mismatch, does not mask the target condition
-- focused invalid tests cover each validation class named by the task with a
-  true invalid value: empty identifier, bad enum, `nan` or `inf` for finite
-  fields, a negative value for non-negative fields, reversed timing order,
-  missing or malformed provenance when provenance is required, and identity
-  mismatch for workload-aligned records
-
-Avoid generic infrastructure that the paper workflow does not need, such as
-deployment systems, dashboards, database layers, or distributed orchestration,
-unless the upstream plans or DeepResearch evidence make them necessary.
-
-## Documentation Contract
-
-Maintain three root documents:
-
-- `README.md`: short entry document with repository purpose, quick entrypoints,
-  and major directories.
-- `FRAMEWORK.md`: English framework explanation for downstream coding agents and
-  human developers.
-- `FRAMEWORK.zh-CN.md`: Chinese framework explanation. Keep conventional module,
-  method, metric, command, and code identifiers in English when exact spelling
-  matters.
-
-`FRAMEWORK.md` and `FRAMEWORK.zh-CN.md` should describe the actual repository,
-not a generic template. Cover:
-
-- how the framework inherits the paper blueprint, experiment plan, and coding
-  plan
-- why the selected ecosystem structure and source layout fit this project and
-  reduce friction
-- meaning of the fixed research directories
-- core modules, ownership boundaries, interfaces, and data flow
-- method and baseline extension points
-- harness structure, paper goals served, metrics, raw artifacts, and the
-  "modify module -> run harness -> inspect results -> refine module" loop
-- testing structure, fixture style, pass/fail purpose, and separation from
-  paper harnesses
-- raw-first result export schema and downstream use by plotting, paper writing,
-  and analysis
-- placeholder locations and what later implementation should fill
-- real or explicitly reserved entrypoints only
-
-When the docs are the only requested change, base them on the current scaffold
-and the upstream plans rather than on future implementation intent. Use
-repository-relative paths only. If a module, command, harness, test, dependency,
-result schema, or paper-output derivation is only a placeholder, say so plainly
-and do not describe it as runnable, validated, or result-producing.
-When docs describe authored tests or static validation files, state whether they
-have actually been run. Do not let "validated" mean both "the repository
-contains validation code" and "the validation was executed"; use explicit
-wording for each.
-
-Do not put skill workflow, runtime tool failures, sandbox details, or generation
-process commentary into repository files. Mention neither "skill-required"
-actions nor DeepResearch as a workflow step in repository docs; translate those
-inputs into ordinary project rationale such as deferred stack selection,
-license caution, or low-friction scaffold scope.
-
-## Code Style
-
-Write and revise code in the Academic Army direct style:
-
-- Prefer short, straight-line logic and shallow call chains.
-- Add helpers only when they express a stable boundary, remove real duplication,
-  or name a meaningful invariant.
-- Delete or avoid helpers that only wrap, rename, split, reassemble, or forward
-  data.
-- Keep local state local. Put shared state only where it is stable across
-  module boundaries.
-- Name content as content and references as references. Do not let path, handle,
-  content, config, result, and status names blur together.
-- Keep names aligned across code, config, docs, harnesses, tests, metrics, and
-  result artifacts.
-- Put related code near its use site unless it is truly shared.
-- Order inputs, validation, construction, execution, and output in natural
-  reading order.
-- Align field order, parameter order, and documentation order for related
-  objects.
-- Use comments only for non-obvious constraints, placeholder contracts, or
-  design decisions that cannot be made clear through naming and structure.
-
-When revising existing code, follow the repository's good local patterns, but do
-not preserve bad abstraction, stale naming, misplaced ownership, or unclear
-data flow merely for consistency.
-
-## Workflow
-
-1. Confirm the target repository root and keep all project operations inside it.
-2. Read only the required upstream planning artifacts and task-relevant existing
-   repository files.
-3. For repository creation, substantial redesign, stack choice, dependency
-   choice, or external-code reuse, run DeepResearch for the selected or
-   candidate stack, related repositories, dependencies, harness practices,
-   testing practices, and result artifacts. For focused modifications, skip
-   DeepResearch unless the task itself introduces one of those choices.
-4. Form an internal repository decision when structure is being created or
-   changed: selected stack, fixed research
-   directories, ecosystem source structure, harness folders, test folders,
-   configuration mechanism, interfaces, artifact schema, entrypoints, and static
-   quality tooling.
-5. Create missing fixed top-level directories and root documents when
-   initializing or repairing framework structure.
-6. Create or revise only the required ecosystem structure, dependency
-   declaration, static-quality configuration, source interfaces, harness
-   entries, tests, fixtures, and result artifact contracts.
-   If the task names only fixed scaffold paths, create only those paths and
-   root docs.
-   When adding a new static contract beside existing definitions, first inspect
-   any wildcard discovery in nearby loaders and tests; avoid filename or schema
-   choices that make unrelated loaders ingest the new contract.
-7. Preserve existing user work. Apply minimal changes for existing repositories,
-   avoid unrelated cleanup, and run the deletion audit before claiming the task
-   is complete. If review asks for removal of an out-of-scope surface, delete
-   the source/test files, remove package exports and root-doc mentions, and
-   re-check exact path absence before reporting success.
-8. Update `README.md`, `FRAMEWORK.md`, and `FRAMEWORK.zh-CN.md` so their content
-   matches the actual repository when the repository structure, public entry
-   points, extension points, or artifact contract changes. Do not edit root
-   docs for a private implementation test unless the user requests it.
-   Adding a new source package, public contract module, exported schema surface,
-   or top-level test file normally changes the public repository surface; update
-   stale root docs in the same task unless the user explicitly excludes docs.
-9. Perform static validation only.
-10. Respond with a concise summary of created or modified repository abilities,
-    extension points, static validation, and any code-level caveats.
-
-## Revision Trajectory
-
-Treat review feedback as either actionable or blocking:
-
-- Actionable feedback names a code, documentation, contract, validation, or
-  scope defect. Fix the smallest relevant surface and rerun only the permitted
-  static validation.
-- A blocking review reports that the reviewer could not inspect files or tools.
-  Do not make speculative code changes. If the reviewer asks for file contents
-  or a diff, provide that bounded readback package in the next developer report
-  or ask for a review rerun with working read access.
-- If the same environment-only blocker repeats, record that the implementation
-  is unchanged and the review is externally blocked. Do not invent a new target
-  repository task merely to make progress. Do not rerun the same static
-  validation just to fill a revision turn unless the orchestrator explicitly
-  requires a fresh validation report.
-- When a reviewer states that no developer-side revision can be requested,
-  leave repository files unchanged. Respond with the current implementation
-  summary, the last valid static validation, and the blocker status.
-- If a reviewer or developer report says the repository was reconstructed from
-  an empty or partial view, treat that as a repository-integrity defect until a
-  full baseline is restored from a trustworthy source and the scoped change is
-  reapplied on top of it.
-- If review feedback says the developer report and actual files disagree,
-  re-read the modified source, tests, package exports, and root docs before
-  patching. Treat report/file mismatch as an implementation defect, not a
-  wording issue.
-- If review feedback says newly reported files are absent, first re-establish
-  the target root and run an exact-path filesystem check for those files. If the
-  files are absent, create them in the verified target tree and re-check exact
-  presence before touching docs or reporting. If the files disappear again after
-  creation, stop and report a repository-integrity blocker instead of repeating
-  an implementation claim.
-- If review feedback says an out-of-scope surface still exists, perform one
-  atomic cleanup pass: delete the source/test files, remove public exports, purge
-  docs that list the deleted files as live surface, remove generated artifacts,
-  then verify with exact path checks and a repository search for the removed
-  symbol family. Do not split that cleanup across multiple reports unless the
-  user explicitly narrows the revision.
-- If a filesystem check contradicts the intended deletion, trust the filesystem.
-  Reopen the target directory, resolve any duplicate path or working-directory
-  confusion, and either delete the actual file or report a repository-integrity
-  blocker. Do not claim success from memory, patch intent, or an earlier
-  deletion attempt.
-- If review feedback says a project-specific contract regressed to generic
-  fields or names, restore the project-specific dataclass and schema surface
-  first, then align tests and exports. Do not keep a generic replacement just
-  because it has a validator or dict loader.
-
-When selecting a next task after a bounded change, choose the smallest item that
-is directly supported by the paper blueprint, experiment plan, coding plan, and
-current repository state. Prefer missing contract coverage, missing harness
-definition, or missing static entrypoint wiring over broad implementation or
-experiment work. Do not mark an unrelated TODO complete unless the current task
-explicitly verified it or the user asked for a status audit. Do not confirm TODO
-completion from a reconstructed or unread repository state. If review accepts
-the change, record the accepted outcome and promote only the next bounded static
-contract that is directly supported by the current repository and upstream
+Produce clear, direct, maintainable code inside an existing repository. The
+upstream user task decides what to implement; this skill decides how to keep the
+implementation readable, local, low-coupling, and consistent with the current
+framework.
+
+Do not use this skill to create a repository template from scratch. Template
+initialization belongs to the dedicated initialization skill. This skill may add
+files, modules, subfolders, tests, harness support, or documentation only when
+the current task or current repository framework needs them.
+
+## Operating Boundary
+
+Use the user-specified repository root as the boundary for project work. Do not
+create, modify, or reference project files outside that root unless the user
+explicitly asks.
+
+Respect the current repository structure, language ecosystem, naming style,
+test layout, and framework documents. Improve them locally when they make the
+current feature hard to read, test, or change, but do not redesign the whole
+repository just because upstream plans describe future systems.
+
+Ignore unrelated drafts, logs, old outputs, historical runs, and nearby files
+unless the user makes them part of the task.
+
+Keep the fixed experiment directories when they already exist:
+
+- `data/`: input datasets, pointers, traces, manifests, fixtures, or sample data
+- `output/`: program-run outputs and intermediate artifacts
+- `results/`: experiment result records and curated artifacts
+- `harness/`: harness code, harness contracts, configs, schemas, samples, and
+  support files
+
+Do not force a fixed test directory. Tests follow the repository's existing
+layout, project configuration, initialization docs, or adjacent test style.
+
+## Task Classification
+
+Before editing, classify the task:
+
+- **Feature or code implementation**: implement the smallest clear code path
+  that satisfies the requested behavior.
+- **Refactor or structure cleanup**: move, split, merge, rename, or delete code
+  only to improve the current change's locality, readability, or testability.
+- **Harness work**: keep harness code under the relevant `harness/` subfolder;
+  make the harness objective, inputs, metrics, raw artifacts, and run loop
+  explicit.
+- **Test work**: place tests in the existing test system's natural location;
+  keep each test focused on one behavior with small fixtures or toy inputs.
+- **Method, baseline, metric, or export work**: keep the change close to that
+  extension point and update registration, docs, exports, and tests only when
+  those surfaces are explicitly in scope.
+- **Validation-only pass**: run the exact requested focused validation before
+  editing. If it passes, make no source, test, docs, dependency, export, or TODO
+  changes except removing generated cache artifacts. If it fails, inspect the
+  failure first and make only the smallest local fix to the accepted contract
+  named by the failing test or source path.
+  Before running, verify that every explicitly requested test target exists; a
+  missing target is a validation blocker to report, not permission to create a
+  new test, drop that target from the command, or run a narrower substitute.
+  Existing dirty or untracked files that are part of the accepted in-progress
+  surface are not a reason to reset or clean the repository; validate the
+  current tree as given and remove only cache artifacts created by the run. If
+  no cache or bytecode artifacts are present after the run, report that finding
+  instead of treating cleanup as a required edit.
+- **Framework/documentation sync**: update `FRAMEWORK.md` and
+  `FRAMEWORK.zh-CN.md` when module boundaries, extension points, harness/test
+  organization, artifact schemas, or repository responsibilities change.
+- **Repository integrity repair**: restore, revert, or clean only the explicitly
+  requested tracked files or artifacts from the trusted source named by the
+  user. Do not use planning documents, old reports, or memory to recreate
+  missing files, and do not advance the repository with new implementation,
+  tests, harnesses, dependencies, generated artifacts, or TODO direction unless
+  the user separately requests that work.
+- **Docs-only scaffold or handoff repair**: describe the current repository
+  exactly. Do not backfill missing code, tests, loaders, schemas, dependencies,
+  entrypoints, results, TODO status, or execution claims.
+- **Trajectory or TODO maintenance**: record only accepted, verified work and a
+  next task only when a next task was requested or already exists as part of
+  the active workflow. Do not invent implementation work from broad plans after
+  a restore, cleanup, or docs-only repair.
+
+If the task is broad, choose a local implementation slice that can be reviewed.
+If the next useful work would require real data, algorithmic evidence, harness
+runs, metrics, experiments, baselines, or generated results beyond the user's
+request, pause or mark the trajectory finished instead of inventing another
+static task.
+
+## Pre-Edit Inventory
+
+For existing repositories, establish a small task-relevant inventory:
+
+- target repository root and version-control root
+- files and directories relevant to the task
+- files expected to be created, modified, deleted, and left untouched
+- current test layout and harness layout when either is relevant
+- whether task-relevant files are present, untracked, tracked, or absent
+- for record-backed helpers, the accepted constructor fields, constructor
+  defaults, validation owner, existing `record_id` prefix and identity payload,
+  and whether package-level exports are in scope
+
+Treat a suddenly empty or partially missing tree as an integrity blocker. Do not
+reconstruct missing code from memory, reports, or plans unless the user requests
+restoration from a trusted source.
+
+For integrity-repair tasks, inventory the exact status entries before editing,
+restore only those requested paths from the trusted source, and verify that the
+same status entries are gone afterward. A successful restore is complete when
+the requested version-control state is reached; it is not a signal to begin the
+next implementation slice.
+
+## Implementation Style
+
+Prefer code that is short, direct, and easy to read in execution order. The data
+flow should be visible: where inputs come from, how they are transformed, where
+they go, and what is returned or written.
+
+Use names from the paper blueprint, experiment plan, coding plan, user request,
+and current code semantics. Keep one concept's spelling consistent across code,
+config, harnesses, tests, artifacts, prompts, and docs.
+
+Keep responsibilities single:
+
+- one file should mainly carry one interface, adapter family, metric family,
+  harness entry/support area, data-processing step, export shape, or test group
+- split files that mix unrelated change reasons or abstraction levels
+- merge or simplify files that only add thin wrappers, pure forwarding, or
+  extra jumping
+- avoid `utils`, `misc`, mega-runners, and all-in-one modules unless they are
+  already narrow and stable
+
+Prefer inline or local helpers when logic is used once and remains readable.
+Extract helpers, adapters, registries, factories, contexts, or interfaces only
+when they provide real reuse, isolate a stable boundary, preserve an invariant,
+reduce caller code, or make tests simpler.
+
+Do not add abstractions for imagined future cases. If a simple implementation
+clearly satisfies the current task, keep it simple.
+
+Reduce global state, hidden path assumptions, implicit side effects, long
+calling chains, repeated registration points, and heavy configuration for simple
+experiments.
+
+When an interface forces every caller to pass excessive parameters, consider a
+small explicit context or config object. Do not turn that into a framework when
+plain values remain clearer.
+
+## Change Locality
+
+Before writing code, identify the natural owner of the change:
+
+- a method change should mainly touch method code and necessary comparison or
+  registration surfaces
+- a baseline change should mainly touch baseline code and focused tests;
+  comparison, registration, docs, package exports, and harness surfaces change
+  only when explicitly requested
+- a metric change should mainly touch metric definition, computation, export,
+  and tests
+- a public package export change should mainly touch the package entrypoint or
+  existing export module plus a focused export-surface test; keep `__all__`
+  exactly aligned with the intended public names and do not export helpers or
+  adjacent internal types unless the task asks for them
+- a harness change should mainly touch the relevant `harness/<name>/` area plus
+  necessary shared interfaces
+- a result-artifact change should mainly touch artifact schema/export logic and
+  tests
+- a loader or manifest change should mainly touch that input layer and tests
+
+If one feature requires unrelated edits across many areas, treat that as a
+framework-boundary risk. Do the smallest local refactor that brings related
+code together, or report the coupling if a safe local refactor is outside the
+current task.
+
+Keep code that changes together close. Keep unrelated reasons to change in
+separate modules. Public/shared layers should contain only stable capabilities
+needed by multiple users; special cases should stay near their use sites.
+
+## Harness And Test Discipline
+
+Harnesses serve paper goals, performance comparison, method screening, module
+optimization, and experiment evaluation. Tests serve functional correctness,
+interfaces, data formats, config parsing, metrics, export behavior, and basic
+module interaction.
+
+Keep harness and test responsibilities separate:
+
+- harnesses should expose stable entry semantics, input protocols, metric names,
+  raw artifact records, seeds, splits, config snapshots, and parseable outputs
+- tests should use small fixtures, toy inputs, and clear pass/fail expectations
+- each test function should keep one named behavioral responsibility; when a
+  task adds a focused check, do not move or append unrelated assertions into
+  that test just because they use the same fixture or module
+- no-mutation tests should pass the mutable sequence, mapping, or object that
+  they later inspect into the implementation; do not pass a tuple, copy, or
+  derived proxy and then assert that the untouched original stayed unchanged
+- when the no-mutation contract is about source record objects rather than
+  container ordering, it is enough to inspect those exact objects before and
+  after the call; do not force a mutable container unless the container itself
+  is part of the mutation contract
+- preserve existing test responsibility boundaries when editing a test file:
+  export-surface assertions belong in export tests, invalid-state assertions
+  belong in invalid-state tests, and identity or schema assertions belong in
+  their own clearly named tests
+- harness code should not become functional test code
+- test code should not become paper-performance evaluation
+- plotting and paper table generation should consume raw or metric artifacts
+  outside the core harness logic
+
+When a harness grows, split support modules inside that harness's own folder
+before pushing special logic into a shared layer. When tests grow, split them in
+the existing test system's style.
+
+## Framework Documents
+
+Maintain `FRAMEWORK.md` and `FRAMEWORK.zh-CN.md` when the task changes the
+repository's framework surface. The English document uses English; the Chinese
+document uses Chinese and may keep code identifiers, method names, metric names,
+harness names, and config keys in English.
+
+Framework docs should describe current reality, not template initialization and
+not aspirational implementation status. Include only capabilities that exist on
+disk and distinguish:
+
+- implemented source code
+- reserved or documented extension points
+- authored but unrun tests
+- runnable harnesses versus README-only harness specs
+- raw artifact schemas versus generated result artifacts
+- installed or declared dependencies versus planned dependencies
+
+Useful framework docs explain where future local changes should happen:
+
+- stable boundaries and extension points
+- change map from feature type to module/harness/test/export area
+- harness purposes, metrics, and raw artifacts
+- test organization actually used by the repository
+- raw-first export approach and downstream analysis boundary
+- framework risks where future changes cannot yet stay local
+
+Do not put skill internals, tool mechanics, sandbox notes, or generation process
+inside framework docs.
+
+For README-style documentation syncs, update the requested overview, package,
+and test documents as a consistent current-state map. Name implemented modules,
+public entrypoints, helper contracts, and focused test files exactly as they
+exist, and keep capability lists aligned across root, package, and test READMEs.
+Before editing, read each requested README-style file and classify it as current,
+stale, or internally inconsistent. Edit only the files that are stale or
+inconsistent. If a requested doc already describes the accepted state, leave it
+unchanged and say it was verified current; do not rewrite it for cosmetic
+parallelism. If all requested docs are current, report a no-op docs sync rather
+than creating formatting churn.
+If the task text says the docs are stale but the live files already contain the
+accepted helper names, metric names, test coverage, and narrowed absence clauses,
+trust the current files over the stale premise. Report the exact surfaces that
+were verified current and make no edit.
+When a newly accepted helper and its focused test exist on disk but are missing
+from current-surface lists, package-helper lists, layout tables, or test
+summaries, treat that as a real stale-doc reason. Update each requested doc only
+at the surfaces needed to make the current-state map complete and parallel with
+accepted sibling helpers.
+When an accepted surface changes from one implementation to multiple sibling
+implementations, update singular wording in prose, package summaries, layout
+tables, and test summaries together. A row that still says "the scheduler" or
+"the helper" after documenting two accepted siblings is stale even when the
+module filename is already listed correctly.
+Also scan negative or absence statements in the requested docs, such as "no
+metric tests are present" or "no helper exists"; update those when the accepted
+files now exist, while preserving narrower exclusions such as no metric formulas,
+aggregation logic, result exporters, harnesses, or experiments.
+If an absence statement names a broad capability category that now has one
+accepted bounded exception, rewrite the category instead of leaving a
+contradiction. For example, after accepting a minimum baseline scheduler, do not
+keep "no scheduling methods exist"; say no proposed RefABR algorithms, robust
+MPC/BOLA/learned policies, full scheduling infrastructure, harnesses,
+experiments, or paper outputs exist beyond that accepted baseline.
+When a helper name overlaps with planned runtime work, such as metrics or method
+manifests, keep or add explicit absence clauses for the adjacent runtime
+capabilities so readers do not infer formulas, selection logic, runners, exports,
+experiments, or paper outputs.
+When documenting a bounded helper, state what it accepts, what it returns, and
+which owner performs deeper validation, but do not convert that description into
+claims about loaders, registries, fixtures, harnesses, metrics, runnable
+experiments, dependencies, generated outputs, or paper results.
+For metric-record helpers, describe only mapping-to-`MetricRecord`
+normalization and focused validation. Do not let the word metric imply metric
+formula implementation, computation, aggregation, result export, harness
+execution, or paper-result generation.
+For bounded metric-computation helper docs, describe only the accepted formula
+that exists, its raw input record type, returned `MetricRecord` fields, and
+focused validation. Narrow stale "no metrics" or "no metric computation"
+clauses to exclude additional metric formulas, QoE weighting, aggregation
+frameworks, result exporters, harnesses, experiments, and paper outputs without
+contradicting the accepted in-memory computation helper. If the helper returns
+provenance such as source record IDs, describe it as provenance from existing
+source records, not as generated artifacts or result export. Do not call one
+accepted formula the Metric Computation Layer, metric registry, experiment
+metric suite, or paper-result metric implementation.
+When multiple bounded metric-computation helpers are accepted in the same
+module, name each formula helper in implemented-surface lists, package
+summaries, layout rows, and test summaries. Keep absence clauses limited to
+metric formulas and runtime surfaces beyond those accepted helpers.
+For repeated metric-helper documentation syncs, use the newly accepted helper
+as a checklist key across every requested README-style file: helper function
+name, emitted `metric_name`, package/module summary, layout row, test summary,
+and local absence clause. Do not stop after updating the first helper list; a
+stale test row or absence sentence is still a docs-sync defect.
+Also update the category label when the accepted helpers broaden the module's
+meaning. If a non-rate helper such as mean latency joins rate helpers, replace
+stale wording like "rate metric computation", "rate computation path", or
+"deadline-rate helpers" with neutral "metric computation" wording or an exact
+helper list; adding the new helper name while leaving a rate-only descriptor is
+an incomplete docs sync.
+When documenting focused coverage for numeric mean helpers, mirror the actual
+test cases and metric semantics. Use zero-latency, zero-FPS, zero-quality,
+all-zero, mixed, and single-frame wording only when those exact numeric cases
+are covered; do not turn numeric zero cases into "none" wording, which belongs
+to boolean/count rate cases only when tests assert no flagged frames.
+In bilingual docs, check both the implemented-helper sentence and the local
+absence sentence for stale singular exceptions. Phrases like "except the
+accepted deadline-hit-rate helper" become misleading after a sibling helper is
+accepted; rewrite them to name the current accepted helpers or to say only
+additional formulas and runtime metric infrastructure remain absent. When a
+third or later sibling helper is accepted, also replace stale "both helpers",
+"two helpers", or "deadline-rate helpers" wording with an exact list or a
+neutral plural description that includes the new helper.
+For frozen-method-manifest helpers, describe only mapping-to-`FrozenMethodManifest`
+normalization and focused validation. Do not let method, freeze, or manifest
+wording imply method adapters, candidate selection, method-freeze selection
+logic, harness runners, CLI entrypoints, package exports, experiments, or paper
+outputs.
+For bounded lifecycle projection helper docs, describe only
+`simulate_reference_lifecycle_state(...)` as selected-reference `MediaObject`
+plus explicit timing inputs projected into `ReferenceLifecycleState`, with
+focused validation for that projection path. Do not call this helper a
+normalizer, do not describe stable-ID coverage as a normalization path, and in
+Chinese docs prefer `投影路径` over `归一化路径` for this helper. Do not let
+lifecycle wording imply full simulators, transport models, event processors,
+component profilers, dataset or trace loaders, metrics, harness runners,
+experiments, or paper outputs.
+For bounded raw-record mapping helper docs, describe only
+`record_to_mapping(...)` as accepted-record-to-JSON-compatible-mapping
+conversion in memory. State that it preserves accepted field names and each
+source record's existing `record_id`; do not claim stable-ID mutation or
+identity-bearing-field coverage unless the focused tests actually mutate those
+fields. If a doc has broad absence wording such as "exports are not
+implemented", narrow it after accepting this helper to file-based/result
+exporters, JSONL/CSV writers, artifact schemas or directories, harnesses,
+experiments, and paper outputs. Do not imply package-level exports unless the
+package entrypoint exports the helper.
+For bounded method scheduling interface docs, describe only the `MethodScheduler`
+and `run_scheduler(...)` call boundary over existing records plus its focused
+tests. Do not let scheduler, method, or interface wording imply concrete
+scheduling methods, baseline policies, ABR algorithms, candidate selection,
+utility models, adapters, harness runners, CLI entrypoints, package exports,
+experiments, or paper outputs.
+For bounded baseline scheduler docs, describe only the accepted simple baseline
+surface that exists on disk, its input records, configuration keys, returned
+record type, and focused tests. Do not let baseline wording imply proposed
+RefABR methods, BOLA/MPC/learned policies, candidate generation, utility-model
+research, harness runners, metric computation, result export, experiments, or
+paper outputs unless those files and validations actually exist.
+For cumulative helper docs, update prose lists, layout tables, package summaries,
+and test summaries together with parallel wording for all accepted sibling
+helpers. Do not imply that helper modules are package-level exports unless the
+package entrypoint actually exports them.
+For cumulative baseline docs, name each accepted simple baseline in every
+current-surface description that characterizes the baseline module or its tests;
+do not leave old singular descriptions in layout rows or package/test summaries.
+If the user names an exact docs-only file set or excludes TODO/status files, do
+not update TODO, handoff, source, test, dependency, export, or generated-artifact
+surfaces as part of the documentation sync. Leave TODO or trajectory recording
+to the separate TODO-maintenance step.
+
+## Content, State, And References
+
+Keep content and references distinct in names and data flow. A variable named
+like a path, ID, URL, handle, or reference should not contain already-read
+content; a variable named like content should not contain an external location.
+
+Only stable cross-boundary information belongs in shared models. Temporary,
+single-run, display-only, orchestration-only, or unstable intermediate values
+should stay local.
+
+Assign one owner for writing, saving, exporting, or returning an artifact. Avoid
+multiple layers claiming responsibility for the same output.
+
+For shared record, schema, or metadata surfaces, treat identity as an explicit
+contract. Prefer caller-provided stable IDs and required identity fields over
+derived hashes, generated suffixes, timestamps, random values, or implicit
+serialization choices. Add derived `record_id`, cache keys, or fingerprint
+helpers only when the user or existing framework asks for derived identity.
+When derived identity is required, document the identity-bearing fields in code
+structure rather than prose alone, include every required field that changes the
+record's semantic identity, and keep non-identity payload separate from the key.
+Tests for identity-owner changes must mutate each identity-bearing field that
+matters and prove the identifier changes. Add non-identity no-change checks only
+when the task changes identity code, the user requests that distinction, or
+existing tests already define it; otherwise cover non-identity payload through
+pass-through or validation tests.
+Before writing identity tests around an existing record, inspect the accepted
+`record_id` construction or equivalent key contract and treat that as the source
+of truth. A helper, loader, adapter, or normalizer task must not add fields to an
+accepted record identity merely because a new helper test mutated those fields;
+if a validation-only field is not part of the accepted key, cover it through
+presence, pass-through, or delegated invalid-state tests instead. Do not infer a
+record-id prefix or identity-bearing fields from the class name, helper name, or
+domain wording; use the current implementation as the accepted contract unless
+the user explicitly asks to revise that contract.
+
+For bounded in-memory normalization helpers, preserve the accepted field names
+and keep the helper as a thin adapter into the owning record or schema type.
+Validate presence and shape only as far as the helper owns them, then delegate
+domain validation, defaults, and stable identity to the record or schema that
+already owns those contracts. Do not turn a mapping normalizer into file I/O, a
+dataset registry, fixture discovery, trace loading, or a broader ingestion
+layer unless the task explicitly asks for that expansion.
+
+When adding a sibling normalizer, mirror the established local helper shape
+before inventing a new pattern: required-field constant, optional-field
+handling, mapping-type rejection, missing-key rejection, payload construction,
+and constructor delegation. Focus tests on the helper's owned contract: valid
+normalization, non-mapping rejection when required, missing required fields,
+optional field pass-through, delegated invalid values, and stable identity
+through the normalization path. When the user names accepted identity-bearing
+fields, use that list and the current record implementation as the test
+boundary; do not expand stable-ID coverage to optional non-identity fields just
+because they are accepted payload. Do not use a normalizer test to redefine
+which fields belong to the underlying record's identity; mutate fields already
+owned by that record's accepted identity contract. If a normalizer exposes both
+identity-bearing fields and validation-only fields, keep those assertions in
+separate clearly named tests so reviewer feedback can distinguish adapter
+behavior from record-contract changes. Keep mutated identity payloads valid so a
+stable-ID test reaches the identity path rather than a domain validator.
+
+For optional fields in normalizers, either pass them only when the input
+contains them or mirror the owning record's constructor defaults exactly. Do not
+invent aliases, alternate defaults, package-level exports, documentation
+updates, or broader API surfaces as part of a normalizer source/test task unless
+the user explicitly asks. If a normalizer test reveals that the accepted record
+identity or validation contract may be wrong, report that as a separate
+contract question; do not change the record class, schema, or existing record
+tests inside the bounded normalizer task.
+
+For frozen-method-manifest normalizers, keep the implementation to record
+construction and focused validation only. The presence of `FrozenMethodManifest`
+does not authorize method adapters, candidate selection, method-freeze selection
+logic, harness runners, CLI entrypoints, package-level exports, file I/O, or
+experiment artifacts.
+
+For bounded in-memory metric computation helpers, implement only the named
+formula over accepted raw record objects. Validate only helper-owned inputs such
+as non-empty source sequences and aggregation-key presence, compute the direct
+numerator, denominator, ratio, and provenance required by the task, and then
+delegate metric-field validation and stable `record_id` generation to
+`MetricRecord`. Do not add metric registries, QoE weighting, aggregation
+frameworks, confidence statistics, file I/O, JSONL/CSV writers, result
+exporters, artifact directories, package-level exports, docs, dependencies,
+loaders, harness runners, CLI, experiments, or paper-output behavior unless the
+task explicitly asks. Tests should cover all relevant boundary count cases,
+empty input, invalid aggregation keys, source `record_id` provenance, no source
+mutation, and `record_id` behavior according to the accepted `MetricRecord`
+identity fields rather than inferred provenance fields.
+For numeric metric helpers, boundary-value coverage must be literal. A test
+named zero-latency, zero-FPS, all-zero, all-hit, all-miss, all-dropped,
+none-dropped, or single-frame must use fixture values and assertions that
+actually exercise that boundary; a mixed-valued case with a boundary word in its
+name is not boundary coverage.
+When adding a sibling formula to an existing bounded metric-computation module,
+share a small private counting/build helper only if it makes both public
+functions shorter and keeps the formula-specific fields obvious at each
+entrypoint. Do not turn that helper into a registry, dispatcher, framework, or
+configuration layer.
+If a previously formula-specific private helper becomes shared by a broader
+metric family, rename that helper in the same change so its name matches the
+new responsibility. For example, a helper named for deadline rates should not
+also compute dropped-frame rates; use a neutral operation/data name such as
+`_compute_frame_rate` instead of adding another abstraction layer.
+For sibling arithmetic-mean helpers over `FrameOutcome` fields, avoid one
+private helper per field when those helpers duplicate validation and
+`MetricRecord` construction. Either keep each public helper direct when it stays
+short, or use one neutral helper such as `_compute_frame_mean` that accepts the
+metric name, unit, direction, and value extractor while leaving formula-specific
+fields visible at the public entrypoint.
+
+For bounded lifecycle projection helpers, keep the implementation to an
+in-memory projection from an already selected `MediaObject` and explicit timing
+inputs into `ReferenceLifecycleState`. Reject non-reference media objects,
+require only the timing keys needed for the requested lifecycle state, derive
+`useful`, `stale`, and `expired` only from provided state, timestamp, and
+deadline values, and delegate timestamp ordering, lifecycle legality, defaults,
+and stable `record_id` generation to `ReferenceLifecycleState`. Do not add
+external clocks, file I/O, trace loading, transport models, event processors,
+component profilers, full simulators, harness runners, exports, docs, or
+generated artifacts unless the task explicitly asks for them.
+
+For bounded in-memory record-to-mapping helpers, keep the helper as a raw record
+surface adapter, not a result exporter. Support only the accepted record classes
+named by the task, preserve dataclass field names exactly, include the existing
+`record_id`, and convert JSON-hostile containers such as tuples, lists, sets,
+and nested mappings into JSON-friendly in-memory values without mutating the
+source record. Prefer explicit `dataclasses.fields(record)` plus `getattr(...)`
+over `dataclasses.asdict(...)` when accepted records may contain arbitrary
+`Mapping` implementations; `asdict(...)` can fail on valid non-`dict` mappings
+before custom conversion runs. Convert `collections.abc.Mapping` values into
+plain `dict` values recursively. Do not add file I/O, JSONL/CSV writers, result
+artifact directories, schema layers beyond the returned mapping shape,
+package-level exports, docs, dependencies, loaders, metrics, harnesses, CLI, or
+paper-output behavior unless explicitly requested.
+
+For bounded method scheduling interfaces, implement only the requested call
+boundary over existing record types. A first scheduler contract may define a
+small protocol, callable type, or minimal runner that invokes a supplied
+scheduler and rejects non-`ScheduleDecision` returns, but it must not introduce
+concrete scheduling policies, baseline behavior, ABR algorithms, candidate
+selection, utility models, method-freeze logic, harness runners, CLI entrypoints,
+package exports, file I/O, or experiment artifacts. Tests should use toy
+in-memory records, prove the scheduler receives candidates and configuration as
+given, assert the returned `ScheduleDecision` is the exact object produced by
+the scheduler, and cover invalid-return rejection only when a runtime runner is
+part of the task.
+
+For minimum simple baseline schedulers, implement only the named baseline policy
+and keep it as an in-memory method implementation behind the accepted scheduling
+boundary. Use existing record fields directly, make ordering and default
+configuration behavior deterministic, avoid mutating candidate sequences or
+configuration mappings, and return the existing decision record without adding
+candidate generators, utility models, metrics, harness runners, file I/O,
+exports, or external state. Tests should invoke the baseline through the method
+runner when one exists, use toy records, cover the policy's owned behavior and
+decision invariants, pass mutable candidates/configuration directly when
+asserting no mutation, and keep algorithm-comparison or experiment assertions
+out of the baseline unit tests.
+
+## Prompts, Text, And Comments
+
+Prompt strings, embedded task text, and user-facing messages should be short,
+direct, and task-oriented. Distinguish input references from direct content and
+generation responsibility from save/write responsibility.
+
+Use comments only for non-obvious constraints, sources, or decisions. Prefer
+clearer names and structure over comments that explain avoidable complexity. Do
+not write style rules, generation history, or tool-process notes into comments.
+
+## Open-Source Reuse
+
+When implementing a mature existing capability, first decide whether reuse is
+legal, appropriate, and lower maintenance than rewriting.
+
+Reuse preference:
+
+1. stable dependency with compatible license
+2. adapter around a stable external API
+3. small copied or ported snippet when license permits
+4. own implementation
+
+Before copying or adapting code, check license compatibility. Do not copy code
+without a clear compatible license. For copied, ported, or adapted code, keep
+source attribution in the relevant code comment and maintain `THIRD_PARTY.md`
+or an equivalent notice file when multiple external snippets are used. Include
+project, URL, file/module, license, version/commit when available, reuse mode,
+and main local changes.
+
+Use `academic_army_mcp_tools.deepresearch` when the task depends on unfamiliar
+language conventions, framework organization, harness/test practices,
+open-source reuse, or external code choices. Do not run it for narrow local
+edits in an already-established stack unless the user asks or reuse decisions
+are involved.
+
+## Trajectory Selection
+
+A good trajectory is one bounded next edit that follows from accepted,
+verified repository state. It should not become a wishlist from the upstream
 plans.
 
-If the accepted task was an explicit fixed scaffold, do not auto-promote a
-source, schema, harness, test, dependency, or artifact task just because the
-framework docs reserve those extension points. In TODO or trajectory files,
-record the scaffold as complete and either pause for an explicit next request or
-name a docs/static-inventory follow-up only when the accepted scaffold docs are
-stale or incomplete.
+After an accepted change:
 
-For integrity-blocker TODO updates, separate accepted history from current
-verifiability. A task may be accepted in prior reports but not currently present
-in the target tree. Keep such items out of "completed in current repository"
-status until the actual files are restored or explicitly rebuilt and reviewed in
-the current target. Put missing accepted work in a blocked/not-currently-
-verifiable section with the exact missing paths and the restore gate.
+- re-read the changed files and any root framework docs that may be stale
+- record only what is present and accepted
+- choose a docs-only sync only when a specific existing framework or package doc
+  is known to be stale, incomplete, or contradicted by the accepted change
+- if a proposed docs-only sync is mostly already current, narrow it to the exact
+  stale document or close it as verified-current instead of editing unrelated
+  README-style files
+- choose a focused source/test/harness/export task only when the user or current
+  workflow explicitly asks for continued implementation
+- after an accepted docs-only sync, update TODO or handoff notes to close that
+  task without inventing another implementation step; clearing the selected next
+  task is appropriate when no bounded follow-up has been requested
+- after repository integrity repair, restore-only cleanup, or docs-only
+  scaffold repair, stop at the verified baseline unless the user explicitly
+  requested a follow-up implementation trajectory
+- after an accepted validation-only pass with no fixes, record the command,
+  pass/fail count, and cache cleanup or no-cache-artifact finding only; leave
+  the next task neutral unless the user or active workflow already selected a
+  bounded follow-up
+- when recording validation-only results, preserve the exact reported result
+  line, including skipped count when present, and distinguish "no fixes needed"
+  from "files changed"; cache cleanup is not a source/test/docs change.
+- do not treat a green whole-surface validation pass as a new accepted feature
+  surface. It confirms the current contracts; it does not create a reason to
+  schedule docs syncs, package exports, harness work, metric expansion, or
+  additional implementation.
+- pause or set `FINISHED` when the accepted change completes the requested
+  static surface and remaining work requires new implementation authority,
+  execution, datasets, metrics, algorithms, harness runs, or paper results
 
-Before advancing to the next implementation item, check whether the accepted
-change made `README.md`, `FRAMEWORK.md`, or `FRAMEWORK.zh-CN.md` stale. If so,
-promote a docs-only sync as the next bounded task. That sync should describe the
-accepted repository surface without adding code, tests, harness definitions,
-entrypoints, artifact writers, execution claims, or paper-result claims.
-This applies to static harness definition files even when they are not public
-source code: if root docs still describe `harness/` as only reserved, record a
-docs-only sync before any loader, CLI, metric, runtime, or next-harness task.
-If the docs already match and the next useful work would require execution,
-metrics, algorithms, real data, or artifact generation, pause instead of
-inventing a repository task.
+For TODO or trajectory files:
 
-Use this static trajectory order when the repository is still a scaffold:
+- make the next task executable as one bounded repository edit only when a next
+  task is required by the user or by an existing active trajectory
+- name the exact stale file or documented mismatch that motivates a docs-only
+  next task; do not add a generic documentation-sync task after every accepted
+  source or test change
+- after an accepted source/test change, set a README-style sync as the next task
+  only when current README-style files are part of the active repository surface
+  and now omit or contradict the newly accepted symbol, helper, test, or
+  boundary; name the exact docs and repeat the exclusions that prevent future
+  capabilities from being implied
+- after accepting a new bounded metric-computation helper, explicitly check the
+  README-style metric-computation entries, package summary, layout row, test
+  summary, and metric absence clause before leaving the next task neutral. If
+  any still omit the helper or describe only older sibling formulas, queue a
+  docs-only sync that names the exact stale docs and keeps runtime metric
+  frameworks, QoE weighting, exports, harnesses, experiments, and paper outputs
+  excluded.
+- before queuing a multi-file README-style sync, do a small read-only scan of
+  the likely README files and record the specific stale sentence, row, or
+  absence clause that needs work. If only one requested doc is stale, make the
+  next task a one-doc correction or say the other docs are already current,
+  instead of carrying a template four-file sync forward.
+- when a TODO or trajectory update selects a README-style sync after a metric
+  helper, name the newly accepted helper/metric and the exact README-style files
+  or surfaces verified stale. Do not set a generic "README sync" next task from
+  the assumption that docs must be stale; if no live docs scan was done, leave
+  the next task neutral or make the next step an explicit read-only docs scan.
+- if a queued README-style sync later proves to be fully current, record it as a
+  verified no-op and clear or keep the next task neutral; do not queue another
+  docs sync for the same helper unless a new stale sentence is found in the live
+  files.
+- when recording an accepted docs-only sync, distinguish docs that were changed
+  from docs that were only read back and verified current; do not imply all
+  requested docs were modified if only one needed a formatting or consistency
+  adjustment
+- if the accepted task was only a restore, cleanup, revert, or docs-only repair,
+  record the accepted baseline and mark the trajectory finished or waiting for
+  user direction instead of promoting code, test, harness, or experiment work
+- after an accepted README-style sync for a metric helper, do not select the
+  next metric helper from the coding plan merely because the docs are now
+  current. Leave the next task neutral unless task selection has explicitly
+  chosen that next implementation slice.
+- for TODO-only maintenance after an accepted docs-only sync, update only the
+  TODO or handoff file, read it back, and report that no tests were run because
+  no executable code changed
+- for TODO-only maintenance after an accepted validation-only pass, update only
+  the TODO or handoff file; copy the accepted command, pass/fail count, no-fix
+  status, and cache cleanup or no-cache finding from the developer report; state
+  that no tests were run for the TODO-only step; and leave the next task neutral
+  unless an existing active trajectory already selected a bounded follow-up
+- do not convert a validation-only pass count into a completed feature count;
+  it confirms the current accepted surface across the named tests but does not
+  accept additional formulas, exports, harnesses, experiment execution, or paper
+  outputs
+- when no next task has been explicitly selected after docs-only acceptance, use
+  a neutral waiting state such as "no next developer task is selected; run task
+  selection before more work" instead of promoting the next source, harness,
+  metric, experiment, or paper-output task
+- include explicit exclusions when broad verbs like load, run, export,
+  validate, or normalize could be misread as runtime work
+- do not mark source contracts, loaders, runnable harnesses, metrics, exports,
+  experiments, or paper results complete unless they exist and were verified
+- do not promote code/test work from a docs-only scaffold or restored scaffold
+  unless explicitly requested
+- do not resurrect old review defects or historical plans that are not present
+  in the current repository
 
-1. Root handoff docs that accurately describe the current scaffold.
-2. Pause after a fixed scaffold when only directories and root docs were in
-   scope and the docs accurately describe that state.
-3. Docs-only sync when the accepted source, test, harness, or artifact contract
-   surface is now visible to downstream developers but root handoff docs do not
-   describe it.
-4. Shared domain validation schemas and focused test files for contracts that
-   already exist or are explicitly requested.
-5. Manifest-only workload contracts that preserve dataset, trace, split, and
-   seed identities without loading real data.
-6. Explicit substrate-adapter static capability contracts, only as their own
-   bounded task after workload cleanup is accepted; include tiny in-memory
-   contract tests if requested, but do not integrate CAGS, resolve assets, run
-   hooks, or execute harnesses.
-7. Method-interface feasibility checks with mock methods or placeholders, not
-   algorithm implementations.
-8. Raw-first export schemas and provenance fields, without writing real
-   experiment outputs.
-9. Static harness definitions for the earliest paper objectives, without
-   harness execution. After an accepted static harness definition task, sync
-   root docs if they are stale; otherwise pause unless the user explicitly asks
-   for the next bounded static contract.
-10. Pause or hand off when the next useful work requires algorithms, real data,
-    metrics, simulator execution, baseline implementation, or paper-result
-    claims.
+## Review Guidance
 
-When updating TODO or trajectory files, make the next task executable as a
-single bounded repository edit. Include explicit exclusions that prevent the
-next developer from turning a static contract task into workload loading,
-scheduling, metric computation, harness runs, or result generation. If a next
-task asks for test files, say that the files may be authored but not run by this
-skill. Do not set a code or test task as "next" from a docs-only scaffold unless
-the user or orchestrator explicitly asks for continued implementation.
-For accepted harness definitions, record the exact definition paths and accepted
-scope, then choose a docs-only sync when root handoff docs omit those paths or
-still present the harness directory as empty or only reserved. Do not promote a
-definition-loader, schema-normalizer, bundle validator, CLI, metric, or result
-export task merely because definition files now exist.
-If a next task uses broad verbs such as normalize, load, run, export, or
-validate, bind the verb to the intended static scope in the task wording. For
-example, say "manifest-only normalization of in-memory metadata" and repeat that
-real dataset, trace, artifact, or runtime resolution is excluded.
+When reviewing code, lead with defects that harm readability, locality, naming,
+state ownership, interface clarity, harness/test separation, artifact shape, or
+framework consistency.
 
-If a cleanup task removed an out-of-scope adjacent surface, do not describe the
-next task as restoring or continuing that rejected work. If the upstream plans
-support it as the next real step, phrase it as a fresh explicit bounded task,
-for example "add static substrate-adapter capability contracts," and repeat the
-non-runtime exclusions. The TODO should say that the previous surface was
-removed because it was out of scope for the prior task, not because substrate
-contracts are permanently forbidden.
+Prefer review suggestions that delete, inline, move to the use site, rename,
+align ordering, split responsibilities, clarify ownership, or reduce caller
+burden. Do not default to adding wrappers, registries, config layers, factories,
+or defensive branches unless they solve the concrete defect.
 
-Before updating TODO after review acceptance, re-scan the current target tree
-for every defect class raised during review, especially generated cache/build
-artifacts and stale files. Record only what is present now. Do not resurrect a
-fixed defect from an earlier reviewer report, and do not skip a generated
-artifact that still exists just because the source-code review was accepted.
+If code is already direct and local, avoid suggesting extra abstraction for
+style alone.
 
-If the next task is a validation-only bundle check, keep it as a static
-contract-consistency surface: load or inspect existing definitions, verify
-required identities and cross-references, and report missing static metadata.
-Do not reinterpret "validation" as permission to run tests, execute harnesses,
-load datasets, replay traces, compute metrics, aggregate results, or validate
-paper claims.
+For bounded normalizer reviews, first verify the change did not alter the
+owning record/schema identity contract, package exports, docs, dependencies,
+loaders, registries, fixtures, harnesses, simulators, metrics, or generated
+artifacts unless those edits were explicitly in scope. A test that mutates a
+non-identity optional field and expects `record_id` to change is a test defect,
+not permission to expand the accepted record identity. Conversely, do not
+require non-identity no-change assertions in a bounded normalizer review unless
+they were requested or identity implementation changed. Also check that any
+record-id prefix assertion matches the accepted record implementation rather
+than an inferred helper or class name.
 
-Bundle validators should stay thin. Compose the existing contract loaders,
-return deterministic checked paths, IDs, and status fields, and surface clear
-component failures. Do not turn a bundle check into a new registry, execution
-entrypoint, artifact resolver, or schema-normalization layer unless a later
-task explicitly needs that behavior.
+For lifecycle projection reviews, verify the helper only projects selected
+reference media plus explicit timing inputs into `ReferenceLifecycleState`.
+Non-reference rejection, per-state missing-timing checks, deterministic
+`useful`/`stale`/`expired` flag derivation, delegated timestamp validation, and
+stable identity through the accepted lifecycle record contract should be
+covered. Treat external clocks, runtime simulators, transport or event
+subsystems, component profilers, file I/O, exports, docs, metrics, harness
+runners, or experiment claims as scope defects unless the user requested them.
 
-When the accepted change completes the planned static contract surface and the
-next plausible work would require execution, data, metrics, algorithms,
-baselines, harness runs, or paper-result claims, mark the next task as finished
-or paused instead of inventing another repository task. Record that execution-
-oriented work needs a new explicit user request or a different skill.
-After an accepted docs-only sync, re-read the root docs and the current
-repository inventory. If the docs now describe the accepted static surface and
-the remaining upstream work is execution-oriented, set the next developer task
-to `FINISHED` or an explicit pause marker rather than proposing another static
-contract task.
+For bounded record-to-mapping reviews, verify the helper supports only the
+accepted record classes, includes the existing `record_id`, preserves field
+names, converts tuple-like values to lists, preserves nested mappings as plain
+dicts, rejects unsupported inputs, and does not mutate source records. Check at
+least one accepted record with a non-`dict` `Mapping` field, such as a
+`MappingProxyType`, so the implementation does not rely on `dataclasses.asdict`
+behavior that fails before custom JSON-friendly conversion can run. Treat file
+writers, JSONL/CSV exporters, artifact directories, new schemas, package exports,
+docs, dependencies, loaders, metrics, harnesses, CLI, or experiment claims as
+scope defects unless the user requested them.
+
+For bounded metric-computation reviews, verify the helper implements only the
+named formula, reads accepted raw record fields directly, rejects empty inputs
+and invalid aggregation keys clearly, includes source record IDs as provenance,
+does not mutate source records, and returns a valid `MetricRecord` while
+delegating metric validation and identity to that record type. Treat extra
+metric formulas, QoE weighting, aggregation frameworks, file/result exporters,
+schemas, package exports, docs, dependencies, loaders, harness runners, CLI,
+experiments, or paper-output claims as scope defects unless the user requested
+them.
+Review named boundary tests against their fixture values and expected metric
+fields. If a zero, all, none, or single-frame case is actually mixed data,
+request the smallest focused test correction before accepting the trajectory.
+Also check private shared helper names after sibling formula additions. Passing
+tests are not enough if a shared helper's name still describes only the older
+formula family; require a neutral private name without changing the public API
+or behavior.
+For sibling mean-metric reviews, check whether the change added parallel private
+helpers that differ only by source field and unit. If so, ask for the smallest
+cleanup: one neutral mean helper with explicit unit/value extraction, or direct
+public functions if that is clearer than another abstraction.
+
+For minimum baseline scheduler reviews, verify the implementation stays behind
+the accepted method boundary, uses only in-memory record fields, has
+deterministic ordering and missing-configuration behavior, does not mutate
+inputs, and returns a valid decision record. Treat added ABR algorithms,
+candidate generation, utility models, metric formulas, result exports, harness
+runners, package exports, docs, file I/O, or experiment claims as scope defects
+unless the user explicitly requested them.
+When reviewing no-mutation coverage, verify the test asserts on the same
+mutable input object that was passed to the implementation; tests that pass an
+immutable copy or converted container while checking the original are false
+positives.
+
+For README-style docs-sync reviews, cross-check every newly documented symbol or
+test against the document's absence clauses. A stale "no methods", "no tests",
+"no metrics", "no exports", or similar broad exclusion that contradicts an
+accepted bounded surface is a documentation defect even if the new module entry
+was added correctly.
+Also scan table rows and summary sentences for stale singular wording after a
+surface becomes cumulative; a docs sync is incomplete if one section says both
+accepted siblings exist while another still describes the same module or test as
+a single helper, scheduler, baseline, or validation path.
+For lifecycle projection docs, also scan English and Chinese wording for
+normalizer/projection confusion. A test summary that says stable IDs are covered
+through a normalization path for `simulate_reference_lifecycle_state(...)` is
+stale; it should say projection path and keep full-simulator/runtime claims out.
+For raw-record mapping docs, verify test summaries say the helper preserves the
+existing `record_id` from source records unless tests actually mutate
+identity-bearing fields. Also narrow stale "no exports" clauses so they exclude
+file-based/result exporters and artifact surfaces without contradicting an
+accepted in-memory mapping helper.
+For bounded metric-computation docs, verify docs name the exact formula helper
+and focused test file, then narrow broad "no metrics" clauses to "no additional
+metric formulas, QoE weighting, aggregation frameworks, runnable harnesses,
+experiments, or paper outputs" without implying the planned metric layer exists.
+When there are multiple accepted formula helpers in one module, review plural
+wording and cumulative lists the same way as baseline docs; stale singular
+"the metric helper" wording can mislead even when every filename is listed.
+After a third or later helper is accepted, treat stale "both", "two", or
+formula-family-only descriptions as review defects even if the module and test
+filenames are already correct.
+For cumulative README-style metric syncs, sample every repeated surface named
+in the task, not just the first occurrence: implemented-surface summary,
+package summary, layout row, test row, and absence clause. If any surface stops
+at the previous helper or omits the new `metric_name`, request the smallest
+docs-only correction in the requested file set.
+When a non-rate metric helper is added to a module that previously contained
+only rate helpers, review the surrounding descriptor as well as the helper list.
+Reject "rate metric computation" or "rate computation path" wording for a mixed
+rate-and-mean surface even when the new helper and metric name are listed.
+For metric docs-sync reviews, compare coverage wording against the focused test
+file. Treat "none FPS", "none latency", "none quality", or "none score" as
+misleading for mean helpers when the tests actually cover all-zero, mixed, and
+single-frame numeric inputs.
+If the developer reports a docs-only no-op, review the live requested files for
+the named helper list, metric names, test summary, and absence clauses before
+requesting edits. Accept the no-op when those surfaces are already current.
+
+For validation-only reviews, verify the developer ran the exact requested
+command from the repository root, reported the pass/fail count, made no source,
+test, docs, dependency, export, or TODO changes when the suite passed, and
+removed only generated cache/bytecode artifacts or reported that none remained
+after the run. Do not request cleanup of pre-existing dirty or untracked
+accepted files, and do not ask for new docs, exports, harnesses, or follow-up
+implementation solely because validation passed.
+Also compare the reported command against the requested test-target list. A
+green validation run that omits a requested file, silently substitutes a smaller
+suite, or creates a missing test target during a validation-only task is not an
+acceptable validation trajectory.
+
+## Readability Audit
+
+After edits, perform a quick static audit:
+
+- names match real meaning and data shape
+- data flow is direct and ordered naturally
+- functions, files, and modules have clear responsibilities
+- abstractions reduce real complexity rather than add jumps
+- no avoidable global state, hidden paths, long call chains, or repeated
+  registration points were added
+- the change stayed local to the natural owner
+- harness and test responsibilities remain separate
+- artifact schemas, exporters, docs, and tests agree when any of them changed
+- framework docs are updated or confirmed current
+- external code has compatible license and attribution when reused
+- no generated cache/build/test/output/result artifacts were left behind unless
+  explicitly requested
+
+For docs-only tasks, audit that docs describe only current repository reality
+and do not imply code, tests, loaders, runnable harnesses, metrics, exports,
+experiments, generated artifacts, or TODO status that do not exist.
 
 ## Static Validation
 
-Do not run install commands, tests, harnesses, or experiments. Use static checks
-appropriate to the selected stack and repository state.
+Use static validation appropriate to the task and existing stack. Do not run
+installs, harnesses, experiments, or full pipelines through this skill unless
+the user or active coding workflow explicitly authorizes that execution.
 
-For source and test authoring, static validation may include syntax,
-importability, constructor, or schema-surface checks when they have no workload,
-network, device, harness, output, or result side effects. Use the selected
-ecosystem's no-cache/no-build-artifact mode where available. If a static check
-creates generated cache or build files, remove them before completion and
-verify the tree is clean of those artifacts.
+For explicit validation-only tasks, run the requested command from the
+repository root before making any edits. Treat a green run as the desired
+outcome, not as permission to tidy nearby code, refresh docs, update TODO, add
+exports, or broaden coverage. If the run fails, change only the accepted
+source/test surface needed to satisfy the existing contract, then rerun the
+same focused command and clean generated cache artifacts.
 
-For shared contract tasks, perform a readback audit after edits and before the
-developer report. Compare the actual dataclass constructor fields, schema keys,
-schema registry entries, enum names, `__all__` exports, package imports, test
-fixtures, and documented public surface. Do not rely on the implementation plan
-or a prior report as proof that a symbol or field exists.
-When the schema registry is public, include a small drift check in tests or
-static review for any non-obvious bucket: required provenance is listed as
-required and rejected as missing or empty, finite-only fields are not marked
-non-negative, non-negative finite fields are not hidden in timing buckets, and
-timing buckets contain timing or duration fields only.
+For source changes, useful static validation may include syntax checks,
+importability checks, schema-surface checks, public export checks, or collection
+shape checks that do not load real data, run harnesses, or write results.
 
-For new public modules, include exact-path presence in the readback audit:
-the module file exists on disk, the test file exists on disk when authored,
-package exports import from existing modules only, and root docs mention only
-files that are present after any generated-artifact cleanup.
+For tests, inspect that fixtures exist, parametrized argument names match test
+function signatures, helpers refer to existing symbols, and invalid cases reach
+the intended validator. For no-mutation tests, check that the object inspected
+after the call is the same mutable object given to the code path under test.
+If the contract is about immutable source records rather than container order or
+mapping mutation, check that the same source record objects are inspected after
+the call; a tuple containing those records is acceptable when the container is
+not itself under test.
 
-For authored tests, statically inspect collection shape before reporting. Check
-that parametrized argument names match the test function signature, fixtures are
-actually declared or imported, and helper names in the test file refer to
-existing source symbols. Treat a parametrization/signature mismatch as a source
-defect even when tests are not executed.
+When a task adds or changes focused unit tests and the repository already has a
+lightweight test runner configured, prefer running the smallest relevant test
+target if that does not require dependency installation, real datasets,
+harnesses, experiments, or generated result artifacts. If the focused tests
+cannot be run in the current task, say so and make the next trajectory
+validation-only before adding more implementation.
 
-For method-interface surfaces, static validation must include ownership and
-public-path checks: there is one authoritative implementation module, any other
-method module is an explicit re-export shim, root docs name the owner rather
-than the shim as the active surface, and authored tests import through the public
-owner/top-level export path. Valid method-config fixtures satisfy the
-configuration record's required fields or documented defaults, malformed config
-fixtures reach the project method-configuration error, and feasibility tests hit
-the exported implementation that users will call.
+Before running Python tests, choose a command form that avoids in-repository
+generated artifacts where the project permits it, such as disabling bytecode
+and pytest's cache provider for focused validation. For `src/` layouts, prefer
+an explicit environment path or existing editable install over changing project
+metadata just to satisfy imports. After any validation run, check for generated
+cache or bytecode directories created inside the repository and remove only
+those generated artifacts before handoff.
 
-For documentation-only syncs, static validation is a readback and scope check:
-the referenced repository-relative paths exist, the docs describe only the
-current source/test/harness/artifact surface, and the diff contains only the
-requested documentation files. Also check that the docs do not claim execution,
-loader discovery, test execution, generated artifacts, or metric/paper-output
-derivation when those surfaces are only reserved or metadata-only.
+For docs-only syncs, re-read the docs and check referenced paths exist, the docs
+match current repository state, and the diff contains only the requested docs.
+If the diff only touches formatting, verify that the formatting change removes a
+real inconsistency with sibling docs; otherwise leave the file unchanged and
+report it as already current.
+Resolve every documented path from the repository root exactly as written. If a
+file lives outside the repository, label it as an external or parent input and
+use the correct relative path from the documented context, not a bare filename
+that implies a repo-root file. Do not list external planning inputs in a
+repository layout table unless the table explicitly distinguishes them from
+files inside the target repo. When docs list implemented symbols, files, tests,
+or artifacts, derive the list and counts from the current source tree instead
+of memory or planning documents.
 
-For cleanup revisions, static validation is an exact absence check plus a
-surface-consistency check: deleted files are absent on disk, public exports do
-not import them, root docs do not list them as current files, tests do not import
-them, and generated caches from the cleanup are absent.
-
-For static harness definitions, validate local derivability: each paper-output
-mapping references only the definition's declared raw artifacts and required
-metrics, the artifact and metric names match the upstream plan terminology and
-existing export contracts where present, and no mapping silently depends on an
-undeclared lifecycle, timing, decision, frame, or resource record. This is a
-readback check only unless the task explicitly asks for a static consistency
-test.
-
-Validate:
-
-- all created, modified, and referenced project paths are inside the repository
-  root
-- integrity reports distinguish present-on-disk, missing-on-disk, tracked,
-  untracked, and absent paths; do not describe an untracked scaffold as empty
-- `data/`, `output/`, `results/`, `harness/`, `test/`, `README.md`,
-  `FRAMEWORK.md`, and `FRAMEWORK.zh-CN.md` exist
-- the selected ecosystem structure follows DeepResearch-supported best
-  practices without unnecessary config or hidden path assumptions
-- dependency declarations, configuration entrypoints, source interfaces,
-  harness entries, tests, fixtures, and result artifact contracts exist when
-  required by the upstream plans
-- documentation matches the actual repository structure
-- documentation distinguishes authored-but-not-run tests, static validation
-  surfaces, executed validation, runtime behavior, and paper-result claims
-- placeholders are clearly labeled and do not pretend to be completed
-  algorithms
-- harness folders and test folders are semantic and separate
-- validation schemas match the declared contract shape and preserve field
-  meaning, value domains, required provenance, and reference integrity
-- schema registry bucket names match the implemented validators, especially for
-  required mappings, finite numbers, non-negative finite numbers, and timing
-  fields
-- public exports, schema registries, documentation mentions, and test imports
-  reference only source symbols that actually exist
-- every newly reported source or test file exists at the exact repository-
-  relative path after cleanup, and its public symbols match package exports and
-  documentation mentions
-- public method-interface symbols have one implementation owner; compatibility
-  modules re-export that owner only, and export-identity tests compare the
-  owner, top-level package, and shimmed package when a shim is present
-- valid method-configuration fixtures match required/default fields, malformed
-  method configuration raises the method-configuration error, and feasibility
-  tests exercise candidate identity, dependency, budget, deadline, and schema
-  validity through the public method path
-- removed or excluded surfaces have no remaining source file, test file, public
-  export, documentation claim, generated cache artifact, or stale import
-- authored tests use current contract field names and invalid cases exercise the
-  implemented validation path, not stale draft schemas
-- parametrized tests have decorator argument names that match function
-  parameters, so test collection would not fail before reaching the contract
-  checks
-- invalid tests are shaped so the intended validator is reached before other
-  record-level checks fail
-- invalid tests include actual negative values for fields described as
-  non-negative, not only `nan` or malformed-type cases
-- validation hooks, constructors, normalization, and immutable-record behavior
-  are attached to the owning contract type and can initialize without import or
-  construction errors
-- split, seed, dataset, trace, device, workload, method, metric, and artifact
-  identity fields preserve declared identities without hard-coded allowlists
-  unless an upstream plan or existing repository contract explicitly defines a
-  closed vocabulary
-- static definitions with different schemas are not accidentally matched by the
-  same wildcard loader, glob, registry, or test expectation
-- static harness definitions with paper-output mappings are internally
-  derivable from their declared raw artifacts and required metrics
-- artifact schemas use stable fields aligned with method, metric, dataset,
-  split, seed, harness, and stage names
-- reproducibility and workload-coverage manifests preserve split and seed
-  identities as declared, and their loaders do not resolve dataset, trace,
-  device, output, or result artifact references
-- names are consistent across docs, code, config, harnesses, tests, and
-  artifacts
-- code avoids thin wrappers, repeated registration points, unnecessary
-  conversions, over-split modules, path aliases, hidden environment assumptions,
-  and long calling paths that make harnesses or tests harder to use
-- focused changes use only permitted temporary locations and do not write to
-  real `output/` or `results/` unless the task explicitly asks for repository
-  artifact files there
-- generated cache, bytecode, build, coverage, temporary, and test-output
-  artifacts from the selected ecosystem are absent unless explicitly requested
-  as repository files
-- focused changes pass the deletion audit: no unrelated existing files,
-  fixtures, docs, harnesses, tests, or static markers disappeared
-- review or TODO updates do not claim paper results, executed tests, harness
-  success, restored baselines, or repository abilities that were only inferred
-  from filenames or prior reports
+For cleanup, verify exact deleted paths are absent and no exports, tests, docs,
+or generated artifacts still reference them.
 
 ## Final Response
 
-Keep the final response short. For repository creation or structural revision,
-state:
+Keep the final response concise:
 
-- the repository-relative paths or capabilities created or modified
-- the selected stack and why it fits this project, in one concise sentence
-- key extension points for later implementation
-- static validation performed
-- any remaining project-level caveats
+- changed repository-relative paths
+- behavior or contract covered
+- relevant static validation performed
+- caveats only when they affect the user's next action
 
-For focused modifications, state only the changed repository-relative paths,
-the contract or behavior covered, static validation performed, and any caveats.
-
-Do not paste full files unless the user explicitly requests it. Do not explain
-skill internals, template mechanics, tool failures, or runtime workarounds.
+Do not paste full files unless requested. Do not explain skill internals or tool
+mechanics.

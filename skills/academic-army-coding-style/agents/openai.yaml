@@ -1,11 +1,11 @@
 interface:
-  display_name: "Academic Army Excellent Repo"
-  short_description: "Build and revise maintainable research repos"
-  default_prompt: "Use $academic-army-excellent-repo to create or make a focused improvement to a low-friction research code repository from the paper blueprint, experiment plan, coding plan, and the repository path I provide."
+  display_name: "Academic Army Coding Style"
+  short_description: "Keep research-code changes clean and local"
+  default_prompt: "Use $academic-army-coding-style while making this code or framework change so the implementation stays readable, local, low-coupling, and consistent with the existing repository."
 
 dependencies:
   tools:
     - type: "mcp"
       value: "academic_army_mcp_tools"
-      description: "Provides academic_army_mcp_tools.deepresearch for current repository, tooling, framework, harness, testing, and artifact-structure evidence."
+      description: "Provides academic_army_mcp_tools.deepresearch when unfamiliar ecosystem conventions, harness/test practices, framework organization, or open-source reuse decisions need current evidence."
       transport: "stdio"
