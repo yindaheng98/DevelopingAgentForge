@@ -21,7 +21,7 @@ export type DevelopingAgentVariablesByName = {
 export type DevelopingOptions = {
   targetPath: string;
   achiveDir: string;
-  todoPath: string;
+  artifactPath: string;
   codingStyleSkillPath: string;
   paperBlueprintPath: string;
   experimentPlanPath: string;
@@ -57,7 +57,7 @@ const USAGE = [
   "--config <path>",
   "--target-path <folder>",
   "--achive-dir <folder>",
-  "--todo-path <path>",
+  "--artifact-path <folder>",
   "--coding-style-skill-path <path>",
   "--paper-blueprint-path <path>",
   "--experiment-plan-path <path>",
@@ -77,7 +77,7 @@ export function parseDevelopingArgs(
       config,
       "target-path": targetPath,
       "achive-dir": achiveDir,
-      "todo-path": todoPath,
+      "artifact-path": artifactPath,
       "coding-style-skill-path": codingStyleSkillPath,
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
@@ -91,7 +91,7 @@ export function parseDevelopingArgs(
       config: { type: "string", multiple: true },
       "target-path": { type: "string" },
       "achive-dir": { type: "string" },
-      "todo-path": { type: "string" },
+      "artifact-path": { type: "string" },
       "coding-style-skill-path": { type: "string" },
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
@@ -105,7 +105,7 @@ export function parseDevelopingArgs(
     config === undefined ||
     targetPath === undefined ||
     achiveDir === undefined ||
-    todoPath === undefined ||
+    artifactPath === undefined ||
     codingStyleSkillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
@@ -119,7 +119,7 @@ export function parseDevelopingArgs(
     runningOptions: {
       targetPath,
       achiveDir,
-      todoPath,
+      artifactPath,
       codingStyleSkillPath,
       paperBlueprintPath,
       experimentPlanPath,
@@ -139,7 +139,8 @@ export async function developing(
   };
 
   const achiveDir = path.resolve(options.achiveDir);
-  const todoPath = path.resolve(options.todoPath);
+  const artifactPath = path.resolve(options.artifactPath);
+  const todoPath = path.join(artifactPath, "TODO.md");
   const agentVariables: DevelopingAgentVariables = {
     targetPath: path.resolve(options.targetPath),
     codingStyleSkillPath: path.resolve(options.codingStyleSkillPath),
@@ -149,6 +150,7 @@ export async function developing(
   };
 
   await mkdir(achiveDir, { recursive: true });
+  await mkdir(artifactPath, { recursive: true });
   if (!existsSync(todoPath)) {
     await writeText(todoPath, "# TODO");
   }

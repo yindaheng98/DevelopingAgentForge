@@ -6,11 +6,11 @@
 - `experiment_plan.md`
 - `coding_plan.md`
 - `skills/academic-army-coding-style/SKILL.md`
-- `TODO.md`
+- the artifact directory containing `TODO.md`
 - the target codebase directory
 - development achive directory
 
-The pipeline works in the configured `--target-path`, maintains the configured TODO file, and archives per-iteration task/review artifacts under the configured achive directory.
+The pipeline works in the configured `--target-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured achive directory.
 
 For the overall TypeScript pipeline usage and entry points, see [`src/README.md`](../README.md).
 
@@ -20,7 +20,7 @@ For the overall TypeScript pipeline usage and entry points, see [`src/README.md`
 
 Each iteration does the following:
 
-1. `coding-manager` scans the current repository and the configured TODO file, then chooses one developer task.
+1. `coding-manager` scans the current repository and `TODO.md` in the artifact directory, then chooses one developer task.
 2. `developer` loads the configured coding-style skill, edits the repository, and reports what changed for review.
 3. `code-reviewer` reads the code and developer report, then returns exactly `ACCEPT` or revision feedback.
 4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
@@ -40,5 +40,5 @@ Each iteration does the following:
 
 The pipeline maintains:
 
-- the configured `TODO.md`: the coding-manager-maintained task list.
+- `TODO.md` under the configured artifact directory: the coding-manager-maintained task list.
 - timestamped archive folders containing each selected task, per-revision reports, and TODO update reports.

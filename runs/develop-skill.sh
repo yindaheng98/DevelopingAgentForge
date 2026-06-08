@@ -6,7 +6,7 @@ npm run developing-skill -- \
   --config "secret.yaml" \
   --target-path "output/codebase" \
   --achive-dir "output/developing-archives" \
-  --todo-path "output/developing/TODO.md" \
+  --artifact-path "output/developing" \
   --coding-style-skill-path "skills/academic-army-coding-style" \
   --metaskill-path "metaskills/academic-army-coding-style/METASKILL.md" \
   --paper-blueprint-path "output/paper_blueprint.md" \

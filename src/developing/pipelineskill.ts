@@ -26,7 +26,7 @@ const USAGE = [
   "--config <path>",
   "--target-path <folder>",
   "--achive-dir <folder>",
-  "--todo-path <path>",
+  "--artifact-path <folder>",
   "--coding-style-skill-path <path>",
   "--metaskill-path <path>",
   "--paper-blueprint-path <path>",
@@ -44,7 +44,7 @@ export function parseDevelopingSkillArgs(
       config,
       "target-path": targetPath,
       "achive-dir": achiveDir,
-      "todo-path": todoPath,
+      "artifact-path": artifactPath,
       "coding-style-skill-path": codingStyleSkillPath,
       "metaskill-path": metaskillPath,
       "paper-blueprint-path": paperBlueprintPath,
@@ -59,7 +59,7 @@ export function parseDevelopingSkillArgs(
       config: { type: "string", multiple: true },
       "target-path": { type: "string" },
       "achive-dir": { type: "string" },
-      "todo-path": { type: "string" },
+      "artifact-path": { type: "string" },
       "coding-style-skill-path": { type: "string" },
       "metaskill-path": { type: "string" },
       "paper-blueprint-path": { type: "string" },
@@ -74,7 +74,7 @@ export function parseDevelopingSkillArgs(
     config === undefined ||
     targetPath === undefined ||
     achiveDir === undefined ||
-    todoPath === undefined ||
+    artifactPath === undefined ||
     codingStyleSkillPath === undefined ||
     metaskillPath === undefined ||
     paperBlueprintPath === undefined ||
@@ -89,7 +89,7 @@ export function parseDevelopingSkillArgs(
     runningOptions: {
       targetPath,
       achiveDir,
-      todoPath,
+      artifactPath,
       codingStyleSkillPath,
       metaskillPath,
       paperBlueprintPath,
