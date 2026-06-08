@@ -5,7 +5,7 @@ npm run developing-skill -- \
   --config "agent-forge.yaml" \
   --config "secret.yaml" \
   --target-path "output/codebase" \
-  --achive-dir "output/developing-skill-archives" \
+  --achive-dir "output/developing-archives" \
   --todo-path "output/developing/TODO.md" \
   --coding-style-skill-path "skills/academic-army-coding-style" \
   --metaskill-path "metaskills/academic-army-coding-style/METASKILL.md" \
