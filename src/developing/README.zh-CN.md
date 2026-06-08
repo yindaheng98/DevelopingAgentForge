@@ -8,9 +8,11 @@
 - `skills/academic-army-coding-style/SKILL.md`
 - 包含 `TODO.md` 的 artifact 目录
 - 目标代码库目录
-- development achive 目录
+- development archive 目录；当前 CLI 参数名仍是 `--achive-dir`
 
-pipeline 会在配置的 `--target-path` 中继续写代码，维护配置的 `--artifact-path` 下的 `TODO.md`，并把每轮 task/review 产物归档到 achive 目录。
+pipeline 会在配置的 `--target-path` 中继续写代码，维护配置的 `--artifact-path` 下的 `TODO.md`，并把每轮 task/review 产物归档到 archive 目录。
+
+[`runs/develop-skill.sh`](../../runs/develop-skill.sh) 会调用 [`pipelineskill.ts`](pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
 
 TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../README.zh-CN.md)。
 
@@ -30,11 +32,13 @@ TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../READM
 ## 重要文件
 
 - [`pipeline.ts`](pipeline.ts)：参数解析、循环编排、archive 创建和各 agent 之间的交接。
+- [`pipelineskill.ts`](pipelineskill.ts)：给基础开发循环增加 trajectory optimization hooks 的 `developing-skill` 包装。
 - [`agents/factory.ts`](agents/factory.ts)：注册 developing coding manager、developer 和 reviewer agents。
 - [`agents/types.ts`](agents/types.ts)：共享的 workspace-aware base class 和变量定义。
 - [`agents/manager.ts`](agents/manager.ts)：维护 TODO 文件并选择外层任务。
 - [`agents/developer.ts`](agents/developer.ts)：使用共享 coding-style skill 修改目标 repo。
 - [`agents/reviewer.ts`](agents/reviewer.ts)：执行只读代码审阅 gate。
+- [`agents/trajectory-optimizer.ts`](agents/trajectory-optimizer.ts)：扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。
 
 ## 产物
 

@@ -8,9 +8,11 @@
 - `skills/academic-army-coding-style/SKILL.md`
 - the artifact directory containing `TODO.md`
 - the target codebase directory
-- development achive directory
+- the development archive directory, passed through the current CLI option name `--achive-dir`
 
-The pipeline works in the configured `--target-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured achive directory.
+The pipeline works in the configured `--target-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured archive directory.
+
+[`runs/develop-skill.sh`](../../runs/develop-skill.sh) calls the related `developing-skill` pipeline in [`pipelineskill.ts`](pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
 
 For the overall TypeScript pipeline usage and entry points, see [`src/README.md`](../README.md).
 
@@ -30,11 +32,13 @@ Each iteration does the following:
 ## Important Files
 
 - [`pipeline.ts`](pipeline.ts): argument parsing, loop orchestration, archive creation, and per-agent handoff.
+- [`pipelineskill.ts`](pipelineskill.ts): `developing-skill` wrapper that adds trajectory optimization hooks around the base loop.
 - [`agents/factory.ts`](agents/factory.ts): registers the developing coding manager, developer, and reviewer agents.
 - [`agents/types.ts`](agents/types.ts): shared workspace-aware base class and variables.
 - [`agents/manager.ts`](agents/manager.ts): maintains the TODO file and selects outer-loop tasks.
 - [`agents/developer.ts`](agents/developer.ts): edits the target repository using the shared coding-style skill.
 - [`agents/reviewer.ts`](agents/reviewer.ts): performs the read-only code review gate.
+- [`agents/trajectory-optimizer.ts`](agents/trajectory-optimizer.ts): scans the trajectory and proposes coding-style skill improvements for `developing-skill`.
 
 ## Artifacts
 
