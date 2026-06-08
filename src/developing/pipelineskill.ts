@@ -27,7 +27,7 @@ const USAGE = [
   "--target-path <folder>",
   "--achive-dir <folder>",
   "--todo-path <path>",
-  "--excellent-repo-skill-path <path>",
+  "--coding-style-skill-path <path>",
   "--metaskill-path <path>",
   "--paper-blueprint-path <path>",
   "--experiment-plan-path <path>",
@@ -45,7 +45,7 @@ export function parseDevelopingSkillArgs(
       "target-path": targetPath,
       "achive-dir": achiveDir,
       "todo-path": todoPath,
-      "excellent-repo-skill-path": excellentRepoSkillPath,
+      "coding-style-skill-path": codingStyleSkillPath,
       "metaskill-path": metaskillPath,
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
@@ -60,7 +60,7 @@ export function parseDevelopingSkillArgs(
       "target-path": { type: "string" },
       "achive-dir": { type: "string" },
       "todo-path": { type: "string" },
-      "excellent-repo-skill-path": { type: "string" },
+      "coding-style-skill-path": { type: "string" },
       "metaskill-path": { type: "string" },
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
@@ -75,7 +75,7 @@ export function parseDevelopingSkillArgs(
     targetPath === undefined ||
     achiveDir === undefined ||
     todoPath === undefined ||
-    excellentRepoSkillPath === undefined ||
+    codingStyleSkillPath === undefined ||
     metaskillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
@@ -90,7 +90,7 @@ export function parseDevelopingSkillArgs(
       targetPath,
       achiveDir,
       todoPath,
-      excellentRepoSkillPath,
+      codingStyleSkillPath,
       metaskillPath,
       paperBlueprintPath,
       experimentPlanPath,

@@ -1,4 +1,4 @@
-import { excellentRepoSkillInstruction } from "./prompts.js";
+import { codingStyleSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
@@ -19,17 +19,17 @@ export type CodingManagerVariables = SelectCodingManagerVariables | UpdateCoding
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
-    const excellentRepoSkillPath = this.workspaceRelativePath(variables.excellentRepoSkillPath);
+    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
     const todoPath = this.workspaceRelativePath(variables.todoPath);
-    const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
+    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
 
     if (variables.phase === "update") {
       return `
-${excellentRepoSkillInstructionText}
+${codingStyleSkillInstructionText}
 
 Update the TODO file after a developer task.
 Work only in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
@@ -52,7 +52,7 @@ Update the TODO so completed work and future developer tasks match the current r
     }
 
     return `
-${excellentRepoSkillInstructionText}
+${codingStyleSkillInstructionText}
 
 Select the next developer task for the target repository.
 Scan the target repository at ${targetPath}/ and the TODO file at ${todoPath}.

@@ -7,7 +7,7 @@ npm run developing -- \
   --target-path "output/codebase" \
   --achive-dir "output/developing-archives" \
   --todo-path "output/developing/TODO.md" \
-  --excellent-repo-skill-path "skills/academic-army-excellent-repo" \
+  --coding-style-skill-path "skills/academic-army-coding-style" \
   --paper-blueprint-path "output/paper_blueprint.md" \
   --experiment-plan-path "output/experiment_plan.md" \
   --coding-plan-path "output/coding_plan.md" \

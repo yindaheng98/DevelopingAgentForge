@@ -1,4 +1,4 @@
-import { excellentRepoSkillInstruction } from "./prompts.js";
+import { codingStyleSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type DeveloperVariables = DevelopingAgentVariables & {
@@ -8,16 +8,16 @@ export type DeveloperVariables = DevelopingAgentVariables & {
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
-    const excellentRepoSkillPath = this.workspaceRelativePath(variables.excellentRepoSkillPath);
+    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
     const reviewerReport = variables.reviewerReport ?? "(none)";
-    const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
+    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
 
     return `
-${excellentRepoSkillInstructionText}
+${codingStyleSkillInstructionText}
 
 Work only in the target repository at ${targetPath}/.
 

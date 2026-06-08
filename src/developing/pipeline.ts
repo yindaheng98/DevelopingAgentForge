@@ -22,7 +22,7 @@ export type DevelopingOptions = {
   targetPath: string;
   achiveDir: string;
   todoPath: string;
-  excellentRepoSkillPath: string;
+  codingStyleSkillPath: string;
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;
@@ -58,7 +58,7 @@ const USAGE = [
   "--target-path <folder>",
   "--achive-dir <folder>",
   "--todo-path <path>",
-  "--excellent-repo-skill-path <path>",
+  "--coding-style-skill-path <path>",
   "--paper-blueprint-path <path>",
   "--experiment-plan-path <path>",
   "--coding-plan-path <path>",
@@ -78,7 +78,7 @@ export function parseDevelopingArgs(
       "target-path": targetPath,
       "achive-dir": achiveDir,
       "todo-path": todoPath,
-      "excellent-repo-skill-path": excellentRepoSkillPath,
+      "coding-style-skill-path": codingStyleSkillPath,
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
       "coding-plan-path": codingPlanPath,
@@ -92,7 +92,7 @@ export function parseDevelopingArgs(
       "target-path": { type: "string" },
       "achive-dir": { type: "string" },
       "todo-path": { type: "string" },
-      "excellent-repo-skill-path": { type: "string" },
+      "coding-style-skill-path": { type: "string" },
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
       "coding-plan-path": { type: "string" },
@@ -106,7 +106,7 @@ export function parseDevelopingArgs(
     targetPath === undefined ||
     achiveDir === undefined ||
     todoPath === undefined ||
-    excellentRepoSkillPath === undefined ||
+    codingStyleSkillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
     codingPlanPath === undefined
@@ -120,7 +120,7 @@ export function parseDevelopingArgs(
       targetPath,
       achiveDir,
       todoPath,
-      excellentRepoSkillPath,
+      codingStyleSkillPath,
       paperBlueprintPath,
       experimentPlanPath,
       codingPlanPath,
@@ -142,7 +142,7 @@ export async function developing(
   const todoPath = path.resolve(options.todoPath);
   const agentVariables: DevelopingAgentVariables = {
     targetPath: path.resolve(options.targetPath),
-    excellentRepoSkillPath: path.resolve(options.excellentRepoSkillPath),
+    codingStyleSkillPath: path.resolve(options.codingStyleSkillPath),
     paperBlueprintPath: path.resolve(options.paperBlueprintPath),
     experimentPlanPath: path.resolve(options.experimentPlanPath),
     codingPlanPath: path.resolve(options.codingPlanPath),

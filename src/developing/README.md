@@ -5,7 +5,7 @@
 - `paper_blueprint.md`
 - `experiment_plan.md`
 - `coding_plan.md`
-- `skills/academic-army-excellent-repo/SKILL.md`
+- `skills/academic-army-coding-style/SKILL.md`
 - `TODO.md`
 - the target codebase directory
 - development achive directory
@@ -21,7 +21,7 @@ For the overall TypeScript pipeline usage and entry points, see [`src/README.md`
 Each iteration does the following:
 
 1. `coding-manager` scans the current repository and the configured TODO file, then chooses one developer task.
-2. `developer` loads the configured excellent repo skill, edits the repository, and reports what changed for review.
+2. `developer` loads the configured coding-style skill, edits the repository, and reports what changed for review.
 3. `code-reviewer` reads the code and developer report, then returns exactly `ACCEPT` or revision feedback.
 4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
 5. After the review loop ends, the pipeline archives the task and reports, then asks `coding-manager` to update the TODO file.
@@ -33,7 +33,7 @@ Each iteration does the following:
 - [`agents/factory.ts`](agents/factory.ts): registers the developing coding manager, developer, and reviewer agents.
 - [`agents/types.ts`](agents/types.ts): shared workspace-aware base class and variables.
 - [`agents/manager.ts`](agents/manager.ts): maintains the TODO file and selects outer-loop tasks.
-- [`agents/developer.ts`](agents/developer.ts): edits the target repository using the shared excellent-repo skill.
+- [`agents/developer.ts`](agents/developer.ts): edits the target repository using the shared coding-style skill.
 - [`agents/reviewer.ts`](agents/reviewer.ts): performs the read-only code review gate.
 
 ## Artifacts

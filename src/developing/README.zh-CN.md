@@ -5,7 +5,7 @@
 - `paper_blueprint.md`
 - `experiment_plan.md`
 - `coding_plan.md`
-- `skills/academic-army-excellent-repo/SKILL.md`
+- `skills/academic-army-coding-style/SKILL.md`
 - `TODO.md`
 - 目标代码库目录
 - development achive 目录
@@ -21,7 +21,7 @@ TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../READM
 每轮迭代执行以下步骤：
 
 1. `coding-manager` 扫描当前 repo 和配置的 TODO 文件，然后选择一个 developer task。
-2. `developer` 加载配置的 excellent repo skill，修改 repo，并报告自己改了哪些内容给 reviewer。
+2. `developer` 加载配置的 coding-style skill，修改 repo，并报告自己改了哪些内容给 reviewer。
 3. `code-reviewer` 阅读代码和 developer report，返回严格的 `ACCEPT` 或 revision feedback。
 4. 如果 reviewer 返回 feedback，`developer` 继续修同一个任务，然后 `code-reviewer` 再审。
 5. review 循环结束后，pipeline 归档 task 和 reports，然后让 `coding-manager` 更新 TODO 文件。
@@ -33,7 +33,7 @@ TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../READM
 - [`agents/factory.ts`](agents/factory.ts)：注册 developing coding manager、developer 和 reviewer agents。
 - [`agents/types.ts`](agents/types.ts)：共享的 workspace-aware base class 和变量定义。
 - [`agents/manager.ts`](agents/manager.ts)：维护 TODO 文件并选择外层任务。
-- [`agents/developer.ts`](agents/developer.ts)：使用共享 excellent-repo skill 修改目标 repo。
+- [`agents/developer.ts`](agents/developer.ts)：使用共享 coding-style skill 修改目标 repo。
 - [`agents/reviewer.ts`](agents/reviewer.ts)：执行只读代码审阅 gate。
 
 ## 产物

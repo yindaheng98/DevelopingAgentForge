@@ -7,8 +7,8 @@ npm run developing-skill -- \
   --target-path "output/codebase" \
   --achive-dir "output/developing-skill-archives" \
   --todo-path "output/developing/TODO.md" \
-  --excellent-repo-skill-path "skills/academic-army-excellent-repo" \
-  --metaskill-path "metaskills/academic-army-excellent-repo/METASKILL.md" \
+  --coding-style-skill-path "skills/academic-army-coding-style" \
+  --metaskill-path "metaskills/academic-army-coding-style/METASKILL.md" \
   --paper-blueprint-path "output/paper_blueprint.md" \
   --experiment-plan-path "output/experiment_plan.md" \
   --coding-plan-path "output/coding_plan.md" \

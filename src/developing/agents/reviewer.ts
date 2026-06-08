@@ -1,4 +1,4 @@
-import { excellentRepoSkillInstruction } from "./prompts.js";
+import { codingStyleSkillInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
@@ -9,15 +9,15 @@ export type CodeReviewerVariables = DevelopingAgentVariables & {
 
 export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
   protected buildPrompt(variables: Readonly<CodeReviewerVariables>): string {
-    const excellentRepoSkillPath = this.workspaceRelativePath(variables.excellentRepoSkillPath);
+    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
     const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
-    const excellentRepoSkillInstructionText = excellentRepoSkillInstruction(excellentRepoSkillPath);
+    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
 
     return (
-      excellentRepoSkillInstructionText +
+      codingStyleSkillInstructionText +
       `
 
 Review the current developer task result. Read only.

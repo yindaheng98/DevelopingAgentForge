@@ -26,7 +26,7 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
 Read only. Scan the target repository before the Developer starts the current task.
 
 Read:
-- skill: ${variables.excellentRepoSkillPath}
+- skill: ${variables.codingStyleSkillPath}
 - target repository: ${variables.targetPath}
 - paper blueprint: ${variables.paperBlueprintPath}
 - experiment plan: ${variables.experimentPlanPath}
@@ -41,7 +41,7 @@ Output a concise baseline of the repository state relevant to this task and the 
 
     const metaskill = readFileSync(variables.metaskillPath, "utf8");
     return `
-Revise the skill at ${variables.excellentRepoSkillPath} so it produces better development trajectories.
+Revise the skill at ${variables.codingStyleSkillPath} so it produces better development trajectories.
 
 The metaskill below contains the design goals and tips of this skill:
 
