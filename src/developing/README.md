@@ -18,9 +18,19 @@ The usual entry point is [`runs/develop.sh`](../../runs/develop.sh), which calls
 
 The pipeline works in the configured `--target-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured archive directory.
 
-[`runs/develop-skill.sh`](../../runs/develop-skill.sh) calls the related `developing-skill` pipeline in [`pipelineskill.ts`](pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
-
 For the overall TypeScript pipeline usage and entry points, see [`src/README.md`](../README.md).
+
+## Core Idea: Developing And Coding Style
+
+`src/developing` turns the three planning artifacts into a repeatable code-writing trajectory. `coding-manager` reads the current repository and `TODO.md`, chooses one concrete developer task, `developer` edits the target repository, and `code-reviewer` either returns `ACCEPT` or sends revision feedback back into the same task.
+
+The coding-style skill is [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md). Its job is to control the code-writing agent's code structure and style. The upstream user task decides what to implement; this skill decides how to keep the implementation readable, local, low-coupling, and consistent with the current framework.
+
+Every developer run loads the configured coding-style skill through `--coding-style-skill-path`. [`agents/developer.ts`](agents/developer.ts) prepends the instruction from [`agents/prompts.ts`](agents/prompts.ts): load and follow that skill before reading the blueprint, experiment plan, coding plan, repository files, and current task. That makes the writing agent use the same code-structure and style preferences across features, refactors, harness/test work, methods, baselines, metrics, result exports, and framework docs.
+
+`academic-army-coding-style` is generic for any code-writing task. It does not decide the research method, experiment content, task priority, or repository template initialization. It only keeps code concise, readable, low-friction, easy to modify, and aligned with the existing repository structure.
+
+Put durable code-structure and style preferences in [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md), then run [`runs/develop-skill.sh`](../../runs/develop-skill.sh) from the repository root to update the skill.
 
 ## Quick Start
 
@@ -80,6 +90,30 @@ Each iteration does the following:
 4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
 5. After the review loop ends, the pipeline archives the task and reports, then asks `coding-manager` to update the TODO file.
 6. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
+
+## Developing-Skill And Trajectory Feedback
+
+[`runs/develop-skill.sh`](../../runs/develop-skill.sh) calls the related `developing-skill` pipeline in [`pipelineskill.ts`](pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
+
+The first `trajectory-optimizer` call runs in `scan` mode before the developer starts. It reads the target repository, the current coding-style skill, the blueprint, the experiment plan, and the coding plan so the optimizer has the same project context as the code-writing loop.
+
+The second `trajectory-optimizer` call runs in `optimize` mode after the TODO update report is produced. It reads the metaskill, target repository, plans, current task, revision report, and TODO update report; evaluates whether the skill produced a good modification trajectory; then edits the coding-style skill directly. The prompt focuses the optimizer on missing, misleading, or redundant guidance that affected task selection, coding, review, or TODO update.
+
+The intended loop is:
+
+1. Add code-style preferences, failure modes, and review tips to [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md).
+2. Run `bash runs/develop-skill.sh`.
+3. Let `developer`, `code-reviewer`, `coding-manager`, and `trajectory-optimizer` expose where the current skill helped or failed.
+4. Inspect the updated [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md), keep the useful changes, and repeat when new code-style preferences appear.
+
+This is the coding-style version of skill self-improvement: the metaskill states what "good style guidance" means, the trajectory records how the agent actually modified code, and `develop-skill` uses that evidence to make the reusable skill more precise over time.
+
+Related work points in the same direction, though `developing-skill` is a local AcademicArmy implementation rather than a direct implementation of these papers:
+
+- [Reflexion](https://arxiv.org/abs/2303.11366) shows language agents improving across trials by turning task feedback into verbal reflection instead of updating model weights.
+- [Agent Trajectory Explorer](https://research.ibm.com/publications/agent-trajectory-explorer-visualizing-and-providing-feedback-on-agent-trajectories) argues that raw agent trajectories need navigable formats so developers can inspect behavior and provide feedback for future improvement.
+- [Agent-as-a-Judge](https://openreview.net/forum?id=Nn9POI9Ekt) evaluates agentic code-generation systems with an agentic evaluator that can consider the step-by-step task-solving process, not only the final output.
+- [When Agents go Astray](https://arxiv.org/abs/2509.02360) studies trajectory-level errors in software-engineering agents and uses process feedback to detect and course-correct inefficient trajectories during execution.
 
 ## Output Artifacts
 

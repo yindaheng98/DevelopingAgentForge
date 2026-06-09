@@ -18,9 +18,19 @@
 
 pipeline 会在配置的 `--target-path` 中继续写代码，维护配置的 `--artifact-path` 下的 `TODO.md`，并把每轮 task/review 产物归档到 archive 目录。
 
-[`runs/develop-skill.sh`](../../runs/develop-skill.sh) 会调用 [`pipelineskill.ts`](pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
-
 TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../README.zh-CN.md)。
+
+## 核心思想：Developing 和 Coding Style
+
+`src/developing` 会把三份规划产物变成一条可重复执行的代码编写 trajectory。`coding-manager` 读取当前 repo 和 `TODO.md`，选择一个具体 developer task；`developer` 修改目标 repo；`code-reviewer` 返回严格的 `ACCEPT`，或者把 revision feedback 送回同一个 task。
+
+coding-style skill 是 [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md)。它的功能是控制写代码 agent 的代码结构和代码风格。上游用户任务决定要实现什么；这个 skill 决定如何让实现保持 readable、local、low-coupling，并和当前 framework 保持一致。
+
+每次 developer run 都会通过 `--coding-style-skill-path` 加载配置的 coding-style skill。[`agents/developer.ts`](agents/developer.ts) 会把 [`agents/prompts.ts`](agents/prompts.ts) 里的说明放到 developer prompt 前面：先 load and follow 这个 skill，再读取 blueprint、experiment plan、coding plan、repo files 和 current task。这样负责写代码的 agent 在 feature、refactor、harness/test work、methods、baselines、metrics、result exports 和 framework docs 等各种任务里，都会用同一套代码结构和风格偏好，保证输出的代码结构和风格统一。
+
+`academic-army-coding-style` 对各种代码编写任务都是通用的。它不决定 research method、experiment content、task priority 或 repository template initialization；它只关心代码结构和风格，让代码 concise、readable、low-friction、easy to modify，并贴合现有 repo 结构。
+
+任何对代码结构和代码风格的长期偏好，都放进 [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md)，然后在仓库根目录运行 [`runs/develop-skill.sh`](../../runs/develop-skill.sh) 来更新这个 skill。
 
 ## 快速开始
 
@@ -80,6 +90,30 @@ npm run developing -- \
 4. 如果 reviewer 返回 feedback，`developer` 继续修同一个任务，然后 `code-reviewer` 再审。
 5. review 循环结束后，pipeline 归档 task 和 reports，然后让 `coding-manager` 更新 TODO 文件。
 6. 当 `coding-manager` 返回 `FINISHED` 或达到 `--max-iterations` 时停止。
+
+## developing-skill 和 Trajectory Feedback
+
+[`runs/develop-skill.sh`](../../runs/develop-skill.sh) 会调用 [`pipelineskill.ts`](pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
+
+第一次 `trajectory-optimizer` 调用发生在 developer 开始前，使用 `scan` 模式。它会读取目标 repo、当前 coding-style skill、blueprint、experiment plan 和 coding plan，让 optimizer 拿到和代码编写循环相同的项目上下文。
+
+第二次 `trajectory-optimizer` 调用发生在 TODO update report 生成后，使用 `optimize` 模式。它会读取 metaskill、target repo、plans、current task、revision report 和 TODO update report；根据 [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md) 中写的偏好评估这次修改 trajectory 的质量；然后直接修改 coding-style skill。这个 prompt 会重点检查哪些 guidance 缺失、误导或冗余，并看这些问题是否影响 task selection、coding、review 或 TODO update。
+
+推荐的使用循环是：
+
+1. 把代码风格偏好、failure modes 和 review tips 写进 [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md)。
+2. 运行 `bash runs/develop-skill.sh`。
+3. 让 `developer`、`code-reviewer`、`coding-manager` 和 `trajectory-optimizer` 暴露当前 skill 在真实开发轨迹里哪里有效、哪里失效。
+4. 检查更新后的 [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md)，保留有用修改；当出现新的代码偏好时继续重复。
+
+这就是 coding-style 版本的 skill self-improvement：metaskill 说明什么是“好的代码风格 guidance”，trajectory 记录 agent 实际如何修改代码，`develop-skill` 根据这些证据修改可复用的 skill，让这个 skill 越用越强。
+
+相关研究也在支持类似方向；这里的 `developing-skill` 是 AcademicArmy 的本地实现，不是对下面论文的直接复现：
+
+- [Reflexion](https://arxiv.org/abs/2303.11366) 展示了 language agents 可以把任务反馈转成 verbal reflection，在不更新模型权重的情况下跨 trial 改善表现。
+- [Agent Trajectory Explorer](https://research.ibm.com/publications/agent-trajectory-explorer-visualizing-and-providing-feedback-on-agent-trajectories) 讨论了 raw agent trajectory 不适合直接做人工分析，需要更容易浏览的格式来检查行为并提供 future improvement feedback。
+- [Agent-as-a-Judge](https://openreview.net/forum?id=Nn9POI9Ekt) 使用 agentic evaluator 评价 agentic code-generation systems，强调评价时不只看 final output，也看 step-by-step task-solving process。
+- [When Agents go Astray](https://arxiv.org/abs/2509.02360) 研究 software-engineering agents 的 trajectory-level errors，并用 process feedback 在执行中检测和纠正低效 trajectory。
 
 ## 输出产物
 
