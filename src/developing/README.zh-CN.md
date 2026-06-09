@@ -11,12 +11,13 @@
 - `paper_blueprint.md`
 - `experiment_plan.md`
 - `coding_plan.md`
+- 通过 `--goal-path` 传入的目标文件
 - `skills/academic-army-coding-style/SKILL.md`
 - 包含 `TODO.md` 的 artifact 目录
 - 目标代码库目录
 - development archive 目录；当前 CLI 参数名仍是 `--achive-dir`
 
-pipeline 会在配置的 `--target-path` 中继续写代码，维护配置的 `--artifact-path` 下的 `TODO.md`，并把每轮 task/review 产物归档到 archive 目录。
+pipeline 会在配置的 `--target-path` 中继续写代码，从 `--goal-path` 读取当前高层任务目标，维护配置的 `--artifact-path` 下的 `TODO.md`，并把每轮 task/review 产物归档到 archive 目录。
 
 TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../README.zh-CN.md)。
 
@@ -42,6 +43,25 @@ bash runs/develop.sh
 
 使用这个 wrapper 按上面列出的项目约定路径在 `output/codebase` 下写代码。
 
+每次要执行下一个新任务前，先更新当前 goal 文件：
+
+```bash
+$EDITOR output/goal.md
+bash runs/develop.sh
+```
+
+预设 wrapper 会传入 `--goal-path "output/goal.md"`。用这个文件描述下一轮希望开发循环执行的高层任务目标。
+
+## Goal 文件和临时 TODO 上下文
+
+`developing` 和 `developing-skill` 现在都接受 `--goal-path <path>`。pipeline 会在运行开始时读取这个文件，并把其中内容作为当前 high-level objective 传给 `coding-manager`、`developer`、`code-reviewer` 和 `trajectory-optimizer`。
+
+每次想执行下一个新任务时，先更新 `--goal-path` 指向的文件，再重新运行 [`runs/develop.sh`](../../runs/develop.sh) 或 [`runs/develop-skill.sh`](../../runs/develop-skill.sh)。三份规划产物仍然提供稳定的项目 contract；goal 文件用来告诉开发循环“这一次重点做什么”。
+
+配置的 `--artifact-path` 下的 `TODO.md` 是当前由 `coding-manager` 维护的临时任务记忆文件。如果现有 TODO 内容开始把旧任务和新任务上下文串味，可以在下一次运行前手动删除当前 TODO 文件，例如 `output/developing/TODO.md`。pipeline 会自动重新创建一个空 TODO 文件。
+
+这个 `TODO.md` workflow 是临时记忆机制。之后会实现更高级的记忆机制来替代或扩展它，所以现在可以把这个文件理解成用于保持任务连续性的过渡方案，而不是最终的长期记忆设计。
+
 ## 直接命令
 
 `runs/develop.sh` 会调用：
@@ -57,6 +77,7 @@ npm run developing -- \
   --paper-blueprint-path "output/paper_blueprint.md" \
   --experiment-plan-path "output/experiment_plan.md" \
   --coding-plan-path "output/coding_plan.md" \
+  --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-revision-iterations "10"
 ```
@@ -75,6 +96,7 @@ npm run developing -- \
 | `--paper-blueprint-path`    | `paper_blueprint.md`。                                      |
 | `--experiment-plan-path`    | `experiment_plan.md`。                                      |
 | `--coding-plan-path`        | `coding_plan.md`。                                          |
+| `--goal-path`               | 包含当前 high-level objective 的 Markdown 文件。             |
 | `--max-iterations`          | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。    |
 | `--max-revision-iterations` | 限制内层 developer/reviewer 修复循环。                      |
 
@@ -84,7 +106,7 @@ npm run developing -- \
 
 每轮迭代执行以下步骤：
 
-1. `coding-manager` 扫描当前 repo 和 artifact 目录中的 `TODO.md`，然后选择一个 developer task。
+1. `coding-manager` 扫描当前 repo、`--goal-path` 中的 goal，以及 artifact 目录中的 `TODO.md`，然后选择一个 developer task。
 2. `developer` 加载配置的 coding-style skill，修改 repo，并报告自己改了哪些内容给 reviewer。
 3. `code-reviewer` 阅读代码和 developer report，返回严格的 `ACCEPT` 或 revision feedback。
 4. 如果 reviewer 返回 feedback，`developer` 继续修同一个任务，然后 `code-reviewer` 再审。
@@ -121,7 +143,7 @@ pipeline 会维护：
 
 | Artifact             | 位置                                                                                         |
 | -------------------- | -------------------------------------------------------------------------------------------- |
-| `TODO.md`            | 配置的 artifact 目录下，由 coding-manager 维护的任务列表。                                   |
+| `TODO.md`            | 配置的 artifact 目录下，由 coding-manager 维护的临时任务记忆文件。                           |
 | 按时间戳归档的文件夹 | 配置的 archive 目录下，保存 selected task、每次 revision 的 reports 和 TODO update reports。 |
 
 ## 重要文件
@@ -143,4 +165,5 @@ pipeline 会维护：
 | ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
 | Loop 以 `FINISHED` 停止            | `coding-manager` 判断不需要继续选择 developer task。 | 检查 artifact 目录中的 `TODO.md` 和最新 archive。 |
 | 某个任务持续返回 revision feedback | 内层 developer/reviewer 修复循环尚未达到 `ACCEPT`。  | 阅读按时间戳归档的 per-revision reports。         |
+| 新 goal 仍然继承旧上下文           | 临时 `TODO.md` 里还保留旧任务状态。                  | 更新 `--goal-path`；必要时先删除 `output/developing/TODO.md`，再重新运行 wrapper。 |
 | Archive 参数看起来拼错             | 当前 CLI 参数名就是 `--achive-dir`。                 | 在 CLI 改名前继续使用当前参数名。                 |

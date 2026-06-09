@@ -11,12 +11,13 @@ The usual entry point is [`runs/develop.sh`](../../runs/develop.sh), which calls
 - `paper_blueprint.md`
 - `experiment_plan.md`
 - `coding_plan.md`
+- the goal file passed with `--goal-path`
 - `skills/academic-army-coding-style/SKILL.md`
 - the artifact directory containing `TODO.md`
 - the target codebase directory
 - the development archive directory, passed through the current CLI option name `--achive-dir`
 
-The pipeline works in the configured `--target-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured archive directory.
+The pipeline works in the configured `--target-path`, reads the current high-level objective from `--goal-path`, maintains `TODO.md` under the configured `--artifact-path`, and archives per-iteration task/review artifacts under the configured archive directory.
 
 For the overall TypeScript pipeline usage and entry points, see [`src/README.md`](../README.md).
 
@@ -42,6 +43,25 @@ bash runs/develop.sh
 
 Use the wrapper with the conventional project paths listed above to write code under `output/codebase`.
 
+Before each new task, update the current goal file:
+
+```bash
+$EDITOR output/goal.md
+bash runs/develop.sh
+```
+
+The prepared wrapper passes `--goal-path "output/goal.md"`. Use that file to describe the next high-level task you want the development loop to pursue.
+
+## Goal File And Temporary TODO Context
+
+`developing` and `developing-skill` now both accept `--goal-path <path>`. The pipeline reads that file once at the start of the run and passes its contents to `coding-manager`, `developer`, `code-reviewer`, and `trajectory-optimizer` as the current high-level objective.
+
+Each time you want to execute the next new task, update the file passed to `--goal-path` before rerunning [`runs/develop.sh`](../../runs/develop.sh) or [`runs/develop-skill.sh`](../../runs/develop-skill.sh). The three planning artifacts still provide the stable project contract; the goal file tells the development loop what you want to focus on now.
+
+`TODO.md` under the configured `--artifact-path` is the current temporary task-memory file maintained by `coding-manager`. If the existing TODO content starts to mix old and new task context, you can manually delete the current TODO file, for example `output/developing/TODO.md`, before the next run. The pipeline will recreate an empty TODO file automatically.
+
+This `TODO.md` workflow is a temporary memory mechanism. A more advanced memory mechanism should replace or extend it later, so treat the current file as a practical bridge for task continuity rather than the final long-term memory design.
+
 ## Direct Command
 
 `runs/develop.sh` calls:
@@ -57,6 +77,7 @@ npm run developing -- \
   --paper-blueprint-path "output/paper_blueprint.md" \
   --experiment-plan-path "output/experiment_plan.md" \
   --coding-plan-path "output/coding_plan.md" \
+  --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-revision-iterations "10"
 ```
@@ -75,6 +96,7 @@ The current CLI option name is `--achive-dir`.
 | `--paper-blueprint-path`    | `paper_blueprint.md`.                                                 |
 | `--experiment-plan-path`    | `experiment_plan.md`.                                                 |
 | `--coding-plan-path`        | `coding_plan.md`.                                                     |
+| `--goal-path`               | Markdown file containing the current high-level objective.            |
 | `--max-iterations`          | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
 | `--max-revision-iterations` | Limits the inner developer/reviewer repair loop.                      |
 
@@ -84,7 +106,7 @@ The current CLI option name is `--achive-dir`.
 
 Each iteration does the following:
 
-1. `coding-manager` scans the current repository and `TODO.md` in the artifact directory, then chooses one developer task.
+1. `coding-manager` scans the current repository, the goal from `--goal-path`, and `TODO.md` in the artifact directory, then chooses one developer task.
 2. `developer` loads the configured coding-style skill, edits the repository, and reports what changed for review.
 3. `code-reviewer` reads the code and developer report, then returns exactly `ACCEPT` or revision feedback.
 4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
@@ -121,7 +143,7 @@ The pipeline maintains:
 
 | Artifact                    | Where it lives                                                                                                      |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `TODO.md`                   | Under the configured artifact directory; the coding-manager-maintained task list.                                   |
+| `TODO.md`                   | Under the configured artifact directory; the temporary coding-manager-maintained task-memory file.                  |
 | Timestamped archive folders | Under the configured archive directory; contains each selected task, per-revision reports, and TODO update reports. |
 
 ## Important Files
@@ -143,4 +165,5 @@ The pipeline maintains:
 | ---------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
 | The loop stops with `FINISHED`           | `coding-manager` decided no further developer task is needed.      | Inspect `TODO.md` in the artifact directory and the latest archive. |
 | A task keeps returning revision feedback | The inner developer/reviewer repair loop has not reached `ACCEPT`. | Read the per-revision reports in the timestamped archive folder.    |
+| A new goal keeps inheriting old context   | The temporary `TODO.md` still contains old task state.              | Update `--goal-path`; if needed, delete `output/developing/TODO.md` before rerunning the wrapper. |
 | The archive option looks misspelled      | The current CLI option name is `--achive-dir`.                     | Use the current option name until the CLI changes.                  |
