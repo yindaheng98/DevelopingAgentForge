@@ -1,4 +1,4 @@
-import { codingStyleSkillInstruction } from "./prompts.js";
+import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
@@ -26,6 +26,7 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
     const todoPath = this.workspaceRelativePath(variables.todoPath);
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
+    const goalInstructionText = goalInstruction(variables.goal);
 
     if (variables.phase === "update") {
       return `
@@ -38,6 +39,7 @@ Read:
 - paper blueprint: ${paperBlueprintPath}
 - experiment plan: ${experimentPlanPath}
 - coding plan: ${codingPlanPath}
+${goalInstructionText}
 
 Current developer task:
 ${variables.currentTask}
@@ -61,6 +63,7 @@ Read:
 - paper blueprint: ${paperBlueprintPath}
 - experiment plan: ${experimentPlanPath}
 - coding plan: ${codingPlanPath}
+${goalInstructionText}
 
 Choose exactly one new bounded task for the Developer.
 

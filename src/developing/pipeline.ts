@@ -1,6 +1,6 @@
 import { AgentTeam, type RecordCallback } from "coding-agent-forge";
 import { existsSync } from "node:fs";
-import { cp, mkdir, writeFile } from "node:fs/promises";
+import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { definePipeline, type ParsedPipelineArgs } from "../pipeline.js";
@@ -26,6 +26,7 @@ export type DevelopingOptions = {
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;
+  goalPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
   hooks?: DevelopingHooks;
@@ -62,6 +63,7 @@ const USAGE = [
   "--paper-blueprint-path <path>",
   "--experiment-plan-path <path>",
   "--coding-plan-path <path>",
+  "--goal-path <path>",
   "[--max-iterations <positive-integer>]",
   "[--max-revision-iterations <positive-integer>]",
 ].join(" ");
@@ -82,6 +84,7 @@ export function parseDevelopingArgs(
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
       "coding-plan-path": codingPlanPath,
+      "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
     },
@@ -96,6 +99,7 @@ export function parseDevelopingArgs(
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
       "coding-plan-path": { type: "string" },
+      "goal-path": { type: "string" },
       "max-iterations": { type: "string" },
       "max-revision-iterations": { type: "string" },
     },
@@ -109,7 +113,8 @@ export function parseDevelopingArgs(
     codingStyleSkillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
-    codingPlanPath === undefined
+    codingPlanPath === undefined ||
+    goalPath === undefined
   ) {
     throw new Error(USAGE);
   }
@@ -124,6 +129,7 @@ export function parseDevelopingArgs(
       paperBlueprintPath,
       experimentPlanPath,
       codingPlanPath,
+      goalPath,
       maxIterations: Number(maxIterations ?? 10),
       maxRevisionIterations: Number(maxRevisionIterations ?? 3),
     },
@@ -141,12 +147,14 @@ export async function developing(
   const achiveDir = path.resolve(options.achiveDir);
   const artifactPath = path.resolve(options.artifactPath);
   const todoPath = path.join(artifactPath, "TODO.md");
+  const goal = await readGoal(options.goalPath);
   const agentVariables: DevelopingAgentVariables = {
     targetPath: path.resolve(options.targetPath),
     codingStyleSkillPath: path.resolve(options.codingStyleSkillPath),
     paperBlueprintPath: path.resolve(options.paperBlueprintPath),
     experimentPlanPath: path.resolve(options.experimentPlanPath),
     codingPlanPath: path.resolve(options.codingPlanPath),
+    goal,
   };
 
   await mkdir(achiveDir, { recursive: true });
@@ -281,6 +289,14 @@ export async function developing(
 async function writeText(filePath: string, content: string): Promise<void> {
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(filePath, `${content.trimEnd()}\n`, "utf8");
+}
+
+async function readGoal(goalPath: string): Promise<string> {
+  const goal = (await readFile(path.resolve(goalPath), "utf8")).trim();
+  if (goal === "") {
+    throw new Error(`Goal file must not be empty: ${goalPath}`);
+  }
+  return goal;
 }
 
 export const developingPipeline = definePipeline({

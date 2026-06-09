@@ -32,6 +32,7 @@ const USAGE = [
   "--paper-blueprint-path <path>",
   "--experiment-plan-path <path>",
   "--coding-plan-path <path>",
+  "--goal-path <path>",
   "[--max-iterations <positive-integer>]",
   "[--max-revision-iterations <positive-integer>]",
 ].join(" ");
@@ -50,6 +51,7 @@ export function parseDevelopingSkillArgs(
       "paper-blueprint-path": paperBlueprintPath,
       "experiment-plan-path": experimentPlanPath,
       "coding-plan-path": codingPlanPath,
+      "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
     },
@@ -65,6 +67,7 @@ export function parseDevelopingSkillArgs(
       "paper-blueprint-path": { type: "string" },
       "experiment-plan-path": { type: "string" },
       "coding-plan-path": { type: "string" },
+      "goal-path": { type: "string" },
       "max-iterations": { type: "string" },
       "max-revision-iterations": { type: "string" },
     },
@@ -79,7 +82,8 @@ export function parseDevelopingSkillArgs(
     metaskillPath === undefined ||
     paperBlueprintPath === undefined ||
     experimentPlanPath === undefined ||
-    codingPlanPath === undefined
+    codingPlanPath === undefined ||
+    goalPath === undefined
   ) {
     throw new Error(USAGE);
   }
@@ -95,6 +99,7 @@ export function parseDevelopingSkillArgs(
       paperBlueprintPath,
       experimentPlanPath,
       codingPlanPath,
+      goalPath,
       maxIterations: Number(maxIterations ?? 10),
       maxRevisionIterations: Number(maxRevisionIterations ?? 3),
     },

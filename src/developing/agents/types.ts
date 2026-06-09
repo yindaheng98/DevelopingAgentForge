@@ -9,6 +9,7 @@ export type DevelopingAgentVariables = {
   paperBlueprintPath: string;
   experimentPlanPath: string;
   codingPlanPath: string;
+  goal: string;
 };
 
 export type DevelopingAgentConstants = {
