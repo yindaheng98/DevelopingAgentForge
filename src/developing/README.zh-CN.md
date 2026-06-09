@@ -65,18 +65,18 @@ npm run developing -- \
 
 ## 参数参考
 
-| 参数 | 说明 |
-|---|---|
-| `--config` | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。 |
-| `--target-path` | 目标代码库目录。 |
-| `--achive-dir` | Development archive 目录。 |
-| `--artifact-path` | 包含 `TODO.md` 的 artifact 目录。 |
-| `--coding-style-skill-path` | 配置的 coding-style skill。 |
-| `--paper-blueprint-path` | `paper_blueprint.md`。 |
-| `--experiment-plan-path` | `experiment_plan.md`。 |
-| `--coding-plan-path` | `coding_plan.md`。 |
-| `--max-iterations` | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。 |
-| `--max-revision-iterations` | 限制内层 developer/reviewer 修复循环。 |
+| 参数                        | 说明                                                        |
+| --------------------------- | ----------------------------------------------------------- |
+| `--config`                  | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。 |
+| `--target-path`             | 目标代码库目录。                                            |
+| `--achive-dir`              | Development archive 目录。                                  |
+| `--artifact-path`           | 包含 `TODO.md` 的 artifact 目录。                           |
+| `--coding-style-skill-path` | 配置的 coding-style skill。                                 |
+| `--paper-blueprint-path`    | `paper_blueprint.md`。                                      |
+| `--experiment-plan-path`    | `experiment_plan.md`。                                      |
+| `--coding-plan-path`        | `coding_plan.md`。                                          |
+| `--max-iterations`          | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。    |
+| `--max-revision-iterations` | 限制内层 developer/reviewer 修复循环。                      |
 
 ## 主流程
 
@@ -119,28 +119,28 @@ npm run developing -- \
 
 pipeline 会维护：
 
-| Artifact | 位置 |
-|---|---|
-| `TODO.md` | 配置的 artifact 目录下，由 coding-manager 维护的任务列表。 |
+| Artifact             | 位置                                                                                         |
+| -------------------- | -------------------------------------------------------------------------------------------- |
+| `TODO.md`            | 配置的 artifact 目录下，由 coding-manager 维护的任务列表。                                   |
 | 按时间戳归档的文件夹 | 配置的 archive 目录下，保存 selected task、每次 revision 的 reports 和 TODO update reports。 |
 
 ## 重要文件
 
-| 路径 | 作用 |
-|---|---|
-| [`pipeline.ts`](pipeline.ts) | 参数解析、循环编排、archive 创建和各 agent 之间的交接。 |
-| [`pipelineskill.ts`](pipelineskill.ts) | 给基础开发循环增加 trajectory optimization hooks 的 `developing-skill` 包装。 |
-| [`agents/factory.ts`](agents/factory.ts) | 注册 developing coding manager、developer 和 reviewer agents。 |
-| [`agents/types.ts`](agents/types.ts) | 共享的 workspace-aware base class 和变量定义。 |
-| [`agents/manager.ts`](agents/manager.ts) | 维护 TODO 文件并选择外层任务。 |
-| [`agents/developer.ts`](agents/developer.ts) | 使用共享 coding-style skill 修改目标 repo。 |
-| [`agents/reviewer.ts`](agents/reviewer.ts) | 执行只读代码审阅 gate。 |
-| [`agents/trajectory-optimizer.ts`](agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。 |
+| 路径                                                               | 作用                                                                          |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| [`pipeline.ts`](pipeline.ts)                                       | 参数解析、循环编排、archive 创建和各 agent 之间的交接。                       |
+| [`pipelineskill.ts`](pipelineskill.ts)                             | 给基础开发循环增加 trajectory optimization hooks 的 `developing-skill` 包装。 |
+| [`agents/factory.ts`](agents/factory.ts)                           | 注册 developing coding manager、developer 和 reviewer agents。                |
+| [`agents/types.ts`](agents/types.ts)                               | 共享的 workspace-aware base class 和变量定义。                                |
+| [`agents/manager.ts`](agents/manager.ts)                           | 维护 TODO 文件并选择外层任务。                                                |
+| [`agents/developer.ts`](agents/developer.ts)                       | 使用共享 coding-style skill 修改目标 repo。                                   |
+| [`agents/reviewer.ts`](agents/reviewer.ts)                         | 执行只读代码审阅 gate。                                                       |
+| [`agents/trajectory-optimizer.ts`](agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。      |
 
 ## 常见问题
 
-| 问题 | 常见原因 | 解决办法 |
-|---|---|---|
-| Loop 以 `FINISHED` 停止 | `coding-manager` 判断不需要继续选择 developer task。 | 检查 artifact 目录中的 `TODO.md` 和最新 archive。 |
-| 某个任务持续返回 revision feedback | 内层 developer/reviewer 修复循环尚未达到 `ACCEPT`。 | 阅读按时间戳归档的 per-revision reports。 |
-| Archive 参数看起来拼错 | 当前 CLI 参数名就是 `--achive-dir`。 | 在 CLI 改名前继续使用当前参数名。 |
+| 问题                               | 常见原因                                             | 解决办法                                          |
+| ---------------------------------- | ---------------------------------------------------- | ------------------------------------------------- |
+| Loop 以 `FINISHED` 停止            | `coding-manager` 判断不需要继续选择 developer task。 | 检查 artifact 目录中的 `TODO.md` 和最新 archive。 |
+| 某个任务持续返回 revision feedback | 内层 developer/reviewer 修复循环尚未达到 `ACCEPT`。  | 阅读按时间戳归档的 per-revision reports。         |
+| Archive 参数看起来拼错             | 当前 CLI 参数名就是 `--achive-dir`。                 | 在 CLI 改名前继续使用当前参数名。                 |

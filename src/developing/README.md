@@ -65,18 +65,18 @@ The current CLI option name is `--achive-dir`.
 
 ## Options Reference
 
-| Option | Description |
-|---|---|
-| `--config` | One or more YAML config files loaded with `coding-agent-forge`. |
-| `--target-path` | Target codebase directory. |
-| `--achive-dir` | Development archive directory. |
-| `--artifact-path` | Artifact directory containing `TODO.md`. |
-| `--coding-style-skill-path` | Configured coding-style skill. |
-| `--paper-blueprint-path` | `paper_blueprint.md`. |
-| `--experiment-plan-path` | `experiment_plan.md`. |
-| `--coding-plan-path` | `coding_plan.md`. |
-| `--max-iterations` | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
-| `--max-revision-iterations` | Limits the inner developer/reviewer repair loop. |
+| Option                      | Description                                                           |
+| --------------------------- | --------------------------------------------------------------------- |
+| `--config`                  | One or more YAML config files loaded with `coding-agent-forge`.       |
+| `--target-path`             | Target codebase directory.                                            |
+| `--achive-dir`              | Development archive directory.                                        |
+| `--artifact-path`           | Artifact directory containing `TODO.md`.                              |
+| `--coding-style-skill-path` | Configured coding-style skill.                                        |
+| `--paper-blueprint-path`    | `paper_blueprint.md`.                                                 |
+| `--experiment-plan-path`    | `experiment_plan.md`.                                                 |
+| `--coding-plan-path`        | `coding_plan.md`.                                                     |
+| `--max-iterations`          | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
+| `--max-revision-iterations` | Limits the inner developer/reviewer repair loop.                      |
 
 ## Main Flow
 
@@ -119,28 +119,28 @@ Related work points in the same direction, though `developing-skill` is a local 
 
 The pipeline maintains:
 
-| Artifact | Where it lives |
-|---|---|
-| `TODO.md` | Under the configured artifact directory; the coding-manager-maintained task list. |
+| Artifact                    | Where it lives                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `TODO.md`                   | Under the configured artifact directory; the coding-manager-maintained task list.                                   |
 | Timestamped archive folders | Under the configured archive directory; contains each selected task, per-revision reports, and TODO update reports. |
 
 ## Important Files
 
-| Path | Purpose |
-|---|---|
-| [`pipeline.ts`](pipeline.ts) | Argument parsing, loop orchestration, archive creation, and per-agent handoff. |
-| [`pipelineskill.ts`](pipelineskill.ts) | `developing-skill` wrapper that adds trajectory optimization hooks around the base loop. |
-| [`agents/factory.ts`](agents/factory.ts) | Registers the developing coding manager, developer, and reviewer agents. |
-| [`agents/types.ts`](agents/types.ts) | Shared workspace-aware base class and variables. |
-| [`agents/manager.ts`](agents/manager.ts) | Maintains the TODO file and selects outer-loop tasks. |
-| [`agents/developer.ts`](agents/developer.ts) | Edits the target repository using the shared coding-style skill. |
-| [`agents/reviewer.ts`](agents/reviewer.ts) | Performs the read-only code review gate. |
+| Path                                                               | Purpose                                                                                   |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| [`pipeline.ts`](pipeline.ts)                                       | Argument parsing, loop orchestration, archive creation, and per-agent handoff.            |
+| [`pipelineskill.ts`](pipelineskill.ts)                             | `developing-skill` wrapper that adds trajectory optimization hooks around the base loop.  |
+| [`agents/factory.ts`](agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                  |
+| [`agents/types.ts`](agents/types.ts)                               | Shared workspace-aware base class and variables.                                          |
+| [`agents/manager.ts`](agents/manager.ts)                           | Maintains the TODO file and selects outer-loop tasks.                                     |
+| [`agents/developer.ts`](agents/developer.ts)                       | Edits the target repository using the shared coding-style skill.                          |
+| [`agents/reviewer.ts`](agents/reviewer.ts)                         | Performs the read-only code review gate.                                                  |
 | [`agents/trajectory-optimizer.ts`](agents/trajectory-optimizer.ts) | Scans the trajectory and proposes coding-style skill improvements for `developing-skill`. |
 
 ## Troubleshooting
 
-| Problem | Likely cause | Fix |
-|---|---|---|
-| The loop stops with `FINISHED` | `coding-manager` decided no further developer task is needed. | Inspect `TODO.md` in the artifact directory and the latest archive. |
-| A task keeps returning revision feedback | The inner developer/reviewer repair loop has not reached `ACCEPT`. | Read the per-revision reports in the timestamped archive folder. |
-| The archive option looks misspelled | The current CLI option name is `--achive-dir`. | Use the current option name until the CLI changes. |
+| Problem                                  | Likely cause                                                       | Fix                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| The loop stops with `FINISHED`           | `coding-manager` decided no further developer task is needed.      | Inspect `TODO.md` in the artifact directory and the latest archive. |
+| A task keeps returning revision feedback | The inner developer/reviewer repair loop has not reached `ACCEPT`. | Read the per-revision reports in the timestamped archive folder.    |
+| The archive option looks misspelled      | The current CLI option name is `--achive-dir`.                     | Use the current option name until the CLI changes.                  |
