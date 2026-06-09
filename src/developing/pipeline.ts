@@ -1,6 +1,6 @@
 import { AgentTeam, type RecordCallback } from "coding-agent-forge";
 import { existsSync } from "node:fs";
-import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 import { definePipeline, type ParsedPipelineArgs } from "../pipeline.js";
@@ -271,7 +271,6 @@ export async function developing(
       )
     ).trim();
     await writeText(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport);
-    await cp(artifactPath, path.join(archiveDir, "artifacts"), { recursive: true });
 
     await options.hooks?.afterTodoUpdate?.(
       agentVariables,
