@@ -274,7 +274,7 @@ export const developingPipeline = definePipeline({
   agentFactories,
   async run(
     team: AgentTeam<DevelopingAgentVariablesByName>,
-    options: PipelineOptions<typeof developingArgsOptions>,
+    options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "hooks">,
   ) {
     const {
       "target-path": targetPath,
@@ -287,6 +287,7 @@ export const developingPipeline = definePipeline({
       "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
+      hooks,
     } = options;
     if (
       targetPath === undefined ||
@@ -323,6 +324,7 @@ export const developingPipeline = definePipeline({
       goalPath,
       maxIterations: Number(maxIterations),
       maxRevisionIterations: Number(maxRevisionIterations),
+      ...(hooks === undefined ? {} : { hooks }),
     });
   },
 });
