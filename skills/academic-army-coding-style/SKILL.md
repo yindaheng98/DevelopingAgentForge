@@ -321,6 +321,12 @@ configuration or budget keys, ordering or priority rules, emitted metadata, and
 validation behavior. Do not rely on a neighboring surface, a shared-helper
 phrase, or an absence clause to imply a detail that the current subject's
 surface must state explicitly.
+If the scope gives an exact callable signature, return annotation, record
+shape, output container, or immutability promise, reproduce that contract on
+every requested API, package-summary, module-summary, and translated surface
+that names the callable or record. Generic phrases such as "sample values",
+"helper output", or "bounded parser" are not substitutes for a named return
+shape when the user supplied one.
 
 When a docs-sync request says a surface currently lists through a previous
 accepted subject, search that predecessor token in every requested document
@@ -440,6 +446,11 @@ task as a separate task-selection decision, not as a consequence of making docs
 current. If a next source/test task is recorded, tie it to an explicit upstream
 selector, accepted backlog item, or already-scanned stale implementation gap;
 otherwise leave the trajectory neutral.
+Do not use a docs-only sync that merely documented an accepted helper as the
+reason to select an adjacent implementation task. Newly visible omissions in
+the docs may be recorded as candidates for later selection, but the next
+developer task stays neutral unless the user or active workflow explicitly
+selects that implementation work.
 
 If a docs-only sync is explicitly selected, name the exact stale current
 surfaces found in a read-only scan and make clear that it is a separate future
@@ -584,6 +595,12 @@ with local context: the current subject name and the required fixture, metadata,
 reason, or config term should appear in the same bullet, paragraph, or clearly
 bounded coverage block.
 
+When the scope names an exact callable signature, return type, output container,
+or record immutability contract, validate that exact contract in every requested
+surface that names the callable. Read local context around the callable in each
+document; a whole-file hit for the record name or helper name does not prove the
+API surface carries the return contract.
+
 When a scoped invalid-value matrix names multiple keys or inputs, validate each
 owner separately in local context. Search/read back for every named key or input
 together with the invalid-value class or explicit invalid values in the same
@@ -652,6 +669,11 @@ Treat cross-surface leakage as a docs defect: a required rejection reason,
 metadata value, fixture ID, provenance field, or mutation target is still
 missing if it appears only in a helper/API list while the scoped test-summary
 paragraph omits it.
+
+Treat exact-contract leakage as a docs defect: if the user supplied a callable
+signature, return annotation, output container, or frozen/immutable record
+promise, every requested API or module surface that names the callable must
+state that exact contract or a direct equivalent in the same local context.
 
 Treat roster leakage as a docs defect: when a request extends an implemented
 surface that was previously listed through an older subject, any current
