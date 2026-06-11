@@ -257,10 +257,10 @@ the existing test system's style.
 
 ## Framework Docs
 
-Maintain framework docs when the accepted change alters current repository
-structure, module boundaries, extension points, harness/test organization,
-artifact schemas, or repository responsibilities. Keep docs about current
-reality, not template initialization and not aspirational status.
+Maintain framework docs only when docs are in scope, the active workflow
+requires docs, or the accepted change would leave a current documented surface
+materially misleading. Keep docs about current reality, not template
+initialization, aspirational status, or skill mechanics.
 
 Framework docs should explain where future local changes should happen:
 
@@ -271,17 +271,10 @@ Framework docs should explain where future local changes should happen:
 - raw-first export approach and downstream analysis boundary;
 - framework risks where future changes cannot yet stay local.
 
-Do not put skill internals, tool mechanics, sandbox notes, generation process,
-or run-specific history into framework docs.
-
 For README-style or package docs, read the requested files first and classify
-them as current, stale, or internally inconsistent. Edit only the stale surfaces
-needed for the current accepted change. If all requested docs are current,
-report a no-op docs sync rather than rewriting for symmetry.
-For a no-op docs sync, still verify every requested surface type named by the
-scope, including helper lists, module summaries, layout rows, test summaries,
-fixture details, and absence clauses. Say explicitly that no requested docs were
-changed, rather than only saying source or test files were untouched.
+surfaces as current, stale, or historical. Edit only stale current surfaces
+needed for the accepted change. If all requested docs are current, report a
+no-op docs sync and the readback/search checks that proved it.
 
 When one accepted symbol, artifact, metric, method, or helper is documented in
 multiple parallel surfaces, build a small surface map before editing: helper or
@@ -290,14 +283,33 @@ and absence clauses. Update each stale parallel surface consistently, but do
 not add new public exports, runtime behavior, or future-plan claims just because
 the docs mention the accepted bounded surface.
 
+For each subject-specific surface in that map, carry the full scoped contract
+when the user names it: accepted inputs or candidate classes, rejection reasons,
+configuration or budget keys, ordering or priority rules, emitted metadata, and
+validation behavior. Do not rely on a neighboring surface, a shared-helper
+phrase, or an absence clause to imply a detail that the current subject's
+surface must state explicitly.
+
 When a docs-sync request says a surface currently lists through a previous
 accepted subject, search that predecessor token in every requested document
-before editing. Treat each occurrence as a candidate surface to classify:
-helper/API list, module summary, package summary, repository layout row,
-root-layout table row, parenthetical roster, test-summary block, absence
-clause, or historical note. Update every stale roster or scoped surface that is
-meant to remain current; leave historical notes alone only after confirming
-they are not current-surface lists.
+before editing. Treat each occurrence as a current surface or historical note.
+Update stale current rosters and scoped surfaces; leave historical notes alone
+after confirming they are not current-surface lists.
+
+Write docs at the stable contract level by default. Summarize behavior,
+metadata, configuration, rejection reasons, ordering, artifact shape, and test
+coverage clearly enough for future maintainers to find the right code. Do not
+copy full fixture ID lists, exhaustive invalid-value matrices, or lengthy test
+expectations into README-style docs unless the user explicitly requests that
+level of detail, the existing docs already use that convention for the same
+surface, or review feedback depends on an exact fixture detail.
+
+Keep priority, visibility, partition, and ordering terms separate from filters.
+If an item outside a priority group remains eligible, document it as lower
+priority or off-priority, not as rejected or as an invalid type. Rejection
+wording should describe the actual contract owner: type filters reject types,
+validation rejects invalid inputs, and budget handling rejects otherwise
+eligible over-limit items.
 
 When the user scopes specific test-coverage details for README-style docs,
 turn those details into a per-document checklist for every requested test
@@ -307,25 +319,6 @@ metadata value, provenance field, non-mutation target, or same mutable object
 when those are named. A generic sentence such as "covers tie-breaking" or
 "covers non-mutation" is not enough when the scope names the fixture condition
 or the object whose mutation must be rejected.
-
-When a docs-sync scope names multiple config keys, fields, modes, or inputs and
-an invalid-value set for them, bind the invalid-value set to every named owner
-inside the relevant test-summary surface. A generic "invalid configuration" or
-"invalid values" phrase is not enough unless the same sentence or bounded block
-makes clear that all named owners reject the full scoped invalid set.
-
-When docs summarize both default behavior and explicitly configured behavior,
-keep those fixtures separate. Name the configuration condition that makes each
-fixture true, such as a non-default cadence, horizon, threshold, mode, lane, or
-budget, and do not label an explicit configuration fixture as "default".
-Likewise, a default-behavior fixture should document the expected default result
-instead of relying on a nearby non-default fixture with similar objects.
-
-If a scoped fixture string, metadata value, rejection reason, or config key is
-also used by an older or neighboring subject in the same document, its presence
-elsewhere does not satisfy the current subject's documentation. Put the detail
-inside the subject-specific coverage block or sentence for the current accepted
-change.
 
 For staged, filtered, or multi-path behavior in README-style docs, document the
 behavior by responsibility: accepted subset definitions, phase priority, primary
@@ -341,15 +334,6 @@ item in that list. If a metadata value, rejection reason, config key, fixture,
 or coverage case belongs to only one grouped subject, split it into a
 subject-specific bullet or paragraph instead of relying on a shared block.
 
-Track documentation obligations by surface type inside each requested file. A
-detail mentioned in a helper/API list, package summary, layout row, or absence
-clause does not satisfy the same detail when the user also scoped a test
-summary. Mark each scoped fact complete only for the surface where it appears.
-For each requested file, keep the surface map explicit enough to distinguish
-multiple list-like contexts in one file, such as a feature list, package/module
-summary, repository-layout table, and test coverage paragraph. Do not mark the
-file complete merely because the new symbol appears somewhere in the file.
-
 Write absence clauses narrowly. Before saying a broad category is absent, check
 the current code and docs for accepted bounded surfaces in that category. If a
 small in-memory conversion, helper, adapter, or test surface exists, qualify the
@@ -362,12 +346,19 @@ unimplemented larger surface, such as "full", "additional", "beyond the
 accepted bounded formula", or "runtime integration". Do not use the broad
 family name alone as absent when the current docs also document an accepted
 bounded implementation in that family.
+Prefer narrow positive absence sentences such as "This bounded surface does not
+add <capability>" or "<capability> remains unimplemented." Avoid double
+negatives and "No <capability> is not ..." constructions, especially after
+rewriting a long absence clause.
 
 Do not automatically queue a docs-only task after every source/test change.
 Queue or perform docs sync only when docs are explicitly requested, are part of
 the active workflow, or the accepted change would leave a current documented
-surface materially misleading. When docs are not in scope, mention the possible
-staleness briefly instead of promoting it into the next implementation task.
+surface materially misleading. If docs are excluded from the source/test task,
+do not promote stale documentation found during validation or TODO maintenance
+into the next developer task unless the user, active workflow, or existing
+trajectory explicitly selects docs sync. Record possible docs staleness as a
+caveat or candidate, not as a selected handoff.
 
 ## Trajectory And TODO Maintenance
 
@@ -393,27 +384,40 @@ experiment task. Select a next task only when the user, current workflow, or
 existing active trajectory explicitly requires one. Otherwise leave a neutral
 waiting state such as "no next developer task is selected."
 
+When the accepted source/test task explicitly excluded docs, TODO, exports,
+harnesses, experiments, or generated outputs, preserve that exclusion in the
+trajectory. A later TODO-only pass may record accepted work and verified stale
+surfaces, but it must not turn excluded surfaces into selected follow-up work
+without explicit task selection.
+
 After an accepted docs-only or TODO-only update, treat any next implementation
 task as a separate task-selection decision, not as a consequence of making docs
 current. If a next source/test task is recorded, tie it to an explicit upstream
 selector, accepted backlog item, or already-scanned stale implementation gap;
 otherwise leave the trajectory neutral.
 
-If a docs-only sync is selected, name the exact stale surfaces found in a
-read-only scan and make clear that it is a separate future pass, not part of a
-source/test task that explicitly excluded docs. If no live stale surface was
-verified, do not create a generic documentation task.
+If a docs-only sync is explicitly selected, name the exact stale current
+surfaces found in a read-only scan and make clear that it is a separate future
+pass, not part of a source/test task that excluded docs. If no live stale
+surface was verified, do not create a generic documentation task.
 
 When a handoff selects a docs-only follow-up, include a short stale-surface map:
 the document files and surface types to update, such as helper/API lists,
 emitted names, package or module summaries, layout rows, test summaries, or
 absence clauses. A generic "sync docs for <accepted change>" task is not enough
-unless those concrete stale surfaces are also named.
+unless those concrete stale surfaces are also named. Keep the handoff small:
+name stable contracts and stale surface types, not every fixture ID,
+selected-object list, or assertion from the tests.
 
-If accepted review tightened a fixture, discriminator, rejection reason,
-metadata value, or mutation target, carry that exact accepted detail into the
-handoff scope for any later docs-sync or TODO follow-up. Do not downgrade it to
-a generic "tie-break coverage" or "non-mutation coverage" phrase.
+If accepted review tightened a discriminator, rejection reason, metadata value,
+or mutation target that docs must preserve, carry that exact detail into the
+handoff scope. Do not copy unrelated fixture lists merely because they were
+accepted in tests.
+
+When review corrections changed wording, hierarchy, or absence scope, record
+the final accepted correction as the current contract. Do not preserve rejected
+draft wording as a new TODO item unless the reviewer or user explicitly asks
+for a follow-up.
 
 After validation-only work, record only the command, result, no-fix status, and
 cache cleanup/no-cache finding. A green validation run confirms current
@@ -510,6 +514,12 @@ For multi-surface docs, do not rely on whole-file search alone. Check the
 specific edited section or paragraph type that was in scope, especially test
 summary paragraphs in translated docs, so a term present elsewhere in the same
 file does not mask a stale summary.
+
+For Markdown docs with nested bullets or long copied list blocks, audit the
+local hierarchy after editing. Read the lines around every edited heading and
+the next sibling heading or bullet. Confirm top-level file, module, test, or
+artifact bullets remain siblings rather than becoming children of the previous
+coverage block, and confirm nested bullets are nested only where intended.
 
 For README-style docs that extend a roster from a previous accepted subject,
 search both the predecessor token and the new token after editing. Read every
@@ -615,6 +625,11 @@ introduces grouped bullets. A fact is misdocumented if it appears under a group
 where one or more named subjects do not own that metadata value, rejection
 reason, config key, fixture, or coverage case, even if the fact is present
 somewhere in the requested file.
+
+Treat Markdown hierarchy drift as a docs defect. If an edited file, module,
+test, artifact, or capability bullet becomes nested under a neighboring
+coverage block or subject, request a smallest-possible indentation fix even
+when the words themselves are correct.
 
 For docs that describe staged, filtered, or multi-path behavior, verify that the
 primary ordering coverage, phase priority, subset definition, and each
