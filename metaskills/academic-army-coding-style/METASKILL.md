@@ -21,6 +21,36 @@
 如果当前repo已有自己的结构，本skill应尊重既有结构和项目惯例；只有当现有结构影响可读性、局部修改能力或harness/test组织时，才做局部整理。
 如果已有repo没有某个初始化模板约定，本skill不应为了补齐模板而强行创建；只有当前任务需要该结构时才新增。
 
+## Project-agnostic skill hygiene
+
+skill本身必须保持项目无关，只包含通用任务定义、输入输出边界、代码质量原则、framework维护原则、harness/test组织原则和检查机制。
+skill文件只沉淀通用方法、边界、质量标准和检查机制；具体项目名、路径、类名、函数名、模块名、数据集名、method名、harness名只能来自当次输入或当次生成结果，不能写死进skill本身。
+skill中不应写入某次具体项目运行产生的内容，例如具体文件路径、目录名、类名、函数名、模块名、仓库名、数据集名、method名、baseline名、metric名、harness名、test名或artifact字段名。
+固定目录约定可以保留，例如`data/`、`output/`、`results/`和`harness/`；除此之外的路径、源码布局、测试路径、模块路径和文件名应由当前repo、初始化模板、用户输入和当次任务共同决定。
+skill可以说明“根据当前repo已有结构选择测试位置”，但不应写成某个具体测试路径。
+skill可以说明“根据当前功能设计class/function/module”，但不应在skill里预设具体class name、function name或module name。
+skill可以说明“method、baseline、metric、harness应语义化命名”，但具体名称只能来自当次论文蓝图、experiment plan、coding plan或已有repo。
+skill中如果必须举例，应使用明显的抽象占位符，例如`<method_name>`、`<harness_name>`、`<module_name>`、`<artifact_type>`，并确保这些例子不会被误认为固定模板。
+skill中不要放入某次生成出来的`FRAMEWORK.md`、代码片段、目录树、class skeleton或配置文件作为长期规则；这些属于项目输出，不属于skill知识。
+如果需要描述目录结构，应描述决策原则，而不是写死结构。例如写“遵守已有repo的源码布局和测试布局”，不要写某个具体项目的实际文件树。
+如果需要描述代码结构，应描述抽象关系，而不是写死符号。例如写“将candidate method接入统一method interface”，不要写具体类名或函数名。
+如果需要描述harness结构，应描述它应包含目标、输入、输出、metric、raw artifact和修改边界，不要写具体harness名称，除非该名称来自当次输入。
+如果需要描述testing结构，应描述测试应覆盖的功能类型和pass/fail标准，不要写具体测试文件路径或具体测试类名。
+如果需要描述framework文档，应说明`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应记录当前repo实际结构、修改点和设计理由，而不是在skill里预设某个项目的framework内容。
+skill中的变量应保持抽象，例如“当前repo”“当前任务”“当前功能”“当前harness”“当前method”“当前artifact”，不要使用某个项目里的真实命名。
+skill可以要求agent读取当次输入中的项目特定信息，并在生成代码或文档时使用这些信息；但这些项目特定信息只属于当次输出，不应反向写回skill规则。
+如果某条规则换一个项目就不成立，说明它大概率是项目特定内容，不应写进skill。
+如果某条规则包含真实路径、真实类名、真实函数名、真实实验名或真实仓库名，应检查它是否只是某次运行的残留；如果是，应删除或改写成抽象原则。
+如果某条规则来自某次debug、某次repo结构、某次框架实现或某次代码生成结果，应先判断它是否能泛化为质量原则；不能泛化就不要写进skill。
+skill不应通过硬编码项目细节来“帮助下次运行”；下次运行需要的项目细节应从输入文件、当前repo和deepresearch结果中重新获得。
+skill中保留的固定内容应只包括跨项目稳定成立的约定，例如任务定位、输出边界、文档维护、harness/test职责区分、固定实验目录、代码可读性、change locality、高内聚低耦合和scope hygiene。
+skill应避免把示例写得过于真实；过真实的示例容易被agent误当成固定结构，从而在其他项目中生成错误路径或错误类名。
+如果确实需要示例，示例应放在“illustrative only”语境下，并使用中性占位符，不使用真实项目命名。
+skill输出的代码和文档可以是项目特定的，因为它们服务当前repo；skill定义本身必须是项目无关的，因为它会被多种任务复用。
+`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`可以记录当前项目的具体模块、路径、harness、test和修改点；但这些内容应生成在当前repo文档里，不应复制进skill文件。
+当agent从某次任务中总结经验时，只能把可泛化的设计原则加入skill，例如“避免长文件”“减少不必要配置”“保持修改局部化”；不能把当次项目的具体结构加入skill。
+skill应采用“runtime binding”思路：skill定义通用规则，当次运行再把规则绑定到当前repo、当前蓝图、当前plan和当前代码结构上。
+
 ## 通用代码写作原则
 
 agent写代码时应优先保证代码清晰、直接、可读，而不是为了显得“工程化”引入不必要抽象。
@@ -244,6 +274,8 @@ readability audit应检查外部代码来源标注是否完整：复制或改写
 readability audit应检查是否有未标注来源的外部代码片段、疑似无license来源代码或大段无关复制代码；如果有，应补充来源说明、移除不必要代码或改成从依赖调用。
 readability audit应检查是否存在职责过多的文件、过长的runner、过大的utils、混杂的harness/test文件、重复样板代码或明显应该拆分的子功能。
 readability audit应同时检查反方向问题：是否存在过度拆分、空壳文件、薄wrapper、只被调用一次的抽象层或让调用链变长的碎片化模块。
+编写或更新skill时，应做一次project leakage audit，检查是否混入项目名、路径、类名、函数名、模块名、实验名、数据集名、method名、harness名、test名、artifact字段名或某次运行输出。
+project leakage audit发现具体项目内容时，应优先改写成抽象变量、通用原则或运行时读取规则；无法抽象的内容应删除。
 如果发现代码能工作但不够清楚，应优先重构到更清晰的形式，而不是把复杂性留给后续任务。
 如果发现为了“可扩展”而加入了当前任务不需要的抽象，应删除或简化。
 如果发现某个函数、文件或模块的名称不能解释其用途，应重新命名或重新拆分。
@@ -283,6 +315,7 @@ readability audit应同时检查反方向问题：是否存在过度拆分、空
 **No initialization responsibility原则**：这个skill不负责初始化模板repo，不生成通用仓库骨架；它在已有repo和当前任务范围内维护代码质量、局部结构和framework文档一致性。
 **Existing framework preservation原则**：已有framework不能丢；新增或修改代码时，应继续维护模块边界、harness/test组织、extension point、artifact schema、`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`。
 **Template-aligned testing layout原则**：测试文件路径不由本skill固定；本skill应遵守初始化模板或已有repo的测试布局，只维护测试目标、测试覆盖、测试可读性和局部修改能力。`data/`、`output/`、`results/`和`harness/`仍作为固定实验目录保留。
+**Project-agnostic skill原则**：skill只写通用方法和质量标准，不写具体项目事实；具体路径、类名、函数名、模块名、harness名、test名和artifact schema由当次输入、已有repo和当前任务决定，并只出现在当次生成的代码、文档或输出中。
 **Readable implementation over clever abstraction原则**：代码应优先让后续agent和人类读者容易理解；抽象只有在能减少重复、缩短调用方代码、隔离变化点或提升测试性时才引入。
 **Local change principle原则**：每个具体功能都应尽量只在自己的小范围内实现和修改；如果做不到，应先分析模块边界和耦合关系，再决定是否做局部重构。
 **File granularity原则**：优秀代码应避免长文件和职责混杂文件；复杂功能先拆成清晰子功能，再映射到文件和模块，使每个文件主题明确、变化原因清晰、后续修改局部化。
