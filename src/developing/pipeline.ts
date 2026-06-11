@@ -1,9 +1,13 @@
-import { AgentTeam, type RecordCallback } from "coding-agent-forge";
+import {
+  AgentTeam,
+  definePipeline,
+  type PipelineArgsOptions,
+  type PipelineOptions,
+  type RecordCallback,
+} from "coding-agent-forge";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { parseArgs } from "node:util";
-import { definePipeline, type ParsedPipelineArgs } from "../pipeline.js";
 import {
   agentFactories,
   type CodingManagerVariables,
@@ -53,88 +57,8 @@ export type DevelopingHooks = {
   ) => Promise<void> | void;
 };
 
-const USAGE = [
-  "Usage: npm run developing --",
-  "--config <path>",
-  "--target-path <folder>",
-  "--achive-dir <folder>",
-  "--artifact-path <folder>",
-  "--coding-style-skill-path <path>",
-  "--paper-blueprint-path <path>",
-  "--experiment-plan-path <path>",
-  "--coding-plan-path <path>",
-  "--goal-path <path>",
-  "[--max-iterations <positive-integer>]",
-  "[--max-revision-iterations <positive-integer>]",
-].join(" ");
-
 const FINISH_MARK = "FINISHED";
 const ACCEPT_MARK = "ACCEPT";
-
-export function parseDevelopingArgs(
-  args: readonly string[],
-): ParsedPipelineArgs<DevelopingOptions> {
-  const {
-    values: {
-      config,
-      "target-path": targetPath,
-      "achive-dir": achiveDir,
-      "artifact-path": artifactPath,
-      "coding-style-skill-path": codingStyleSkillPath,
-      "paper-blueprint-path": paperBlueprintPath,
-      "experiment-plan-path": experimentPlanPath,
-      "coding-plan-path": codingPlanPath,
-      "goal-path": goalPath,
-      "max-iterations": maxIterations,
-      "max-revision-iterations": maxRevisionIterations,
-    },
-  } = parseArgs({
-    args: [...args],
-    options: {
-      config: { type: "string", multiple: true },
-      "target-path": { type: "string" },
-      "achive-dir": { type: "string" },
-      "artifact-path": { type: "string" },
-      "coding-style-skill-path": { type: "string" },
-      "paper-blueprint-path": { type: "string" },
-      "experiment-plan-path": { type: "string" },
-      "coding-plan-path": { type: "string" },
-      "goal-path": { type: "string" },
-      "max-iterations": { type: "string" },
-      "max-revision-iterations": { type: "string" },
-    },
-  });
-
-  if (
-    config === undefined ||
-    targetPath === undefined ||
-    achiveDir === undefined ||
-    artifactPath === undefined ||
-    codingStyleSkillPath === undefined ||
-    paperBlueprintPath === undefined ||
-    experimentPlanPath === undefined ||
-    codingPlanPath === undefined ||
-    goalPath === undefined
-  ) {
-    throw new Error(USAGE);
-  }
-
-  return {
-    configPaths: config,
-    runningOptions: {
-      targetPath,
-      achiveDir,
-      artifactPath,
-      codingStyleSkillPath,
-      paperBlueprintPath,
-      experimentPlanPath,
-      codingPlanPath,
-      goalPath,
-      maxIterations: Number(maxIterations ?? 10),
-      maxRevisionIterations: Number(maxRevisionIterations ?? 3),
-    },
-  };
-}
 
 export async function developing(
   team: AgentTeam<DevelopingAgentVariablesByName>,
@@ -298,8 +222,107 @@ async function readGoal(goalPath: string): Promise<string> {
   return goal;
 }
 
+export const developingArgsOptions = {
+  "target-path": {
+    type: "string",
+    description: "Target repository folder to create or modify",
+  },
+  "achive-dir": {
+    type: "string",
+    description: "Archive folder for per-iteration reports",
+  },
+  "artifact-path": {
+    type: "string",
+    description: "Working artifact folder containing TODO.md",
+  },
+  "coding-style-skill-path": {
+    type: "string",
+    description: "Coding style skill path used by the agents",
+  },
+  "paper-blueprint-path": {
+    type: "string",
+    description: "Paper blueprint path used by the agents",
+  },
+  "experiment-plan-path": {
+    type: "string",
+    description: "Experiment plan path used by the agents",
+  },
+  "coding-plan-path": {
+    type: "string",
+    description: "Coding plan path used by the agents",
+  },
+  "goal-path": {
+    type: "string",
+    description: "Goal document path",
+  },
+  "max-iterations": {
+    type: "string",
+    default: "10",
+    description: "Maximum number of development iterations",
+  },
+  "max-revision-iterations": {
+    type: "string",
+    default: "3",
+    description: "Maximum review revisions per development iteration",
+  },
+} as const satisfies PipelineArgsOptions;
+
 export const developingPipeline = definePipeline({
+  name: "developing",
+  description: "Run the code development loop.",
+  argsOptions: developingArgsOptions,
   agentFactories,
-  parseArgs: parseDevelopingArgs,
-  run: developing,
+  async run(
+    team: AgentTeam<DevelopingAgentVariablesByName>,
+    options: PipelineOptions<typeof developingArgsOptions>,
+  ) {
+    const {
+      "target-path": targetPath,
+      "achive-dir": achiveDir,
+      "artifact-path": artifactPath,
+      "coding-style-skill-path": codingStyleSkillPath,
+      "paper-blueprint-path": paperBlueprintPath,
+      "experiment-plan-path": experimentPlanPath,
+      "coding-plan-path": codingPlanPath,
+      "goal-path": goalPath,
+      "max-iterations": maxIterations,
+      "max-revision-iterations": maxRevisionIterations,
+    } = options;
+    if (
+      targetPath === undefined ||
+      achiveDir === undefined ||
+      artifactPath === undefined ||
+      codingStyleSkillPath === undefined ||
+      paperBlueprintPath === undefined ||
+      experimentPlanPath === undefined ||
+      codingPlanPath === undefined ||
+      goalPath === undefined
+    ) {
+      throw new Error(
+        [
+          "--target-path",
+          "--achive-dir",
+          "--artifact-path",
+          "--coding-style-skill-path",
+          "--paper-blueprint-path",
+          "--experiment-plan-path",
+          "--coding-plan-path",
+          "--goal-path",
+        ].join(", ") + " are required",
+      );
+    }
+
+    await developing(team, {
+      targetPath,
+      achiveDir,
+      artifactPath,
+      codingStyleSkillPath,
+      paperBlueprintPath,
+      experimentPlanPath,
+      codingPlanPath,
+      goalPath,
+      maxIterations: Number(maxIterations),
+      maxRevisionIterations: Number(maxRevisionIterations),
+    });
+  },
 });
