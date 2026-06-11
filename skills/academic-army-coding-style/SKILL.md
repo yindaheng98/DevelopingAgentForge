@@ -120,6 +120,21 @@ Use names from the current domain contract and existing code semantics. Keep one
 concept's spelling consistent across code, config, tests, harnesses, artifacts,
 prompts, and docs.
 
+When parsing an external schema into an internal record or value, keep source
+column names separate from internal field names. If the task says to map
+external `<source_field>` to internal `<target_field>`, expose and test the
+internal name unless the user explicitly asks to preserve the source field as a
+public output. Keep raw source names local to parsing, validation errors, or
+provenance only when that is the clearest contract.
+
+For parsers and loaders, normalize raw text at the boundary and construct
+public records from already-typed values. Do not relax an existing record's
+field validators because a new file format arrives as strings; parse the new
+format before record construction or add a narrow local parser helper. If a
+private validator is shared across old and new loaders, its contract must stay
+true for every caller and must not broaden legacy public behavior unless the
+task explicitly scopes that behavior change.
+
 Keep responsibilities single:
 
 - one file should mainly carry one interface, adapter family, metric family,
@@ -205,7 +220,18 @@ Keep harness and test responsibilities separate:
 - numeric config validation tests should match the stated contract for each
   key: missing/default behavior, accepted boundary values, negative values when
   non-negative is required, non-numeric values, `NaN`, and infinities when the
-  contract says finite;
+  contract says finite. If multiple fields or parameters say "finite" or "not
+  bool", cover each owner, not only one representative owner;
+- parser and loader tests should assert internal field names, units, converted
+  values, row/sample provenance, slicing semantics, immutable return shape when
+  promised, and boundary normalization after any external-schema mapping. A test
+  that only proves the raw source column was read does not prove the internal
+  contract was respected;
+- fixed-shape parser tests should make malformed structure failures explicit:
+  wrong component counts for each owned tuple/vector, malformed delimiters,
+  non-finite values for each finite owner, and invalid window arguments for each
+  public slicing parameter. Keep these as small contract fixtures, not large
+  real-data reproductions;
 - budget-enforcement tests are separate from budget-configuration validation.
   When the scope asks for over-budget rejection or reason capture, use a valid
   constrained budget that lets at least one eligible candidate reach the
@@ -282,6 +308,12 @@ API lists, emitted names, package/module summaries, layout rows, test summaries,
 and absence clauses. Update each stale parallel surface consistently, but do
 not add new public exports, runtime behavior, or future-plan claims just because
 the docs mention the accepted bounded surface.
+Bind the surface map to the current selected subject. Neighboring helpers,
+methods, tests, metrics, or earlier accepted features in the same document are
+context, not part of the sync, unless the user explicitly scopes them or the
+same sentence/list must change to stay truthful. Do not carry predecessor tokens
+or coverage details from a previous task into the current docs pass when the
+current request names a different stale predecessor or surface boundary.
 
 For each subject-specific surface in that map, carry the full scoped contract
 when the user names it: accepted inputs or candidate classes, rejection reasons,
@@ -380,8 +412,9 @@ paper-result file changed accidentally, treat the run as no longer docs-only
 and validate or repair according to the user's scope.
 
 Do not use TODO or handoff files to invent the next source, harness, docs, or
-experiment task. Select a next task only when the user, current workflow, or
-existing active trajectory explicitly requires one. Otherwise leave a neutral
+experiment task. Select a next task only when the user has explicitly selected
+it, the current workflow instruction names that handoff, or an existing active
+trajectory already contains that selected task. Otherwise leave a neutral
 waiting state such as "no next developer task is selected."
 
 When the accepted source/test task explicitly excluded docs, TODO, exports,
@@ -389,6 +422,18 @@ harnesses, experiments, or generated outputs, preserve that exclusion in the
 trajectory. A later TODO-only pass may record accepted work and verified stale
 surfaces, but it must not turn excluded surfaces into selected follow-up work
 without explicit task selection.
+Verified stale docs, exports, harnesses, or artifacts are evidence for a future
+task-selection pass, not a selected next task by themselves. A repository habit,
+recent sequence, or reasonable maintenance preference is not explicit selection
+when the just-finished task excluded that surface. Require selection language
+from the user, a workflow instruction, or an already-active backlog item before
+writing "next developer task: sync docs" or any equivalent handoff after a
+source/test task that excluded docs.
+Explicit exclusions in the current task are not backlog seeds. If the user says
+not to add a capability, parser family, registry, export, adapter, harness,
+CLI, artifact, experiment, or paper output, a TODO-only pass may record that
+the exclusion was preserved, but must not select that excluded capability as
+the next task unless a later explicit task-selection input asks for it.
 
 After an accepted docs-only or TODO-only update, treat any next implementation
 task as a separate task-selection decision, not as a consequence of making docs
@@ -520,6 +565,12 @@ local hierarchy after editing. Read the lines around every edited heading and
 the next sibling heading or bullet. Confirm top-level file, module, test, or
 artifact bullets remain siblings rather than becoming children of the previous
 coverage block, and confirm nested bullets are nested only where intended.
+For each edited bullet, compare its literal indentation prefix with the nearest
+same-level sibling and nearest child bullet in the same list. A child entry
+under a module/test/feature parent should keep the same prefix as neighboring
+children; a new sibling module/test/file entry should keep the same prefix as
+neighboring siblings. Do this line-level check before reporting docs-only
+validation complete.
 
 For README-style docs that extend a roster from a previous accepted subject,
 search both the predecessor token and the new token after editing. Read every
@@ -567,6 +618,8 @@ or defensive branches unless they solve a concrete defect.
 For bounded helpers, verify that the implementation:
 
 - reads only the accepted inputs and fields;
+- maps external source fields to the requested internal output names without
+  leaking raw source names into public records unless explicitly scoped;
 - rejects invalid inputs at the intended validation owner;
 - implements numeric contracts literally, including rejecting infinities when a
   value must be finite and preserving weaker legacy validators unless changing
@@ -610,10 +663,23 @@ Treat subject leakage as a docs defect too: a required fixture, metadata value,
 rejection reason, or config key is still missing if it appears only under a
 neighboring helper, scheduler, method, metric, or test block.
 
+Treat unrelated-subject drift as a docs defect. If a docs-sync task is scoped
+to one accepted symbol, helper, parser, method, metric, artifact, or test, do
+not accept rewrites to neighboring subjects merely because they are nearby in
+the same README. Request the smallest revert or wording trim unless the
+neighboring edit is necessary to keep a shared sentence, roster, or absence
+clause truthful.
+
 Treat validation-owner leakage as a docs defect: if a scoped invalid-value set
 applies to multiple named keys, fields, modes, or inputs, the test-summary
 surface is stale when it documents the invalid set for only one owner or hides
 the owner list behind a vague "invalid config" phrase.
+
+Treat validation-owner leakage as a test defect too: when the implementation
+contract names multiple finite values, integer fields, or parameters that must
+reject booleans, require at least one focused test per owner or a compact
+parametrized test that names each owner. Do not accept a single neighboring
+owner's `NaN`, infinity, or boolean test as coverage for the whole helper.
 
 Treat default/config leakage as a docs defect: a test-summary surface is stale
 when it labels a fixture with an explicit non-default configuration as default,
