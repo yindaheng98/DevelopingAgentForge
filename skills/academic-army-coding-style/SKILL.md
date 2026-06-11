@@ -153,6 +153,14 @@ When an interface forces every caller to pass excessive parameters, consider a
 small explicit context or config object. Do not turn that into a framework when
 plain values remain clearer.
 
+When a field or config contract says "finite number", validate finiteness
+explicitly. Reject `NaN`, positive infinity, negative infinity, booleans when
+the language treats booleans as numbers, negative values when the contract says
+non-negative, and non-numeric values. Do not treat "not NaN" as equivalent to
+finite. If an existing shared validator has intentionally weaker legacy
+behavior, leave it unchanged unless the task scopes that contract change, and
+add a local validator for the stricter new config.
+
 ## Change Locality
 
 Before writing code, identify the natural owner of the change:
@@ -191,6 +199,50 @@ Keep harness and test responsibilities separate:
   raw artifacts, seeds, splits, config snapshots, and parseable outputs;
 - tests should use small fixtures, toy inputs, and clear pass/fail assertions;
 - each test should have one named behavioral responsibility;
+- formula, threshold, ordering, percentile, or ranking tests should use
+  discriminating fixtures where a neighboring formula, adjacent threshold,
+  reversed ordering, or copied existing helper would fail;
+- numeric config validation tests should match the stated contract for each
+  key: missing/default behavior, accepted boundary values, negative values when
+  non-negative is required, non-numeric values, `NaN`, and infinities when the
+  contract says finite;
+- budget-enforcement tests are separate from budget-configuration validation.
+  When the scope asks for over-budget rejection or reason capture, use a valid
+  constrained budget that lets at least one eligible candidate reach the
+  selection loop and then exceed the remaining budget. Assert the rejected ID
+  and exact budget-exceeded reason named by the task; an invalid budget test,
+  missing-budget test, filtered candidate, cadence skip, or type rejection does
+  not cover selection-time budget exhaustion;
+- for ordered selectors, missing-budget or unbounded-budget behavior still
+  follows the selector's ordering contract after filtering and staging. The
+  expected selected IDs should be the full eligible set in sorted order, not the
+  input order, unless the contract explicitly says input order is preserved;
+- tie-breaker tests should make the primary sort keys equal and deliberately
+  set other sort-like fields to favor the opposite order, so only the requested
+  tie-break field can explain the expected result;
+- for multi-key ordering, test each tie-break level separately: hold all higher
+  priority keys equal, set the key under test to determine the expected order,
+  and set lower-priority sort-like keys to favor the opposite order. A fixture
+  does not prove a middle tie-break if the final ID/name/order key would choose
+  the same winner;
+- treat compound ordering phrases such as "deadline/object-id",
+  "density/deadline/id", or "score/frame/deadline/id" as a checklist, not as a
+  single fixture. Prove the first key with adversarial lower-priority fields,
+  then add a same-higher-key fixture for each fallback key, including the final
+  lexical identifier fallback when it is named;
+- tie-break fixture names and object IDs are labels, not evidence. Before
+  accepting an ordering test, inspect the actual tuple fields used by the sort
+  and confirm the expected winner is not also favored by a lower-priority
+  fallback field;
+- for filtered, staged, or multi-phase selection, repeat the ordering audit for
+  each accepted subset or phase, including catch-all groups such as regular,
+  default, or non-special candidates. A fixture that proves the final
+  identifier tie-break inside one phase does not prove that an earlier ordering
+  key, subset ordering key, or phase priority is enforced;
+- for partitioned budgets, lanes, quotas, queues, or resource pools, isolation
+  tests should leave spare capacity in one partition while a candidate in
+  another partition exceeds its own limit. A fixture where every partition is
+  fully consumed does not prove that borrowing, sharing, or leakage is absent;
 - no-mutation tests should inspect the same objects or mutable containers passed
   into the implementation;
 - export-surface assertions belong in export tests, invalid-state assertions in
@@ -226,6 +278,77 @@ For README-style or package docs, read the requested files first and classify
 them as current, stale, or internally inconsistent. Edit only the stale surfaces
 needed for the current accepted change. If all requested docs are current,
 report a no-op docs sync rather than rewriting for symmetry.
+For a no-op docs sync, still verify every requested surface type named by the
+scope, including helper lists, module summaries, layout rows, test summaries,
+fixture details, and absence clauses. Say explicitly that no requested docs were
+changed, rather than only saying source or test files were untouched.
+
+When one accepted symbol, artifact, metric, method, or helper is documented in
+multiple parallel surfaces, build a small surface map before editing: helper or
+API lists, emitted names, package/module summaries, layout rows, test summaries,
+and absence clauses. Update each stale parallel surface consistently, but do
+not add new public exports, runtime behavior, or future-plan claims just because
+the docs mention the accepted bounded surface.
+
+When a docs-sync request says a surface currently lists through a previous
+accepted subject, search that predecessor token in every requested document
+before editing. Treat each occurrence as a candidate surface to classify:
+helper/API list, module summary, package summary, repository layout row,
+root-layout table row, parenthetical roster, test-summary block, absence
+clause, or historical note. Update every stale roster or scoped surface that is
+meant to remain current; leave historical notes alone only after confirming
+they are not current-surface lists.
+
+When the user scopes specific test-coverage details for README-style docs,
+turn those details into a per-document checklist for every requested test
+summary surface. Preserve the exact behavioral distinction that made the test
+valuable: discriminating fixture setup, tie-break owner, invalid-input owner,
+metadata value, provenance field, non-mutation target, or same mutable object
+when those are named. A generic sentence such as "covers tie-breaking" or
+"covers non-mutation" is not enough when the scope names the fixture condition
+or the object whose mutation must be rejected.
+
+When a docs-sync scope names multiple config keys, fields, modes, or inputs and
+an invalid-value set for them, bind the invalid-value set to every named owner
+inside the relevant test-summary surface. A generic "invalid configuration" or
+"invalid values" phrase is not enough unless the same sentence or bounded block
+makes clear that all named owners reject the full scoped invalid set.
+
+When docs summarize both default behavior and explicitly configured behavior,
+keep those fixtures separate. Name the configuration condition that makes each
+fixture true, such as a non-default cadence, horizon, threshold, mode, lane, or
+budget, and do not label an explicit configuration fixture as "default".
+Likewise, a default-behavior fixture should document the expected default result
+instead of relying on a nearby non-default fixture with similar objects.
+
+If a scoped fixture string, metadata value, rejection reason, or config key is
+also used by an older or neighboring subject in the same document, its presence
+elsewhere does not satisfy the current subject's documentation. Put the detail
+inside the subject-specific coverage block or sentence for the current accepted
+change.
+
+For staged, filtered, or multi-path behavior in README-style docs, document the
+behavior by responsibility: accepted subset definitions, phase priority, primary
+ordering for each accepted subset, tie-break fixtures, metadata, and each
+rejection reason's owner. Do not let a tie-break fixture stand in for the
+primary ordering case, and do not describe one rejection reason as applying to
+all rejected items when another rejection path, such as budget or validation,
+uses a different reason.
+
+When a README section groups multiple symbols, helpers, schedulers, metrics, or
+tests under one sentence or bullet list, the group label must be true for every
+item in that list. If a metadata value, rejection reason, config key, fixture,
+or coverage case belongs to only one grouped subject, split it into a
+subject-specific bullet or paragraph instead of relying on a shared block.
+
+Track documentation obligations by surface type inside each requested file. A
+detail mentioned in a helper/API list, package summary, layout row, or absence
+clause does not satisfy the same detail when the user also scoped a test
+summary. Mark each scoped fact complete only for the surface where it appears.
+For each requested file, keep the surface map explicit enough to distinguish
+multiple list-like contexts in one file, such as a feature list, package/module
+summary, repository-layout table, and test coverage paragraph. Do not mark the
+file complete merely because the new symbol appears somewhere in the file.
 
 Write absence clauses narrowly. Before saying a broad category is absent, check
 the current code and docs for accepted bounded surfaces in that category. If a
@@ -233,6 +356,12 @@ small in-memory conversion, helper, adapter, or test surface exists, qualify the
 missing surface precisely, such as "file-based", "result", "additional",
 "runtime", "full", "real-data", or "paper-output" capability. Do not let a
 negative sentence contradict an implemented helper documented elsewhere.
+When the accepted feature is a bounded or partial member of a broader algorithm,
+model, runtime, or framework family, absence wording should name only the
+unimplemented larger surface, such as "full", "additional", "beyond the
+accepted bounded formula", or "runtime integration". Do not use the broad
+family name alone as absent when the current docs also document an accepted
+bounded implementation in that family.
 
 Do not automatically queue a docs-only task after every source/test change.
 Queue or perform docs sync only when docs are explicitly requested, are part of
@@ -246,15 +375,45 @@ Trajectory files should record accepted facts, exact validation commands and
 results, cache cleanup or no-cache findings, and explicit exclusions that
 preserve scope.
 
+For docs-only or TODO-only accepted work, record the readback and targeted
+search checks that replaced test execution, and state that tests were skipped
+because no executable code or test files changed.
+For a no-op docs sync, record the targeted searches and requested-surface
+readback that proved the docs were already current, plus a changed-file check
+showing no requested docs were modified.
+
+For scoped docs-only or TODO-only work, also record a changed-file check or
+equivalent scope check showing that edits stayed inside the allowed file set.
+If an executable, test, dependency, export, harness, generated artifact, or
+paper-result file changed accidentally, treat the run as no longer docs-only
+and validate or repair according to the user's scope.
+
 Do not use TODO or handoff files to invent the next source, harness, docs, or
 experiment task. Select a next task only when the user, current workflow, or
 existing active trajectory explicitly requires one. Otherwise leave a neutral
 waiting state such as "no next developer task is selected."
 
+After an accepted docs-only or TODO-only update, treat any next implementation
+task as a separate task-selection decision, not as a consequence of making docs
+current. If a next source/test task is recorded, tie it to an explicit upstream
+selector, accepted backlog item, or already-scanned stale implementation gap;
+otherwise leave the trajectory neutral.
+
 If a docs-only sync is selected, name the exact stale surfaces found in a
 read-only scan and make clear that it is a separate future pass, not part of a
 source/test task that explicitly excluded docs. If no live stale surface was
 verified, do not create a generic documentation task.
+
+When a handoff selects a docs-only follow-up, include a short stale-surface map:
+the document files and surface types to update, such as helper/API lists,
+emitted names, package or module summaries, layout rows, test summaries, or
+absence clauses. A generic "sync docs for <accepted change>" task is not enough
+unless those concrete stale surfaces are also named.
+
+If accepted review tightened a fixture, discriminator, rejection reason,
+metadata value, or mutation target, carry that exact accepted detail into the
+handoff scope for any later docs-sync or TODO follow-up. Do not downgrade it to
+a generic "tie-break coverage" or "non-mutation coverage" phrase.
 
 After validation-only work, record only the command, result, no-fix status, and
 cache cleanup/no-cache finding. A green validation run confirms current
@@ -337,7 +496,52 @@ run and remove only those generated artifacts. Do not clean unrelated dirty or
 untracked user work.
 
 For docs-only or TODO-only work, do not run tests unless executable code or
-test files changed accidentally. Re-read edited docs/TODO files instead.
+test files changed accidentally. Re-read edited docs/TODO files and run targeted
+text searches for the accepted names, stale predecessor names, and broad absence
+phrases that were in scope.
+
+When README-style docs must describe focused test coverage, include targeted
+readback checks for the scoped coverage nouns and discriminators, not only the
+new public symbol. Search for the tie-break field, opposite-order fixture clue,
+metadata key or value, provenance field, invalid-input category, and exact
+non-mutation target when the user named them.
+
+For multi-surface docs, do not rely on whole-file search alone. Check the
+specific edited section or paragraph type that was in scope, especially test
+summary paragraphs in translated docs, so a term present elsewhere in the same
+file does not mask a stale summary.
+
+For README-style docs that extend a roster from a previous accepted subject,
+search both the predecessor token and the new token after editing. Read every
+remaining predecessor occurrence in local context and confirm either that the
+new token appears in the same current roster, layout row, summary, or coverage
+block, or that the predecessor occurrence is intentionally historical and not a
+current-surface list.
+
+When scoped details reuse strings already present for other subjects, validate
+with local context: the current subject name and the required fixture, metadata,
+reason, or config term should appear in the same bullet, paragraph, or clearly
+bounded coverage block.
+
+When a scoped invalid-value matrix names multiple keys or inputs, validate each
+owner separately in local context. Search/read back for every named key or input
+together with the invalid-value class or explicit invalid values in the same
+test-summary bullet, paragraph, or bounded coverage block.
+
+When a docs-sync scope includes both default and non-default configured
+fixtures, read back those bullets separately. Confirm the config value or
+"default" label matches the expected selected/rejected IDs and reasons in that
+same local context.
+
+When the user names specific excluded capability categories, include those
+terms or close equivalents in docs/TODO readback searches. The check should
+confirm that absence wording stayed narrow for every explicitly scoped
+exclusion, not only that the new accepted name appears.
+
+For README-style docs, include a quick local prose cleanup pass on edited
+paragraphs: remove duplicated adjacent words or lines, stale sentence tails left
+after rewriting a clause, and grammar artifacts that can make a scoped absence
+claim ambiguous.
 
 ## Review Guidance
 
@@ -354,6 +558,9 @@ For bounded helpers, verify that the implementation:
 
 - reads only the accepted inputs and fields;
 - rejects invalid inputs at the intended validation owner;
+- implements numeric contracts literally, including rejecting infinities when a
+  value must be finite and preserving weaker legacy validators unless changing
+  them is explicitly in scope;
 - returns the accepted record or value shape;
 - preserves provenance when requested;
 - does not mutate source records or inputs unless mutation is the contract;
@@ -368,11 +575,105 @@ the implemented-surface list, package/module summaries, layout rows, and test
 summaries. Treat broad "no <category>" wording as a defect when a narrower
 bounded surface in that category is already accepted; ask for the smallest
 wording fix instead of reopening source or tests.
+Also treat leftover duplicated words, duplicated sentence tails, or malformed
+negative clauses as docs defects when they change or obscure the intended
+scope.
+
+Also compare every requested test-coverage detail against each edited test
+summary surface, including translated README surfaces. If one document keeps a
+generic coverage phrase while another contains the precise discriminating
+fixture or non-mutation target, request the smallest wording fix in the stale
+document only.
+
+Treat cross-surface leakage as a docs defect: a required rejection reason,
+metadata value, fixture ID, provenance field, or mutation target is still
+missing if it appears only in a helper/API list while the scoped test-summary
+paragraph omits it.
+
+Treat roster leakage as a docs defect: when a request extends an implemented
+surface that was previously listed through an older subject, any current
+helper list, module summary, package summary, layout row, parenthetical roster,
+or test summary that still stops at the predecessor is stale even if another
+surface in the same file already includes the new subject.
+
+Treat subject leakage as a docs defect too: a required fixture, metadata value,
+rejection reason, or config key is still missing if it appears only under a
+neighboring helper, scheduler, method, metric, or test block.
+
+Treat validation-owner leakage as a docs defect: if a scoped invalid-value set
+applies to multiple named keys, fields, modes, or inputs, the test-summary
+surface is stale when it documents the invalid set for only one owner or hides
+the owner list behind a vague "invalid config" phrase.
+
+Treat default/config leakage as a docs defect: a test-summary surface is stale
+when it labels a fixture with an explicit non-default configuration as default,
+or when it documents the configured fixture but omits the separate default
+fixture expectation named by the scope.
+
+For documentation reviews, also check the scope sentence or heading that
+introduces grouped bullets. A fact is misdocumented if it appears under a group
+where one or more named subjects do not own that metadata value, rejection
+reason, config key, fixture, or coverage case, even if the fact is present
+somewhere in the requested file.
+
+For docs that describe staged, filtered, or multi-path behavior, verify that the
+primary ordering coverage, phase priority, subset definition, and each
+rejection reason are all present in the correct test-summary surface. A broad
+"rejected with <reason>" phrase is a defect when only one filtered subset uses
+that reason and another path uses budget, validation, or a different rejection
+contract.
 
 Review tests against their fixture values and names. If a test name says
 "all-zero", "empty", "single", "all", or "none", the fixture should actually
 match that case. Passing tests are not enough when naming, boundary, or
 provenance contracts are misleading.
+
+For variants added next to an existing formula or helper, check that at least
+one focused test distinguishes the new variant from the nearest existing one.
+Do not accept a mixed fixture that would still pass if the implementation used
+the previous threshold, percentile, sort direction, condition, or field.
+
+For sort-chain tests, trace the expected order through the exact sort tuple.
+Reject a fixture if the expected winner is also favored by a lower-priority
+fallback key or by an unrelated aligned field. Each named tie-break level should
+have at least one fixture that would fail if that level were omitted.
+Do not trust helper names, object IDs, or comments that say "earlier", "later",
+"best", or "tie" unless the underlying field values prove that relationship and
+the fallback fields are adversarial where needed.
+If review scope asks for a combined fallback chain, such as `<primary>/<id>` or
+`<primary>/<secondary>/<id>`, verify there is both a dominance fixture for each
+non-final key and a same-higher-key fixture for the final identifier fallback.
+
+For staged, filtered, or partitioned-lane schedulers, review the sort tuple for
+every stage, lane, or accepted subset separately, including default or regular
+subsets. If a phase says it orders by one key and then a fallback key, require
+one discriminator for the first key and a separate same-key fixture for the
+fallback; do not accept a same-key fixture as evidence that the first key is
+implemented.
+
+For resource-isolation claims, check the fixture has unused capacity in at least
+one non-borrowing partition and an over-limit item in another partition. A test
+where each lane, quota, queue, or resource pool exactly consumes its own budget
+does not prove that unused capacity cannot leak across boundaries.
+
+For budgeted selectors, review invalid-budget tests separately from
+over-budget selection tests. If the task asked for budget rejection and reason
+capture, require a valid-budget fixture where an otherwise eligible candidate
+is rejected only because remaining budget is insufficient, and assert that
+candidate's exact rejection reason. Do not count missing-budget behavior,
+invalid-budget exceptions, filtered objects, cadence skips, or type rejections
+as over-budget coverage.
+
+For ordered selectors, review missing-budget or unbounded-budget assertions
+against the same filtering, staging, and sort tuple used by constrained-budget
+selection. Selecting every eligible candidate should still prove the accepted
+ordering contract unless the requested behavior explicitly preserves input
+order.
+
+When addressing review feedback in a file with repeated tests or similar helper
+fixtures, verify the exact named test, helper, or caller cited by the review was
+changed. Do not treat a similar edit in a neighboring existing test as
+satisfying feedback for the new surface.
 
 ## Readability Audit
 
@@ -403,7 +704,7 @@ Keep the final response concise:
 
 - changed paths;
 - behavior or contract covered;
-- validation performed;
+- validation performed, using readback/search checks for docs-only work;
 - caveats that affect the user's next action.
 
 Do not explain skill internals, tool mechanics, or style theory unless the user
