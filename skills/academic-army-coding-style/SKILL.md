@@ -135,6 +135,13 @@ Extract helpers, adapters, registries, factories, contexts, or interfaces only
 when they provide real reuse, isolate a stable boundary, preserve an invariant,
 reduce caller code, or make tests simpler.
 
+When reusing an existing private helper for a broader case, first check whether
+the helper name, parameters, and doc-adjacent wording still describe every
+caller. Rename the private helper to the smallest neutral name when its original
+name encodes a narrower case, tail, direction, artifact type, or caller-specific
+behavior that is no longer true. Do not change the public contract merely to fix
+a private naming drift.
+
 Do not add abstractions for imagined future cases. If a simple implementation
 clearly satisfies the current task, keep it simple.
 
@@ -245,8 +252,9 @@ existing active trajectory explicitly requires one. Otherwise leave a neutral
 waiting state such as "no next developer task is selected."
 
 If a docs-only sync is selected, name the exact stale surfaces found in a
-read-only scan. If no live stale surface was verified, do not create a generic
-documentation task.
+read-only scan and make clear that it is a separate future pass, not part of a
+source/test task that explicitly excluded docs. If no live stale surface was
+verified, do not create a generic documentation task.
 
 After validation-only work, record only the command, result, no-fix status, and
 cache cleanup/no-cache finding. A green validation run confirms current
@@ -350,6 +358,8 @@ For bounded helpers, verify that the implementation:
 - preserves provenance when requested;
 - does not mutate source records or inputs unless mutation is the contract;
 - keeps identity behavior delegated to the accepted record or schema type;
+- keeps any reused private helper name semantically true for all current
+  callers;
 - avoids adjacent runtime surfaces such as loaders, registries, exporters,
   harnesses, CLI, experiments, or paper outputs unless explicitly in scope.
 
