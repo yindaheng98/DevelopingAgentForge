@@ -1,121 +1,53 @@
-import { type AgentFactoryMap, AgentTeam, type RecordCallback } from "coding-agent-forge";
+import {
+  AgentTeam,
+  definePipeline,
+  type AgentFactoryMap,
+  type PipelineArgsOptions,
+  type PipelineOptions,
+  type RecordCallback,
+} from "coding-agent-forge";
 import type { Agent } from "coding-agent-forge/agent";
-import { parseArgs } from "node:util";
-import { definePipeline, type ParsedPipelineArgs } from "../pipeline.js";
 import {
   agentFactories as developingAgentFactories,
   TrajectoryOptimizerAgent,
   type TrajectoryOptimizerVariables,
 } from "./agents/index.js";
 import {
-  developing,
+  developingArgsOptions,
+  developingPipeline,
   type DevelopingAgentVariablesByName,
-  type DevelopingOptions,
+  type DevelopingHooks,
 } from "./pipeline.js";
 
 export type DevelopingSkillAgentVariables = DevelopingAgentVariablesByName & {
   "trajectory-optimizer": TrajectoryOptimizerVariables;
 };
 
-export type DevelopingSkillOptions = DevelopingOptions & {
-  metaskillPath: string;
-};
+export const developingSkillArgsOptions = {
+  "metaskill-path": {
+    type: "string",
+    description: "Metaskill design document used by the trajectory optimizer",
+  },
+  ...developingArgsOptions,
+} as const satisfies PipelineArgsOptions;
 
-const USAGE = [
-  "Usage: npm run developing-skill --",
-  "--config <path>",
-  "--target-path <folder>",
-  "--achive-dir <folder>",
-  "--artifact-path <folder>",
-  "--coding-style-skill-path <path>",
-  "--metaskill-path <path>",
-  "--paper-blueprint-path <path>",
-  "--experiment-plan-path <path>",
-  "--coding-plan-path <path>",
-  "--goal-path <path>",
-  "[--max-iterations <positive-integer>]",
-  "[--max-revision-iterations <positive-integer>]",
-].join(" ");
-
-export function parseDevelopingSkillArgs(
-  args: readonly string[],
-): ParsedPipelineArgs<DevelopingSkillOptions> {
-  const {
-    values: {
-      config,
-      "target-path": targetPath,
-      "achive-dir": achiveDir,
-      "artifact-path": artifactPath,
-      "coding-style-skill-path": codingStyleSkillPath,
-      "metaskill-path": metaskillPath,
-      "paper-blueprint-path": paperBlueprintPath,
-      "experiment-plan-path": experimentPlanPath,
-      "coding-plan-path": codingPlanPath,
-      "goal-path": goalPath,
-      "max-iterations": maxIterations,
-      "max-revision-iterations": maxRevisionIterations,
-    },
-  } = parseArgs({
-    args: [...args],
-    options: {
-      config: { type: "string", multiple: true },
-      "target-path": { type: "string" },
-      "achive-dir": { type: "string" },
-      "artifact-path": { type: "string" },
-      "coding-style-skill-path": { type: "string" },
-      "metaskill-path": { type: "string" },
-      "paper-blueprint-path": { type: "string" },
-      "experiment-plan-path": { type: "string" },
-      "coding-plan-path": { type: "string" },
-      "goal-path": { type: "string" },
-      "max-iterations": { type: "string" },
-      "max-revision-iterations": { type: "string" },
-    },
-  });
-
-  if (
-    config === undefined ||
-    targetPath === undefined ||
-    achiveDir === undefined ||
-    artifactPath === undefined ||
-    codingStyleSkillPath === undefined ||
-    metaskillPath === undefined ||
-    paperBlueprintPath === undefined ||
-    experimentPlanPath === undefined ||
-    codingPlanPath === undefined ||
-    goalPath === undefined
-  ) {
-    throw new Error(USAGE);
-  }
-
-  return {
-    configPaths: config,
-    runningOptions: {
-      targetPath,
-      achiveDir,
-      artifactPath,
-      codingStyleSkillPath,
-      metaskillPath,
-      paperBlueprintPath,
-      experimentPlanPath,
-      codingPlanPath,
-      goalPath,
-      maxIterations: Number(maxIterations ?? 10),
-      maxRevisionIterations: Number(maxRevisionIterations ?? 3),
-    },
-  };
-}
+export type DevelopingSkillOptions = PipelineOptions<typeof developingSkillArgsOptions>;
 
 export async function developingSkill(
   team: AgentTeam<DevelopingSkillAgentVariables>,
   options: DevelopingSkillOptions,
 ): Promise<void> {
+  const metaskillPath = options["metaskill-path"];
+  if (metaskillPath === undefined) {
+    throw new Error("--metaskill-path is required");
+  }
+
   const logRecord: RecordCallback = (thread, record) => {
     console.log(thread.recordToPrettyString(record));
   };
   let trajectoryOptimizer: Agent<TrajectoryOptimizerVariables> | undefined;
 
-  await developing(team, {
+  const developingOptions = {
     ...options,
     hooks: {
       beforeRevisionLoop: async (agentVariables, currentTask) => {
@@ -145,7 +77,7 @@ export async function developingSkill(
               currentTask,
               revisionReport,
               todoUpdateReport,
-              metaskillPath: options.metaskillPath,
+              metaskillPath,
             },
             logRecord,
           )
@@ -153,8 +85,9 @@ export async function developingSkill(
 
         console.log(`\n# Skill trajectory optimizer report\n${optimizerReport}\n`);
       },
-    },
-  });
+    } as DevelopingHooks,
+  };
+  await developingPipeline.run(team, developingOptions);
 }
 
 export const developingSkillAgentFactories: AgentFactoryMap = {
@@ -163,7 +96,14 @@ export const developingSkillAgentFactories: AgentFactoryMap = {
 };
 
 export const developingSkillPipeline = definePipeline({
+  name: "developing-skill",
+  description: "Run the code development loop and evolve its skill.",
+  argsOptions: developingSkillArgsOptions,
   agentFactories: developingSkillAgentFactories,
-  parseArgs: parseDevelopingSkillArgs,
-  run: developingSkill,
+  async run(
+    team: AgentTeam<DevelopingSkillAgentVariables>,
+    options: PipelineOptions<typeof developingSkillArgsOptions>,
+  ) {
+    await developingSkill(team, options);
+  },
 });
