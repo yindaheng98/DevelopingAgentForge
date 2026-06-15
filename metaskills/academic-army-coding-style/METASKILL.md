@@ -29,7 +29,7 @@ skill中不应写入某次具体项目运行产生的内容，例如具体文件
 固定目录约定可以保留，例如`data/`、`output/`、`results/`和`harness/`；除此之外的路径、源码布局、测试路径、模块路径和文件名应由当前repo、初始化模板、用户输入和当次任务共同决定。
 skill可以说明“根据当前repo已有结构选择测试位置”，但不应写成某个具体测试路径。
 skill可以说明“根据当前功能设计class/function/module”，但不应在skill里预设具体class name、function name或module name。
-skill可以说明“method、baseline、metric、harness应语义化命名”，但具体名称只能来自当次论文蓝图、experiment plan、coding plan或已有repo。
+skill可以说明“method、baseline、metric、harness应语义化命名”，但具体名称只能来自当次用户输入、goal/reference context、已有repo或当次生成结果。
 skill中如果必须举例，应使用明显的抽象占位符，例如`<method_name>`、`<harness_name>`、`<module_name>`、`<artifact_type>`，并确保这些例子不会被误认为固定模板。
 skill中不要放入某次生成出来的`FRAMEWORK.md`、代码片段、目录树、class skeleton或配置文件作为长期规则；这些属于项目输出，不属于skill知识。
 如果需要描述目录结构，应描述决策原则，而不是写死结构。例如写“遵守已有repo的源码布局和测试布局”，不要写某个具体项目的实际文件树。
@@ -49,7 +49,7 @@ skill应避免把示例写得过于真实；过真实的示例容易被agent误�
 skill输出的代码和文档可以是项目特定的，因为它们服务当前repo；skill定义本身必须是项目无关的，因为它会被多种任务复用。
 `FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`可以记录当前项目的具体模块、路径、harness、test和修改点；但这些内容应生成在当前repo文档里，不应复制进skill文件。
 当agent从某次任务中总结经验时，只能把可泛化的设计原则加入skill，例如“避免长文件”“减少不必要配置”“保持修改局部化”；不能把当次项目的具体结构加入skill。
-skill应采用“runtime binding”思路：skill定义通用规则，当次运行再把规则绑定到当前repo、当前蓝图、当前plan和当前代码结构上。
+skill应采用“runtime binding”思路：skill定义通用规则，当次运行再把规则绑定到当前repo、当前goal/reference context和当前代码结构上。
 
 ## 通用代码写作原则
 
@@ -154,7 +154,7 @@ harness如果变复杂，应在`harness/`下对应harness子文件夹内拆成�
 harness应支持“修改模块 -> 运行harness -> 读取结果 -> 再修改”的循环，因此需要稳定入口语义、固定输入协议、可解析输出格式和清晰metric定义。
 harness输出应优先记录原始、低加工的artifact，例如per-example prediction、raw score、timing trace、resource usage、intermediate decision、error case、log metadata、config snapshot、seed、split和metric values。
 harness不应把面向论文图表的数据聚合和转换写进核心逻辑；聚合、绘图和论文表格生成应由后续分析、绘图或论文写作skill基于原始artifact完成。
-test应覆盖数据读取、配置解析、method接口、baseline接口、metric计算、结果导出、CLI入口和核心模块交互等功能正确性问题；具体覆盖范围由当前任务和上游plan决定。
+test应覆盖数据读取、配置解析、method接口、baseline接口、metric计算、结果导出、CLI入口和核心模块交互等功能正确性问题；具体覆盖范围由当前任务和goal/reference context决定。
 testing输出主要服务debug和开发反馈，应和论文实验结果artifact分开管理。
 如果已有repo使用`test/`作为测试布局，本skill应把它当作已有repo约定维护；如果已有repo使用别的测试布局，本skill应尊重目标生态和repo已有测试结构。
 
@@ -165,13 +165,13 @@ testing输出主要服务debug和开发反馈，应和论文实验结果artifact
 每次重要代码结构、模块边界、harness/test组织、extension point或artifact schema发生变化时，应同步更新`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`。
 `FRAMEWORK.md`使用英文，`FRAMEWORK.zh-CN.md`使用中文；中文版可以自然保留英文模块名、harness名、test名、method名、metric、命令、配置项和代码标识符。
 文档应说明当前framework如何支持后续功能局部修改，而不是只列目录树。
-文档应根据当前任务和上游plan分析：后续可能还需要做哪些修改、这些修改应在哪里做、能否限定在小范围内、有没有做到高内聚低耦合。
+文档应根据当前任务和goal/reference context分析：后续可能还需要做哪些修改、这些修改应在哪里做、能否限定在小范围内、有没有做到高内聚低耦合。
 文档可以包含“Change Map”或类似内容，用自然名称说明主要变化点、对应模块、相关接口、harness/test覆盖和修改范围。
 文档应说明哪些接口是稳定边界，哪些模块是扩展点，哪些位置是后续实现点。
 `FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应说明固定实验目录的含义，包括`data/`、`output/`、`results/`和`harness/`，并说明测试文件遵循当前模板或已有repo的测试布局。
 `FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应记录当前repo实际采用的测试组织方式，而不是假设测试一定在`test/`下。
 文档应说明复杂功能如何被拆成子功能模块，以及这种拆分如何支持高内聚、低耦合和后续局部修改。
-文档应说明harness结构：每种harness服务什么论文目标、修改哪个逻辑模块、如何运行、关注哪些metric、输出哪些raw artifact。
+文档应说明harness结构：每种harness服务什么目标、修改哪个逻辑模块、如何运行、关注哪些metric、输出哪些raw artifact。
 文档应说明testing结构：每类test验证什么功能目标、使用什么最小输入、期望什么行为、测试文件或测试说明位于已有repo的哪个测试区域。
 文档应说明结果导出思路：系统应优先导出原始、低加工artifact，后续绘图和论文写作skill再从这些artifact转换出图表、统计结果和论文表格。
 如果某个后续修改目前无法限定在小范围内，文档应说明这是framework设计风险，并提示后续实现时优先整理该边界。
@@ -181,14 +181,14 @@ testing输出主要服务debug和开发反馈，应和论文实验结果artifact
 ## 命名、顺序和边界
 
 命名必须精确反映真实含义，不使用泛化、含糊、历史残留或与数据形态不一致的名称。
-名称应来自论文领域契约、experiment plan、coding plan、用户输入和当前代码语义，而不是来自临时实现细节。
+名称应来自当前领域契约、goal/reference context、用户输入和当前代码语义，而不是来自临时实现细节。
 名称应尽量短而语义完整，删除不增加信息量的前缀、后缀和包装词。
 同一个概念在接口、配置、类型、文案、文档、调用点和输出artifact中应使用一致名称。
 改名时必须全链路同步，避免旧概念残留在变量、接口、配置、提示文本、文档或报告中。
 名称后缀应反映真实数据形态；表示引用、路径、内容、状态、结果、配置的名称不能混用。
 如果一个名称暗示它是引用或外部资源，它就不应承载已经读取后的内容。
 如果一个名称表示内容本身，就不应继续保留引用式或路径式命名。
-已由论文蓝图、experiment plan、coding plan或用户输入形成契约的术语、拼写和领域词应保持一致，不应擅自改写。
+已由goal/reference context或用户输入形成契约的术语、拼写和领域词应保持一致，不应擅自改写。
 代码排列顺序应帮助读者理解流程；执行顺序明确的逻辑，应让代码顺序尽量反映执行顺序。
 输入、校验、构造、调用、输出等步骤应按自然阅读顺序组织。
 语义对应的结构应尽量保持字段顺序、参数顺序和定义顺序一致，减少读者在多个结构之间反复做脑内映射。

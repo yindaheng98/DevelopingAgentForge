@@ -50,8 +50,8 @@ layout, project configuration, initialization docs, or adjacent test style.
 
 Keep the skill project-agnostic. Bind names, paths, classes, functions,
 datasets, methods, metrics, harnesses, artifact fields, and validation commands
-from the current user request, current repository, paper blueprint, experiment
-plan, coding plan, and existing code.
+from the current user request, current goal or reference context, current
+repository, and existing code.
 
 Do not carry project facts from one run into the skill. If a rule contains a
 real path, symbol, dataset, method, harness, test name, artifact field, or
