@@ -6,20 +6,16 @@ import {
   type PipelineOptions,
   type RecordCallback,
 } from "coding-agent-forge";
-import type { Agent } from "coding-agent-forge/agent";
 import {
-  agentFactories as developingAgentFactories,
+  agentFactories,
+  type DevelopmentAgentVariablesByName,
+  type DevelopmentCallbacks,
   TrajectoryOptimizerAgent,
   type TrajectoryOptimizerVariables,
 } from "./agents/index.js";
-import {
-  developingArgsOptions,
-  developingPipeline,
-  type DevelopingAgentVariablesByName,
-  type DevelopingHooks,
-} from "./pipeline.js";
+import { developingArgsOptions, developingPipeline } from "./pipeline.js";
 
-export type DevelopingSkillAgentVariables = DevelopingAgentVariablesByName & {
+export type DevelopingSkillAgentVariables = DevelopmentAgentVariablesByName & {
   "trajectory-optimizer": TrajectoryOptimizerVariables;
 };
 
@@ -45,13 +41,12 @@ export async function developingSkill(
   const logRecord: RecordCallback = (thread, record) => {
     console.log(thread.recordToPrettyString(record));
   };
-  let trajectoryOptimizer: Agent<TrajectoryOptimizerVariables> | undefined;
+  const trajectoryOptimizer = await team.createAgent("trajectory-optimizer");
 
   const developingOptions = {
     ...options,
-    hooks: {
-      beforeRevisionLoop: async (agentVariables, currentTask) => {
-        trajectoryOptimizer = await team.createAgent("trajectory-optimizer");
+    callbacks: {
+      onTaskStart: async (agentVariables, currentTask) => {
         const repositoryScan = (
           await trajectoryOptimizer.runStreamed(
             {
@@ -64,11 +59,8 @@ export async function developingSkill(
         ).trim();
         console.log(`\n# Skill trajectory repository scan\n${repositoryScan}\n`);
       },
-      afterTodoUpdate: async (agentVariables, currentTask, revisionReport, todoUpdateReport) => {
-        if (trajectoryOptimizer === undefined) {
-          throw new Error("Trajectory optimizer must scan the repository before optimizing.");
-        }
-
+      onTaskFinish: async (agentVariables, currentTask, revisionReports, todoUpdateReport) => {
+        const revisionReport = revisionReports.join("\n\n");
         const optimizerReport = (
           await trajectoryOptimizer.runStreamed(
             {
@@ -85,13 +77,13 @@ export async function developingSkill(
 
         console.log(`\n# Skill trajectory optimizer report\n${optimizerReport}\n`);
       },
-    } as DevelopingHooks,
+    } as const satisfies DevelopmentCallbacks,
   };
   await developingPipeline.run(team, developingOptions);
 }
 
 export const developingSkillAgentFactories: AgentFactoryMap = {
-  ...developingAgentFactories,
+  ...agentFactories,
   "trajectory-optimizer": (thread, constants) => new TrajectoryOptimizerAgent(thread, constants),
 };
 
