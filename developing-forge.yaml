@@ -1,0 +1,61 @@
+# Sample configuration for developing-agent-forge.
+#
+# Keep these paths consistent:
+#   - the CLI's --target-path
+#   - each developing agent's constants.workspacePath
+#   - the developer/reviewer threads' workingDirectory
+#
+# Put provider credentials in secret.yaml (git-ignored) and pass it after this
+# file: --config developing-forge.yaml --config secret.yaml
+
+runtimes:
+  codex:
+    kind: codex
+
+threads:
+  coding-manager-runner:
+    runtime: codex
+    options:
+      model: gpt-5.5
+      sandboxMode: danger-full-access
+      workingDirectory: &targetWorkspace output/codebase
+
+  developer-runner:
+    runtime: codex
+    options:
+      model: gpt-5.3-codex-spark
+      sandboxMode: danger-full-access
+      workingDirectory: *targetWorkspace
+
+  code-reviewer-runner:
+    runtime: codex
+    options:
+      model: gpt-5.5
+      sandboxMode: danger-full-access # read-only review agent
+      workingDirectory: *targetWorkspace
+
+  trajectory-optimizer-runner:
+    runtime: codex
+    options:
+      model: gpt-5.5
+      sandboxMode: danger-full-access
+      workingDirectory: .
+
+agents:
+  coding-manager:
+    thread: coding-manager-runner
+    constants:
+      workspacePath: *targetWorkspace
+
+  developer:
+    thread: developer-runner
+    constants:
+      workspacePath: *targetWorkspace
+
+  code-reviewer:
+    thread: code-reviewer-runner
+    constants:
+      workspacePath: *targetWorkspace
+
+  trajectory-optimizer:
+    thread: trajectory-optimizer-runner
