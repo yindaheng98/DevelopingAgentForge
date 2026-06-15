@@ -1,6 +1,6 @@
 # Developing Pipeline
 
-[`src/developing`](.) 实现三份规划产物准备好之后使用的代码编写循环。
+[`src/developing`](.) 实现一个 goal-driven 的代码编写循环。
 
 [English README](README.md)
 
@@ -8,9 +8,6 @@
 
 常用入口是 [`runs/develop.sh`](../../runs/develop.sh)，它会调用 `npm run developing`，并传入以下路径：
 
-- `paper_blueprint.md`
-- `experiment_plan.md`
-- `coding_plan.md`
 - 通过 `--goal-path` 传入的目标文件
 - `skills/academic-army-coding-style/SKILL.md`
 - 包含 `TODO.md` 的 artifact 目录
@@ -23,11 +20,11 @@ TypeScript pipeline 的整体用法和入口见 [`src/README.zh-CN.md`](../READM
 
 ## 核心思想：Developing 和 Coding Style
 
-`src/developing` 会把三份规划产物变成一条可重复执行的代码编写 trajectory。`coding-manager` 读取当前 repo 和 `TODO.md`，选择一个具体 developer task；`developer` 修改目标 repo；`code-reviewer` 返回严格的 `ACCEPT`，或者把 revision feedback 送回同一个 task。
+`src/developing` 会把当前 goal 变成一条可重复执行的代码编写 trajectory。`coding-manager` 读取当前 repo、goal 和 `TODO.md`，选择一个具体 developer task；`developer` 修改目标 repo；`code-reviewer` 返回严格的 `ACCEPT`，或者把 revision feedback 送回同一个 task。
 
 coding-style skill 是 [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md)。它的功能是控制写代码 agent 的代码结构和代码风格。上游用户任务决定要实现什么；这个 skill 决定如何让实现保持 readable、local、low-coupling，并和当前 framework 保持一致。
 
-每次 developer run 都会通过 `--coding-style-skill-path` 加载配置的 coding-style skill。[`agents/developer.ts`](agents/developer.ts) 会把 [`agents/prompts.ts`](agents/prompts.ts) 里的说明放到 developer prompt 前面：先 load and follow 这个 skill，再读取 blueprint、experiment plan、coding plan、repo files 和 current task。这样负责写代码的 agent 在 feature、refactor、harness/test work、methods、baselines、metrics、result exports 和 framework docs 等各种任务里，都会用同一套代码结构和风格偏好，保证输出的代码结构和风格统一。
+每次 developer run 都会通过 `--coding-style-skill-path` 加载配置的 coding-style skill。[`agents/developer.ts`](agents/developer.ts) 会把 [`agents/prompts.ts`](agents/prompts.ts) 里的说明放到 developer prompt 前面：先 load and follow 这个 skill，再读取 repo、current goal、goal 中提到的 reference documents 和 current task。这样负责写代码的 agent 在 feature、refactor、harness/test work、methods、baselines、metrics、result exports 和 framework docs 等各种任务里，都会用同一套代码结构和风格偏好，保证输出的代码结构和风格统一。
 
 `academic-army-coding-style` 对各种代码编写任务都是通用的。它不决定 research method、experiment content、task priority 或 repository template initialization；它只关心代码结构和风格，让代码 concise、readable、low-friction、easy to modify，并贴合现有 repo 结构。
 
@@ -56,7 +53,7 @@ bash runs/develop.sh
 
 `developing` 和 `developing-skill` 现在都接受 `--goal-path <path>`。pipeline 会在运行开始时读取这个文件，并把其中内容作为当前 high-level objective 传给 `coding-manager`、`developer`、`code-reviewer` 和 `trajectory-optimizer`。
 
-每次想执行下一个新任务时，先更新 `--goal-path` 指向的文件，再重新运行 [`runs/develop.sh`](../../runs/develop.sh) 或 [`runs/develop-skill.sh`](../../runs/develop-skill.sh)。三份规划产物仍然提供稳定的项目 contract；goal 文件用来告诉开发循环“这一次重点做什么”。
+每次想执行下一个新任务时，先更新 `--goal-path` 指向的文件，再重新运行 [`runs/develop.sh`](../../runs/develop.sh) 或 [`runs/develop-skill.sh`](../../runs/develop-skill.sh)。稳定的项目 contract、规划产物路径、约束和这一次的任务重点都直接写进这个 goal 文件。
 
 配置的 `--artifact-path` 下的 `TODO.md` 是当前由 `coding-manager` 维护的临时任务记忆文件。如果现有 TODO 内容开始把旧任务和新任务上下文串味，可以在下一次运行前手动删除当前 TODO 文件，例如 `output/developing/TODO.md`。pipeline 会自动重新创建一个空 TODO 文件。
 
@@ -74,9 +71,6 @@ npm run developing -- \
   --achive-dir "output/developing-archives" \
   --artifact-path "output/developing" \
   --coding-style-skill-path "skills/academic-army-coding-style" \
-  --paper-blueprint-path "output/paper_blueprint.md" \
-  --experiment-plan-path "output/experiment_plan.md" \
-  --coding-plan-path "output/coding_plan.md" \
   --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-revision-iterations "10"
@@ -93,10 +87,7 @@ npm run developing -- \
 | `--achive-dir`              | Development archive 目录。                                  |
 | `--artifact-path`           | 包含 `TODO.md` 的 artifact 目录。                           |
 | `--coding-style-skill-path` | 配置的 coding-style skill。                                 |
-| `--paper-blueprint-path`    | `paper_blueprint.md`。                                      |
-| `--experiment-plan-path`    | `experiment_plan.md`。                                      |
-| `--coding-plan-path`        | `coding_plan.md`。                                          |
-| `--goal-path`               | 包含当前 high-level objective 的 Markdown 文件。             |
+| `--goal-path`               | 包含当前 high-level objective 和 reference context 的 Markdown 文件。 |
 | `--max-iterations`          | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。    |
 | `--max-revision-iterations` | 限制内层 developer/reviewer 修复循环。                      |
 
@@ -117,9 +108,9 @@ npm run developing -- \
 
 [`runs/develop-skill.sh`](../../runs/develop-skill.sh) 会调用 [`pipelineskill.ts`](pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
 
-第一次 `trajectory-optimizer` 调用发生在 developer 开始前，使用 `scan` 模式。它会读取目标 repo、当前 coding-style skill、blueprint、experiment plan 和 coding plan，让 optimizer 拿到和代码编写循环相同的项目上下文。
+第一次 `trajectory-optimizer` 调用发生在 developer 开始前，使用 `scan` 模式。它会读取目标 repo、当前 coding-style skill 和 goal context，让 optimizer 拿到和代码编写循环相同的项目上下文。
 
-第二次 `trajectory-optimizer` 调用发生在 TODO update report 生成后，使用 `optimize` 模式。它会读取 metaskill、target repo、plans、current task、revision report 和 TODO update report；根据 [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md) 中写的偏好评估这次修改 trajectory 的质量；然后直接修改 coding-style skill。这个 prompt 会重点检查哪些 guidance 缺失、误导或冗余，并看这些问题是否影响 task selection、coding、review 或 TODO update。
+第二次 `trajectory-optimizer` 调用发生在 TODO update report 生成后，使用 `optimize` 模式。它会读取 metaskill、target repo、goal context、current task、revision report 和 TODO update report；根据 [`metaskills/academic-army-coding-style/METASKILL.md`](../../metaskills/academic-army-coding-style/METASKILL.md) 中写的偏好评估这次修改 trajectory 的质量；然后直接修改 coding-style skill。这个 prompt 会重点检查哪些 guidance 缺失、误导或冗余，并看这些问题是否影响 task selection、coding、review 或 TODO update。
 
 推荐的使用循环是：
 

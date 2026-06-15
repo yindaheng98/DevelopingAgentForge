@@ -1,6 +1,6 @@
 # Developing Pipeline
 
-[`src/developing`](.) implements the code-writing loop used after the three planning artifacts are ready.
+[`src/developing`](.) implements a goal-driven code-writing loop.
 
 [中文说明](README.zh-CN.md)
 
@@ -8,9 +8,6 @@
 
 The usual entry point is [`runs/develop.sh`](../../runs/develop.sh), which calls `npm run developing` with paths for:
 
-- `paper_blueprint.md`
-- `experiment_plan.md`
-- `coding_plan.md`
 - the goal file passed with `--goal-path`
 - `skills/academic-army-coding-style/SKILL.md`
 - the artifact directory containing `TODO.md`
@@ -23,11 +20,11 @@ For the overall TypeScript pipeline usage and entry points, see [`src/README.md`
 
 ## Core Idea: Developing And Coding Style
 
-`src/developing` turns the three planning artifacts into a repeatable code-writing trajectory. `coding-manager` reads the current repository and `TODO.md`, chooses one concrete developer task, `developer` edits the target repository, and `code-reviewer` either returns `ACCEPT` or sends revision feedback back into the same task.
+`src/developing` turns the current goal into a repeatable code-writing trajectory. `coding-manager` reads the current repository, the goal, and `TODO.md`, chooses one concrete developer task, `developer` edits the target repository, and `code-reviewer` either returns `ACCEPT` or sends revision feedback back into the same task.
 
 The coding-style skill is [`skills/academic-army-coding-style/SKILL.md`](../../skills/academic-army-coding-style/SKILL.md). Its job is to control the code-writing agent's code structure and style. The upstream user task decides what to implement; this skill decides how to keep the implementation readable, local, low-coupling, and consistent with the current framework.
 
-Every developer run loads the configured coding-style skill through `--coding-style-skill-path`. [`agents/developer.ts`](agents/developer.ts) prepends the instruction from [`agents/prompts.ts`](agents/prompts.ts): load and follow that skill before reading the blueprint, experiment plan, coding plan, repository files, and current task. That makes the writing agent use the same code-structure and style preferences across features, refactors, harness/test work, methods, baselines, metrics, result exports, and framework docs.
+Every developer run loads the configured coding-style skill through `--coding-style-skill-path`. [`agents/developer.ts`](agents/developer.ts) prepends the instruction from [`agents/prompts.ts`](agents/prompts.ts): load and follow that skill before reading the repository, current goal, any reference documents named by the goal, and current task. That makes the writing agent use the same code-structure and style preferences across features, refactors, harness/test work, methods, baselines, metrics, result exports, and framework docs.
 
 `academic-army-coding-style` is generic for any code-writing task. It does not decide the research method, experiment content, task priority, or repository template initialization. It only keeps code concise, readable, low-friction, easy to modify, and aligned with the existing repository structure.
 
@@ -56,7 +53,7 @@ The prepared wrapper passes `--goal-path "output/goal.md"`. Use that file to des
 
 `developing` and `developing-skill` now both accept `--goal-path <path>`. The pipeline reads that file once at the start of the run and passes its contents to `coding-manager`, `developer`, `code-reviewer`, and `trajectory-optimizer` as the current high-level objective.
 
-Each time you want to execute the next new task, update the file passed to `--goal-path` before rerunning [`runs/develop.sh`](../../runs/develop.sh) or [`runs/develop-skill.sh`](../../runs/develop-skill.sh). The three planning artifacts still provide the stable project contract; the goal file tells the development loop what you want to focus on now.
+Each time you want to execute the next new task, update the file passed to `--goal-path` before rerunning [`runs/develop.sh`](../../runs/develop.sh) or [`runs/develop-skill.sh`](../../runs/develop-skill.sh). Put any stable project contract, planning artifact paths, constraints, or task focus directly in that goal file.
 
 `TODO.md` under the configured `--artifact-path` is the current temporary task-memory file maintained by `coding-manager`. If the existing TODO content starts to mix old and new task context, you can manually delete the current TODO file, for example `output/developing/TODO.md`, before the next run. The pipeline will recreate an empty TODO file automatically.
 
@@ -74,9 +71,6 @@ npm run developing -- \
   --achive-dir "output/developing-archives" \
   --artifact-path "output/developing" \
   --coding-style-skill-path "skills/academic-army-coding-style" \
-  --paper-blueprint-path "output/paper_blueprint.md" \
-  --experiment-plan-path "output/experiment_plan.md" \
-  --coding-plan-path "output/coding_plan.md" \
   --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-revision-iterations "10"
@@ -93,10 +87,7 @@ The current CLI option name is `--achive-dir`.
 | `--achive-dir`              | Development archive directory.                                        |
 | `--artifact-path`           | Artifact directory containing `TODO.md`.                              |
 | `--coding-style-skill-path` | Configured coding-style skill.                                        |
-| `--paper-blueprint-path`    | `paper_blueprint.md`.                                                 |
-| `--experiment-plan-path`    | `experiment_plan.md`.                                                 |
-| `--coding-plan-path`        | `coding_plan.md`.                                                     |
-| `--goal-path`               | Markdown file containing the current high-level objective.            |
+| `--goal-path`               | Markdown file containing the current objective and reference context. |
 | `--max-iterations`          | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
 | `--max-revision-iterations` | Limits the inner developer/reviewer repair loop.                      |
 
@@ -117,9 +108,9 @@ Each iteration does the following:
 
 [`runs/develop-skill.sh`](../../runs/develop-skill.sh) calls the related `developing-skill` pipeline in [`pipelineskill.ts`](pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
 
-The first `trajectory-optimizer` call runs in `scan` mode before the developer starts. It reads the target repository, the current coding-style skill, the blueprint, the experiment plan, and the coding plan so the optimizer has the same project context as the code-writing loop.
+The first `trajectory-optimizer` call runs in `scan` mode before the developer starts. It reads the target repository, the current coding-style skill, and the goal context so the optimizer has the same project context as the code-writing loop.
 
-The second `trajectory-optimizer` call runs in `optimize` mode after the TODO update report is produced. It reads the metaskill, target repository, plans, current task, revision report, and TODO update report; evaluates whether the skill produced a good modification trajectory; then edits the coding-style skill directly. The prompt focuses the optimizer on missing, misleading, or redundant guidance that affected task selection, coding, review, or TODO update.
+The second `trajectory-optimizer` call runs in `optimize` mode after the TODO update report is produced. It reads the metaskill, target repository, goal context, current task, revision report, and TODO update report; evaluates whether the skill produced a good modification trajectory; then edits the coding-style skill directly. The prompt focuses the optimizer on missing, misleading, or redundant guidance that affected task selection, coding, review, or TODO update.
 
 The intended loop is:
 

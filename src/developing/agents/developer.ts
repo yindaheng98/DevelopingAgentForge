@@ -1,4 +1,4 @@
-import { codingStyleSkillInstruction } from "./prompts.js";
+import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type DeveloperVariables = DevelopingAgentVariables & {
@@ -10,21 +10,17 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
-    const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
-    const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
     const reviewerReport = variables.reviewerReport ?? "(none)";
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
+    const goalInstructionText = goalInstruction(variables.goal);
 
     return `
 ${codingStyleSkillInstructionText}
 
 Work only in the target repository at ${targetPath}/.
+Target repository: ${targetPath}
 
-Read:
-- paper blueprint: ${paperBlueprintPath}
-- experiment plan: ${experimentPlanPath}
-- coding plan: ${codingPlanPath}
+${goalInstructionText}
 
 Current developer task:
 ${variables.currentTask}

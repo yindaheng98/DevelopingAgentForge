@@ -27,9 +27,6 @@ export type DevelopingOptions = {
   achiveDir: string;
   artifactPath: string;
   codingStyleSkillPath: string;
-  paperBlueprintPath: string;
-  experimentPlanPath: string;
-  codingPlanPath: string;
   goalPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
@@ -75,9 +72,6 @@ export async function developing(
   const agentVariables: DevelopingAgentVariables = {
     targetPath: path.resolve(options.targetPath),
     codingStyleSkillPath: path.resolve(options.codingStyleSkillPath),
-    paperBlueprintPath: path.resolve(options.paperBlueprintPath),
-    experimentPlanPath: path.resolve(options.experimentPlanPath),
-    codingPlanPath: path.resolve(options.codingPlanPath),
     goal,
   };
 
@@ -239,18 +233,6 @@ export const developingArgsOptions = {
     type: "string",
     description: "Coding style skill path used by the agents",
   },
-  "paper-blueprint-path": {
-    type: "string",
-    description: "Paper blueprint path used by the agents",
-  },
-  "experiment-plan-path": {
-    type: "string",
-    description: "Experiment plan path used by the agents",
-  },
-  "coding-plan-path": {
-    type: "string",
-    description: "Coding plan path used by the agents",
-  },
   "goal-path": {
     type: "string",
     description: "Goal document path",
@@ -281,9 +263,6 @@ export const developingPipeline = definePipeline({
       "achive-dir": achiveDir,
       "artifact-path": artifactPath,
       "coding-style-skill-path": codingStyleSkillPath,
-      "paper-blueprint-path": paperBlueprintPath,
-      "experiment-plan-path": experimentPlanPath,
-      "coding-plan-path": codingPlanPath,
       "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
@@ -294,9 +273,6 @@ export const developingPipeline = definePipeline({
       achiveDir === undefined ||
       artifactPath === undefined ||
       codingStyleSkillPath === undefined ||
-      paperBlueprintPath === undefined ||
-      experimentPlanPath === undefined ||
-      codingPlanPath === undefined ||
       goalPath === undefined
     ) {
       throw new Error(
@@ -305,9 +281,6 @@ export const developingPipeline = definePipeline({
           "--achive-dir",
           "--artifact-path",
           "--coding-style-skill-path",
-          "--paper-blueprint-path",
-          "--experiment-plan-path",
-          "--coding-plan-path",
           "--goal-path",
         ].join(", ") + " are required",
       );
@@ -318,9 +291,6 @@ export const developingPipeline = definePipeline({
       achiveDir,
       artifactPath,
       codingStyleSkillPath,
-      paperBlueprintPath,
-      experimentPlanPath,
-      codingPlanPath,
       goalPath,
       maxIterations: Number(maxIterations),
       maxRevisionIterations: Number(maxRevisionIterations),

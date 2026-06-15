@@ -1,5 +1,6 @@
 import { Agent } from "coding-agent-forge/agent";
 import { readFileSync } from "node:fs";
+import { goalInstruction } from "./prompts.js";
 import type { DevelopingAgentVariables } from "./types.js";
 
 type ScanTrajectoryOptimizerVariables = DevelopingAgentVariables & {
@@ -21,16 +22,15 @@ export type TrajectoryOptimizerVariables =
 
 export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables> {
   protected buildPrompt(variables: Readonly<TrajectoryOptimizerVariables>): string {
+    const goalInstructionText = goalInstruction(variables.goal);
+
     if (variables.phase === "scan") {
       return `
 Read only. Scan the target repository before the Developer starts the current task.
+Target repository: ${variables.targetPath}
+Skill: ${variables.codingStyleSkillPath}
 
-Read:
-- skill: ${variables.codingStyleSkillPath}
-- target repository: ${variables.targetPath}
-- paper blueprint: ${variables.paperBlueprintPath}
-- experiment plan: ${variables.experimentPlanPath}
-- coding plan: ${variables.codingPlanPath}
+${goalInstructionText}
 
 Current developer task:
 ${variables.currentTask}
@@ -49,9 +49,7 @@ ${metaskill}
 
 Read:
 - target repository: ${variables.targetPath}
-- paper blueprint: ${variables.paperBlueprintPath}
-- experiment plan: ${variables.experimentPlanPath}
-- coding plan: ${variables.codingPlanPath}
+${goalInstructionText}
 
 Current developer task:
 ${variables.currentTask}

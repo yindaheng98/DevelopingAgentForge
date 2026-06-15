@@ -21,9 +21,6 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const paperBlueprintPath = this.workspaceRelativePath(variables.paperBlueprintPath);
-    const experimentPlanPath = this.workspaceRelativePath(variables.experimentPlanPath);
-    const codingPlanPath = this.workspaceRelativePath(variables.codingPlanPath);
     const todoPath = this.workspaceRelativePath(variables.todoPath);
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
@@ -34,11 +31,8 @@ ${codingStyleSkillInstructionText}
 
 Update the TODO file after a developer task.
 Work only in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
-
-Read:
-- paper blueprint: ${paperBlueprintPath}
-- experiment plan: ${experimentPlanPath}
-- coding plan: ${codingPlanPath}
+Target repository: ${targetPath}
+TODO file: ${todoPath}
 ${goalInstructionText}
 
 Current developer task:
@@ -58,11 +52,8 @@ ${codingStyleSkillInstructionText}
 
 Select the next developer task for the target repository.
 Scan the target repository at ${targetPath}/ and the TODO file at ${todoPath}.
-
-Read:
-- paper blueprint: ${paperBlueprintPath}
-- experiment plan: ${experimentPlanPath}
-- coding plan: ${codingPlanPath}
+Target repository: ${targetPath}
+TODO file: ${todoPath}
 ${goalInstructionText}
 
 Choose exactly one new bounded task for the Developer.
