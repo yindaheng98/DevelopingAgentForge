@@ -89,7 +89,11 @@ export class Reviser {
       previousReviewerReport = reviewerReport;
     }
 
-    await writeFile(path.join(archiveDir, "revision_report.md"), revisionReports.join("\n\n"), "utf8");
+    await writeFile(
+      path.join(archiveDir, "revision_report.md"),
+      revisionReports.join("\n\n"),
+      "utf8",
+    );
     return revisionReports;
   }
 }
