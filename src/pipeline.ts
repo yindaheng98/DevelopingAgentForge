@@ -11,7 +11,7 @@ import {
   Development,
   agentFactories,
   type DevelopmentAgentVariablesByName,
-  type DevelopmentIterationCallback,
+  type DevelopmentCallbacks,
 } from "./agents/index.js";
 
 export type DevelopingOptions = {
@@ -22,7 +22,7 @@ export type DevelopingOptions = {
   goalPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
-  iterationCallback?: DevelopmentIterationCallback;
+  callbacks?: DevelopmentCallbacks;
 };
 
 export async function developing(
@@ -44,7 +44,7 @@ export async function developing(
     goal,
     options.maxIterations,
     options.maxRevisionIterations,
-    options.iterationCallback,
+    options.callbacks,
     logRecord,
   );
 }
@@ -97,8 +97,7 @@ export const developingPipeline = definePipeline({
   agentFactories,
   async run(
     team: AgentTeam<DevelopmentAgentVariablesByName>,
-    options: PipelineOptions<typeof developingArgsOptions> &
-      Pick<DevelopingOptions, "iterationCallback">,
+    options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "callbacks">,
   ) {
     const {
       "target-path": targetPath,
@@ -108,7 +107,7 @@ export const developingPipeline = definePipeline({
       "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
-      iterationCallback,
+      callbacks,
     } = options;
     if (
       targetPath === undefined ||
@@ -136,7 +135,7 @@ export const developingPipeline = definePipeline({
       goalPath,
       maxIterations: Number(maxIterations),
       maxRevisionIterations: Number(maxRevisionIterations),
-      ...(iterationCallback === undefined ? {} : { iterationCallback }),
+      ...(callbacks === undefined ? {} : { callbacks }),
     });
   },
 });
