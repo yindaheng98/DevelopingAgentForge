@@ -1,5 +1,5 @@
 这个skill是通用代码质量与框架整理skill，不再负责初始化模板代码库；初始化模板代码库由另一个专门skill完成。
-这个skill的核心功能是让agent在写代码、改代码、补功能、重构代码、实现harness/test、接入method、接入baseline、整理repo结构或维护实验系统时，产出简洁、规整、可读性强、易维护、低耦合、易扩展的代码。
+这个skill的核心功能是让agent在写代码、改代码、补功能、重构代码、实现harness/test、接入method、接入baseline、整理repo结构或维护已有系统时，产出简洁、规整、可读性强、易维护、低耦合、易扩展的代码。
 这个skill会在多种任务中被调用；不管上游任务是什么，只要涉及写代码、改代码、移动模块、拆分文件、补测试、实现harness、接入method、改结果导出或整理framework，就应遵循这个skill。
 上游任务决定“要实现什么功能”；本skill决定“怎么写得简洁、规整、可读、低耦合、可维护”。
 
@@ -17,7 +17,7 @@
 本skill可以创建新文件、新模块或新子文件夹，但前提是当前代码修改、功能实现、harness/test组织或framework整理确实需要。
 本skill创建的文件夹应来自当前功能的自然模块边界，而不是来自预设模板。
 如果已有初始化skill已经创建了`data/`、`output/`、`results/`、`harness/`、`README.md`、`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`，本skill应在这些既有约定上继续工作，而不是重新定义仓库根结构。
-`data/`、`output/`、`results/`和`harness/`仍然作为固定实验目录保留；测试文件的物理路径不固定，应遵守初始化模板代码库或已有repo中已经采用的测试组织方式。
+`data/`、`output/`、`results/`和`harness/`仍然作为固定artifact目录保留；测试文件的物理路径不固定，应遵守初始化模板代码库或已有repo中已经采用的测试组织方式。
 如果当前repo已有自己的结构，本skill应尊重既有结构和项目惯例；只有当现有结构影响可读性、局部修改能力或harness/test组织时，才做局部整理。
 如果已有repo没有某个初始化模板约定，本skill不应为了补齐模板而强行创建；只有当前任务需要该结构时才新增。
 
@@ -29,7 +29,7 @@ skill中不应写入某次具体项目运行产生的内容，例如具体文件
 固定目录约定可以保留，例如`data/`、`output/`、`results/`和`harness/`；除此之外的路径、源码布局、测试路径、模块路径和文件名应由当前repo、初始化模板、用户输入和当次任务共同决定。
 skill可以说明“根据当前repo已有结构选择测试位置”，但不应写成某个具体测试路径。
 skill可以说明“根据当前功能设计class/function/module”，但不应在skill里预设具体class name、function name或module name。
-skill可以说明“method、baseline、metric、harness应语义化命名”，但具体名称只能来自当次用户输入、goal/reference context、已有repo或当次生成结果。
+skill可以说明“method、baseline、metric、harness应语义化命名”，但具体名称只能来自当次用户输入、goal/task context、已有repo或当次生成结果。
 skill中如果必须举例，应使用明显的抽象占位符，例如`<method_name>`、`<harness_name>`、`<module_name>`、`<artifact_type>`，并确保这些例子不会被误认为固定模板。
 skill中不要放入某次生成出来的`FRAMEWORK.md`、代码片段、目录树、class skeleton或配置文件作为长期规则；这些属于项目输出，不属于skill知识。
 如果需要描述目录结构，应描述决策原则，而不是写死结构。例如写“遵守已有repo的源码布局和测试布局”，不要写某个具体项目的实际文件树。
@@ -40,16 +40,16 @@ skill中不要放入某次生成出来的`FRAMEWORK.md`、代码片段、目录�
 skill中的变量应保持抽象，例如“当前repo”“当前任务”“当前功能”“当前harness”“当前method”“当前artifact”，不要使用某个项目里的真实命名。
 skill可以要求agent读取当次输入中的项目特定信息，并在生成代码或文档时使用这些信息；但这些项目特定信息只属于当次输出，不应反向写回skill规则。
 如果某条规则换一个项目就不成立，说明它大概率是项目特定内容，不应写进skill。
-如果某条规则包含真实路径、真实类名、真实函数名、真实实验名或真实仓库名，应检查它是否只是某次运行的残留；如果是，应删除或改写成抽象原则。
+如果某条规则包含真实路径、真实类名、真实函数名、真实任务名或真实仓库名，应检查它是否只是某次运行的残留；如果是，应删除或改写成抽象原则。
 如果某条规则来自某次debug、某次repo结构、某次框架实现或某次代码生成结果，应先判断它是否能泛化为质量原则；不能泛化就不要写进skill。
-skill不应通过硬编码项目细节来“帮助下次运行”；下次运行需要的项目细节应从输入文件、当前repo和deepresearch结果中重新获得。
-skill中保留的固定内容应只包括跨项目稳定成立的约定，例如任务定位、输出边界、文档维护、harness/test职责区分、固定实验目录、代码可读性、change locality、高内聚低耦合和scope hygiene。
+skill不应通过硬编码项目细节来“帮助下次运行”；下次运行需要的项目细节应从输入文件、当前repo和用户当前任务中重新获得。
+skill中保留的固定内容应只包括跨项目稳定成立的约定，例如任务定位、输出边界、文档维护、harness/test职责区分、固定artifact目录、代码可读性、change locality、高内聚低耦合和scope hygiene。
 skill应避免把示例写得过于真实；过真实的示例容易被agent误当成固定结构，从而在其他项目中生成错误路径或错误类名。
 如果确实需要示例，示例应放在“illustrative only”语境下，并使用中性占位符，不使用真实项目命名。
 skill输出的代码和文档可以是项目特定的，因为它们服务当前repo；skill定义本身必须是项目无关的，因为它会被多种任务复用。
 `FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`可以记录当前项目的具体模块、路径、harness、test和修改点；但这些内容应生成在当前repo文档里，不应复制进skill文件。
 当agent从某次任务中总结经验时，只能把可泛化的设计原则加入skill，例如“避免长文件”“减少不必要配置”“保持修改局部化”；不能把当次项目的具体结构加入skill。
-skill应采用“runtime binding”思路：skill定义通用规则，当次运行再把规则绑定到当前repo、当前goal/reference context和当前代码结构上。
+skill应采用“runtime binding”思路：skill定义通用规则，当次运行再把规则绑定到当前repo、当前goal/task context和当前代码结构上。
 
 ## 通用代码写作原则
 
@@ -66,7 +66,7 @@ agent写代码时应优先保证代码清晰、直接、可读，而不是为了
 如果某段代码会让其他地方为了调用它而写大量样板代码，应重新设计接口，使调用方更短、更自然。
 代码应尽量减少全局状态、隐藏路径假设、隐式副作用和跨模块耦合。
 稳定上下文可以收敛到清晰的数据结构、config object、run context或显式参数中，但不要因此引入过重框架。
-代码应避免把论文图表转换、临时实验脚本、核心系统逻辑、harness逻辑和功能测试逻辑混在一起。
+代码应避免把临时输出转换、一次性脚本、核心系统逻辑、harness逻辑和功能测试逻辑混在一起。
 代码应贴近当前repo已有模式，但不要复制已有代码中的坏抽象、坏命名和历史包袱。
 遇到复杂代码时，优先判断哪些结构可以删除、内联、移动到使用点、重新命名或拆成更自然的子模块。
 
@@ -82,7 +82,7 @@ agent写代码时应优先保证代码清晰、直接、可读，而不是为了
 对每个核心抽象，例如registry、adapter、factory、config object、runner、pipeline、plugin interface，skill应评估它带来的收益和代价：是否减少重复实现，是否缩短调用方代码，是否让method替换更清晰，是否让harness更容易运行，是否让测试更简单。
 如果某个抽象会导致大量样板代码，例如每新增一个method都要改多个注册点、写多个配置块、补多个wrapper，skill应考虑更直接的设计。
 如果某个接口设计会让所有调用方都需要传入过多参数，skill应考虑把稳定上下文收敛到配置对象、run context或明确的数据结构中，但不要因此引入过重框架。
-如果某个配置系统会让简单实验必须写大量配置文件，skill应考虑更轻量的默认值、局部覆盖或命令行参数语义。
+如果某个配置系统会让简单任务必须写大量配置文件，skill应考虑更轻量的默认值、局部覆盖或命令行参数语义。
 如果某个模块拆分会导致大量跨模块转发函数、薄wrapper或只调用一次的抽象层，skill应合并或简化这些模块。
 如果某个设计会让test脚本和harness脚本为了调用核心逻辑而写大量准备代码，skill应改进入口和接口，使测试和harness能够直接表达目标。
 
@@ -107,7 +107,7 @@ agent写代码时应优先保证代码清晰、直接、可读，而不是为了
 ## 文件长度 / 模块粒度 / 子功能拆分
 
 文件是否过长是设计信号，不是简单行数问题；skill不应写死固定最大行数。
-具体文件长度应结合目标语言、框架生态、已有repo风格、deepresearch到的高质量公开库风格和当前功能复杂度判断。
+具体文件长度应结合目标语言、框架生态、已有repo风格和当前功能复杂度判断。
 每个文件应有清晰的单一主题，例如一个文件主要承载一个接口、一类adapter、一类metric、一段数据处理逻辑、一个harness入口、一个测试类别或一个结果artifact定义。
 如果某个文件同时包含配置解析、数据处理、method实现、metric计算、harness运行和结果导出，应拆成多个更小的逻辑文件或模块。
 复杂功能应先拆成子功能，再决定文件组织；例如先识别输入解析、核心处理、外部调用、结果计算、artifact导出、错误处理和测试支持等子职责，再把相关内容放入合适模块。
@@ -135,27 +135,27 @@ skill应避免生成或保留“god file”“mega runner”“all-in-one utils�
 ## Harness和test
 
 Framework方面的内容不能丢；本skill仍应维护harness结构、testing结构和它们在framework中的位置。
-harness用于论文目标、性能指标、method筛选、模块优化和实验评估；test用于功能正确性、接口契约、数据格式和基础行为验证。
-`data/`固定用于输入数据或样例数据；`output/`固定用于程序运行产生的输出artifact；`results/`固定用于实验结果记录；`harness/`固定用于所有harness相关内容。
+harness用于评估目标、性能指标、method筛选、模块优化和结果分析；test用于功能正确性、接口契约、数据格式和基础行为验证。
+`data/`固定用于输入数据或样例数据；`output/`固定用于程序运行产生的输出artifact；`results/`固定用于结果记录；`harness/`固定用于所有harness相关内容。
 每一种harness仍应在`harness/`下有独立子文件夹，用于放置该harness相关入口、配置、说明、schema、样例输入或支持代码。
-harness目录固定，是因为harness直接服务论文目标、实验评估和method优化循环；测试目录不固定，是因为测试组织往往受语言生态、框架、模板和已有repo风格影响。
+harness目录固定，是因为harness直接服务评估目标、结果分析和method优化循环；测试目录不固定，是因为测试组织往往受语言生态、框架、模板和已有repo风格影响。
 测试文件的物理路径不固定；skill应遵守初始化模板代码库或已有repo中已经采用的测试组织方式。
 skill不应强制创建顶层`test/`目录，也不应把所有测试都迁移到固定测试目录下。
 如果初始化模板或已有repo已经定义了测试目录、测试命名规则、fixtures位置、mock data位置或测试框架配置，skill应沿用这些约定。
-如果当前repo尚未体现测试放置规则，skill应先根据已有模板文档、`FRAMEWORK.md`、项目配置和相邻测试文件推断测试组织方式；只有在确实没有约定时，才根据目标生态和deepresearch结果选择合适测试结构。
+如果当前repo尚未体现测试放置规则，skill应先根据已有模板文档、`FRAMEWORK.md`、项目配置和相邻测试文件推断测试组织方式；只有在确实没有约定时，才根据目标生态选择合适测试结构。
 testing structure仍然必须被规划和维护，但testing structure描述的是“测试覆盖哪些功能、如何验证、如何组织测试类别”，不是固定测试文件路径。
 写harness代码时，应让harness目标清楚、入口清楚、输入输出清楚、metric清楚、raw artifact清楚。
 写test代码时，应让每个测试验证一个明确功能行为，有清晰pass/fail标准，并尽量使用小型fixture、toy input或mock data。
-harness代码不应承担功能测试职责，test代码不应承担论文性能评估职责。
+harness代码不应承担功能测试职责，test代码不应承担benchmark或性能评估职责。
 harness如果变复杂，应在`harness/`下对应harness子文件夹内拆成清楚的支持模块；test如果变复杂，应在现有测试体系内进一步拆分子文件夹或支持模块，并遵守repo已有风格。
 新增harness或test时，应同步检查它是否与现有framework文档、命名、artifact schema和模块边界一致。
 新增测试时，应优先放在现有测试体系中最自然的位置，使测试与被测功能、fixtures和现有测试风格保持一致。
 测试命名应语义化，表达被测功能或行为，例如数据读取、method接口、metric计算、结果导出、CLI行为等；具体文件名和路径由repo模板和已有风格决定。
 harness应支持“修改模块 -> 运行harness -> 读取结果 -> 再修改”的循环，因此需要稳定入口语义、固定输入协议、可解析输出格式和清晰metric定义。
 harness输出应优先记录原始、低加工的artifact，例如per-example prediction、raw score、timing trace、resource usage、intermediate decision、error case、log metadata、config snapshot、seed、split和metric values。
-harness不应把面向论文图表的数据聚合和转换写进核心逻辑；聚合、绘图和论文表格生成应由后续分析、绘图或论文写作skill基于原始artifact完成。
-test应覆盖数据读取、配置解析、method接口、baseline接口、metric计算、结果导出、CLI入口和核心模块交互等功能正确性问题；具体覆盖范围由当前任务和goal/reference context决定。
-testing输出主要服务debug和开发反馈，应和论文实验结果artifact分开管理。
+harness不应把面向展示或报告的数据聚合和转换写进核心逻辑；聚合、绘图和表格生成应由后续分析流程基于原始artifact完成。
+test应覆盖数据读取、配置解析、method接口、baseline接口、metric计算、结果导出、CLI入口和核心模块交互等功能正确性问题；具体覆盖范围由当前任务和goal/task context决定。
+testing输出主要服务debug和开发反馈，应和正式结果artifact分开管理。
 如果已有repo使用`test/`作为测试布局，本skill应把它当作已有repo约定维护；如果已有repo使用别的测试布局，本skill应尊重目标生态和repo已有测试结构。
 
 ## Framework文档
@@ -165,15 +165,15 @@ testing输出主要服务debug和开发反馈，应和论文实验结果artifact
 每次重要代码结构、模块边界、harness/test组织、extension point或artifact schema发生变化时，应同步更新`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`。
 `FRAMEWORK.md`使用英文，`FRAMEWORK.zh-CN.md`使用中文；中文版可以自然保留英文模块名、harness名、test名、method名、metric、命令、配置项和代码标识符。
 文档应说明当前framework如何支持后续功能局部修改，而不是只列目录树。
-文档应根据当前任务和goal/reference context分析：后续可能还需要做哪些修改、这些修改应在哪里做、能否限定在小范围内、有没有做到高内聚低耦合。
+文档应根据当前任务和goal/task context分析：后续可能还需要做哪些修改、这些修改应在哪里做、能否限定在小范围内、有没有做到高内聚低耦合。
 文档可以包含“Change Map”或类似内容，用自然名称说明主要变化点、对应模块、相关接口、harness/test覆盖和修改范围。
 文档应说明哪些接口是稳定边界，哪些模块是扩展点，哪些位置是后续实现点。
-`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应说明固定实验目录的含义，包括`data/`、`output/`、`results/`和`harness/`，并说明测试文件遵循当前模板或已有repo的测试布局。
+`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应说明固定artifact目录的含义，包括`data/`、`output/`、`results/`和`harness/`，并说明测试文件遵循当前模板或已有repo的测试布局。
 `FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`应记录当前repo实际采用的测试组织方式，而不是假设测试一定在`test/`下。
 文档应说明复杂功能如何被拆成子功能模块，以及这种拆分如何支持高内聚、低耦合和后续局部修改。
 文档应说明harness结构：每种harness服务什么目标、修改哪个逻辑模块、如何运行、关注哪些metric、输出哪些raw artifact。
 文档应说明testing结构：每类test验证什么功能目标、使用什么最小输入、期望什么行为、测试文件或测试说明位于已有repo的哪个测试区域。
-文档应说明结果导出思路：系统应优先导出原始、低加工artifact，后续绘图和论文写作skill再从这些artifact转换出图表、统计结果和论文表格。
+文档应说明结果导出思路：系统应优先导出原始、低加工artifact，后续分析流程再从这些artifact转换出图表、统计结果和表格。
 如果某个后续修改目前无法限定在小范围内，文档应说明这是framework设计风险，并提示后续实现时优先整理该边界。
 文档中解释结构时，应优先用模块名、harness名、test名、method名或自然简称指代内容，而不是依赖抽象编号互相引用。
 文档不应解释skill内部流程、工具调用、沙盒问题、文件读取方式或runtime workaround。
@@ -181,14 +181,14 @@ testing输出主要服务debug和开发反馈，应和论文实验结果artifact
 ## 命名、顺序和边界
 
 命名必须精确反映真实含义，不使用泛化、含糊、历史残留或与数据形态不一致的名称。
-名称应来自当前领域契约、goal/reference context、用户输入和当前代码语义，而不是来自临时实现细节。
+名称应来自当前领域契约、goal/task context、用户输入和当前代码语义，而不是来自临时实现细节。
 名称应尽量短而语义完整，删除不增加信息量的前缀、后缀和包装词。
 同一个概念在接口、配置、类型、文案、文档、调用点和输出artifact中应使用一致名称。
 改名时必须全链路同步，避免旧概念残留在变量、接口、配置、提示文本、文档或报告中。
 名称后缀应反映真实数据形态；表示引用、路径、内容、状态、结果、配置的名称不能混用。
 如果一个名称暗示它是引用或外部资源，它就不应承载已经读取后的内容。
 如果一个名称表示内容本身，就不应继续保留引用式或路径式命名。
-已由goal/reference context或用户输入形成契约的术语、拼写和领域词应保持一致，不应擅自改写。
+已由goal/task context或用户输入形成契约的术语、拼写和领域词应保持一致，不应擅自改写。
 代码排列顺序应帮助读者理解流程；执行顺序明确的逻辑，应让代码顺序尽量反映执行顺序。
 输入、校验、构造、调用、输出等步骤应按自然阅读顺序组织。
 语义对应的结构应尽量保持字段顺序、参数顺序和定义顺序一致，减少读者在多个结构之间反复做脑内映射。
@@ -249,17 +249,6 @@ license决定代码能否被使用、修改、复制、分发和再授权；公�
 复用代码应让当前框架更规整、更可靠、更快落地，而不是带来额外配置、过度封装或调用方负担。
 复制或适配的代码应放在语义明确的小范围内，后续修改某个功能时不应牵动多个无关区域。
 
-## Deepresearch和外部参考
-
-当当前任务涉及不熟悉的语言生态、框架习惯、代码组织方式、harness/test实践、开源复用或可读性约定时，应使用`academic_army_mcp_tools`里的deepresearch现场调研。
-deepresearch应用于学习目标生态的高质量代码风格、模块粒度、测试组织、harness组织、framework文档方式和可复用开源实现。
-deepresearch结果应服务当前代码可读性和framework一致性，不应机械照搬公开库结构。
-这个skill不应在tips里写死具体language、具体framework、具体目录模板、具体包管理器或具体测试框架；这些由用户输入、已有repo和deepresearch共同决定。
-如果已有repo已经确立了某种语言和框架风格，agent应优先遵守现有风格，并只在确有必要时做局部改进。
-参考代码来源可以包括高质量公开库、论文官方代码、benchmark实现、harness实现、实验框架、工具库、工程化模板和目标生态中的成熟项目；具体参考对象由deepresearch现场决定。
-skill应优先参考维护良好、工程化程度高、license明确、结构清晰、与当前任务或当前论文实验系统接近的公开代码库。
-skill下载或参考开源代码时，也应分析其文件粒度：如果参考库把复杂逻辑拆得清楚，可以学习其拆分方式；如果参考库存在过长文件或历史包袱，不应机械复制。
-
 ## Readability audit
 
 每次写完或修改代码后，agent应做一次readability audit。
@@ -274,12 +263,12 @@ readability audit应检查外部代码来源标注是否完整：复制或改写
 readability audit应检查是否有未标注来源的外部代码片段、疑似无license来源代码或大段无关复制代码；如果有，应补充来源说明、移除不必要代码或改成从依赖调用。
 readability audit应检查是否存在职责过多的文件、过长的runner、过大的utils、混杂的harness/test文件、重复样板代码或明显应该拆分的子功能。
 readability audit应同时检查反方向问题：是否存在过度拆分、空壳文件、薄wrapper、只被调用一次的抽象层或让调用链变长的碎片化模块。
-编写或更新skill时，应做一次project leakage audit，检查是否混入项目名、路径、类名、函数名、模块名、实验名、数据集名、method名、harness名、test名、artifact字段名或某次运行输出。
+编写或更新skill时，应做一次project leakage audit，检查是否混入项目名、路径、类名、函数名、模块名、任务名、数据集名、method名、harness名、test名、artifact字段名或某次运行输出。
 project leakage audit发现具体项目内容时，应优先改写成抽象变量、通用原则或运行时读取规则；无法抽象的内容应删除。
 如果发现代码能工作但不够清楚，应优先重构到更清晰的形式，而不是把复杂性留给后续任务。
 如果发现为了“可扩展”而加入了当前任务不需要的抽象，应删除或简化。
 如果发现某个函数、文件或模块的名称不能解释其用途，应重新命名或重新拆分。
-如果需要运行安装、测试、harness或实验，应交给后续代码实现、测试执行或实验执行skill；本skill关注静态代码质量和framework一致性。
+如果需要运行安装、测试、harness或较长验证，应交给后续代码实现、测试执行或验证执行流程；本skill关注静态代码质量和framework一致性。
 
 ## 代码审阅
 
@@ -295,7 +284,7 @@ project leakage audit发现具体项目内容时，应优先改写成抽象变�
 
 ## 和其他skill协作
 
-这个skill可以被写代码skill、harness实现skill、test实现skill、实验执行skill、代码重构skill、论文实验系统维护skill等多种任务调用。
+这个skill可以被写代码skill、harness实现skill、test实现skill、验证执行skill、代码重构skill、系统维护skill等多种任务调用。
 初始化模板skill决定初始repo骨架；本skill在这个骨架上持续维护代码质量和framework清晰度。
 当上游任务只要求一个小功能时，本skill不应扩大任务范围重构整个repo；它应在小范围内保持代码清楚。
 当上游任务暴露出明显framework边界问题时，本skill可以做必要的局部重构，并同步更新framework文档。
@@ -314,7 +303,7 @@ project leakage audit发现具体项目内容时，应优先改写成抽象变�
 **General clean-code skill原则**：这个skill是通用代码质量层；任何任务只要涉及写代码、改代码、补功能、实现harness/test或整理模块，都应使用它来保证代码简洁、规整、可读、低耦合、易维护。
 **No initialization responsibility原则**：这个skill不负责初始化模板repo，不生成通用仓库骨架；它在已有repo和当前任务范围内维护代码质量、局部结构和framework文档一致性。
 **Existing framework preservation原则**：已有framework不能丢；新增或修改代码时，应继续维护模块边界、harness/test组织、extension point、artifact schema、`FRAMEWORK.md`和`FRAMEWORK.zh-CN.md`。
-**Template-aligned testing layout原则**：测试文件路径不由本skill固定；本skill应遵守初始化模板或已有repo的测试布局，只维护测试目标、测试覆盖、测试可读性和局部修改能力。`data/`、`output/`、`results/`和`harness/`仍作为固定实验目录保留。
+**Template-aligned testing layout原则**：测试文件路径不由本skill固定；本skill应遵守初始化模板或已有repo的测试布局，只维护测试目标、测试覆盖、测试可读性和局部修改能力。`data/`、`output/`、`results/`和`harness/`仍作为固定artifact目录保留。
 **Project-agnostic skill原则**：skill只写通用方法和质量标准，不写具体项目事实；具体路径、类名、函数名、模块名、harness名、test名和artifact schema由当次输入、已有repo和当前任务决定，并只出现在当次生成的代码、文档或输出中。
 **Readable implementation over clever abstraction原则**：代码应优先让后续agent和人类读者容易理解；抽象只有在能减少重复、缩短调用方代码、隔离变化点或提升测试性时才引入。
 **Local change principle原则**：每个具体功能都应尽量只在自己的小范围内实现和修改；如果做不到，应先分析模块边界和耦合关系，再决定是否做局部重构。

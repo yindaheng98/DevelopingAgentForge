@@ -1,14 +1,14 @@
 ---
-name: academic-army-coding-style
+name: coding-style
 description: >-
-  Maintain clean, local, low-coupling code trajectories in existing research
-  repositories. Use when Codex writes or edits code, refactors modules,
-  implements features, harnesses, tests, methods, baselines, metrics, result
-  exports, or framework docs. This skill does not initialize template
-  repositories or generate full project scaffolds from empty directories.
+  Maintain clean, local, low-coupling code changes in existing repositories. Use
+  when an agent writes or edits code, refactors modules, implements features,
+  harnesses, tests, exports, or framework docs. This skill does not initialize
+  template repositories or generate full project scaffolds from empty
+  directories.
 ---
 
-# Academic Army Coding Style
+# Coding Style
 
 ## Mission
 
@@ -31,16 +31,16 @@ asks.
 Respect the existing source layout, naming style, language ecosystem, tests,
 harnesses, docs, and project configuration. Improve local structure when it
 makes the current change clearer or safer, but do not redesign the whole
-repository because a plan describes future systems.
+repository because a draft describes future systems.
 
 Ignore unrelated drafts, logs, historical outputs, old runs, and nearby files
 unless the user makes them part of the task.
 
-Keep these experiment directories when they already exist:
+Keep these artifact directories when they already exist:
 
 - `data/`: input data, pointers, traces, manifests, fixtures, or samples.
 - `output/`: program-run outputs and intermediate artifacts.
-- `results/`: experiment results and curated artifacts.
+- `results/`: curated result artifacts.
 - `harness/`: harness code, contracts, configs, schemas, samples, and support.
 
 Do not force a fixed test directory. Tests follow the repository's existing
@@ -50,12 +50,12 @@ layout, project configuration, initialization docs, or adjacent test style.
 
 Keep the skill project-agnostic. Bind names, paths, classes, functions,
 datasets, methods, metrics, harnesses, artifact fields, and validation commands
-from the current user request, current goal or reference context, current
+from the current user request, current goal or task context, current
 repository, and existing code.
 
 Do not carry project facts from one run into the skill. If a rule contains a
 real path, symbol, dataset, method, harness, test name, artifact field, or
-paper-specific claim, generalize it into a principle or remove it.
+project-specific claim, generalize it into a principle or remove it.
 
 Use placeholders only for examples, such as `<method_name>`, `<metric_name>`,
 `<harness_name>`, `<module_name>`, and `<artifact_type>`. Examples are
@@ -75,7 +75,7 @@ Before editing, establish a small task-relevant inventory:
   fields, and export surfaces for record-backed helpers.
 
 Treat a suddenly empty or partially missing tree as an integrity blocker. Do not
-reconstruct missing code from memory, plans, reports, or old outputs unless the
+reconstruct missing code from memory, notes, reports, or old outputs unless the
 user asks for restoration from a trusted source.
 
 ## Task Classification
@@ -106,8 +106,8 @@ Classify the task before editing:
   explicitly asks for one.
 
 If a task is broad, choose a bounded slice that can be reviewed. If meaningful
-progress now requires datasets, long experiments, method evidence, harness
-runs, or paper results outside the request, stop at the accepted boundary and
+progress now requires datasets, extended runs, external evidence, harness
+runs, or generated results outside the request, stop at the accepted boundary and
 report the blocker.
 
 ## Implementation Style
@@ -161,8 +161,7 @@ Do not add abstractions for imagined future cases. If a simple implementation
 clearly satisfies the current task, keep it simple.
 
 Reduce global state, hidden path assumptions, implicit side effects, long call
-chains, repeated registration points, and heavy configuration for simple
-experiments.
+chains, repeated registration points, and heavy configuration for simple tasks.
 
 When an interface forces every caller to pass excessive parameters, consider a
 small explicit context or config object. Do not turn that into a framework when
@@ -203,8 +202,8 @@ needed by multiple users; special cases should stay near their use sites.
 
 ## Harness And Test Discipline
 
-Harnesses serve paper goals, performance comparison, method screening, module
-optimization, and experiment evaluation. Tests serve functional correctness,
+Harnesses serve evaluation goals, performance comparison, workflow screening,
+module optimization, and result analysis. Tests serve functional correctness,
 interfaces, data formats, config parsing, metrics, export behavior, and basic
 module interaction.
 
@@ -275,7 +274,7 @@ Keep harness and test responsibilities separate:
   invalid-state tests, and identity/schema assertions in clearly named identity
   or schema tests;
 - harness code should not become functional test code;
-- test code should not become paper-performance evaluation.
+- test code should not become benchmark or performance evaluation.
 
 When a harness grows, split support modules inside that harness's own folder
 before pushing special logic into shared layers. When tests grow, split them in
@@ -306,7 +305,7 @@ When one accepted symbol, artifact, metric, method, or helper is documented in
 multiple parallel surfaces, build a small surface map before editing: helper or
 API lists, emitted names, package/module summaries, layout rows, test summaries,
 and absence clauses. Update each stale parallel surface consistently, but do
-not add new public exports, runtime behavior, or future-plan claims just because
+not add new public exports, runtime behavior, or future-intent claims just because
 the docs mention the accepted bounded surface.
 Bind the surface map to the current selected subject. Neighboring helpers,
 methods, tests, metrics, or earlier accepted features in the same document are
@@ -376,7 +375,7 @@ Write absence clauses narrowly. Before saying a broad category is absent, check
 the current code and docs for accepted bounded surfaces in that category. If a
 small in-memory conversion, helper, adapter, or test surface exists, qualify the
 missing surface precisely, such as "file-based", "result", "additional",
-"runtime", "full", "real-data", or "paper-output" capability. Do not let a
+"runtime", "full", "full-data", or "generated-output" capability. Do not let a
 negative sentence contradict an implemented helper documented elsewhere.
 When the accepted feature is a bounded or partial member of a broader algorithm,
 model, runtime, or framework family, absence wording should name only the
@@ -414,17 +413,17 @@ showing no requested docs were modified.
 For scoped docs-only or TODO-only work, also record a changed-file check or
 equivalent scope check showing that edits stayed inside the allowed file set.
 If an executable, test, dependency, export, harness, generated artifact, or
-paper-result file changed accidentally, treat the run as no longer docs-only
+result-artifact file changed accidentally, treat the run as no longer docs-only
 and validate or repair according to the user's scope.
 
 Do not use TODO or handoff files to invent the next source, harness, docs, or
-experiment task. Select a next task only when the user has explicitly selected
+implementation task. Select a next task only when the user has explicitly selected
 it, the current workflow instruction names that handoff, or an existing active
 trajectory already contains that selected task. Otherwise leave a neutral
 waiting state such as "no next developer task is selected."
 
 When the accepted source/test task explicitly excluded docs, TODO, exports,
-harnesses, experiments, or generated outputs, preserve that exclusion in the
+harnesses, or generated outputs, preserve that exclusion in the
 trajectory. A later TODO-only pass may record accepted work and verified stale
 surfaces, but it must not turn excluded surfaces into selected follow-up work
 without explicit task selection.
@@ -437,7 +436,7 @@ writing "next developer task: sync docs" or any equivalent handoff after a
 source/test task that excluded docs.
 Explicit exclusions in the current task are not backlog seeds. If the user says
 not to add a capability, parser family, registry, export, adapter, harness,
-CLI, artifact, experiment, or paper output, a TODO-only pass may record that
+CLI, artifact, generated output, or adjacent capability, a TODO-only pass may record that
 the exclusion was preserved, but must not select that excluded capability as
 the next task unless a later explicit task-selection input asks for it.
 
@@ -477,8 +476,8 @@ for a follow-up.
 
 After validation-only work, record only the command, result, no-fix status, and
 cache cleanup/no-cache finding. A green validation run confirms current
-contracts; it does not create new feature, docs, export, harness, or experiment
-work.
+contracts; it does not create new feature, docs, export, harness, or
+generated-output work.
 
 ## Naming, State, And References
 
@@ -529,17 +528,6 @@ repository accumulates copied external code.
 
 Do not vendor large unrelated projects or import heavy dependencies to satisfy a
 small local feature.
-
-## Deep Research
-
-Use deep research when the current task involves unfamiliar language
-conventions, framework organization, harness/test practice, open-source reuse,
-or ecosystem-specific style. Use it to learn transferable patterns, not to copy
-a public repository's structure mechanically.
-
-If the current repository already has clear conventions, prefer the local style
-and improve it only when a concrete readability, locality, or testability
-problem appears.
 
 ## Validation
 
@@ -648,7 +636,7 @@ For bounded helpers, verify that the implementation:
 - keeps any reused private helper name semantically true for all current
   callers;
 - avoids adjacent runtime surfaces such as loaders, registries, exporters,
-  harnesses, CLI, experiments, or paper outputs unless explicitly in scope.
+  harnesses, CLI, or generated outputs unless explicitly in scope.
 
 For documentation reviews, compare every newly edited absence clause against
 the implemented-surface list, package/module summaries, layout rows, and test

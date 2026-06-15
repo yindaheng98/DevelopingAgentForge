@@ -1,11 +1,4 @@
 interface:
-  display_name: "Academic Army Coding Style"
-  short_description: "Keep research-code changes clean and local"
-  default_prompt: "Use $academic-army-coding-style while making this code or framework change so the implementation stays readable, local, low-coupling, and consistent with the existing repository."
-
-dependencies:
-  tools:
-    - type: "mcp"
-      value: "academic_army_mcp_tools"
-      description: "Provides academic_army_mcp_tools.deepresearch when unfamiliar ecosystem conventions, harness/test practices, framework organization, or open-source reuse decisions need current evidence."
-      transport: "stdio"
+  display_name: "Coding Style"
+  short_description: "Keep code changes clean and local"
+  default_prompt: "Use $coding-style while making this code or framework change so the implementation stays readable, local, low-coupling, and consistent with the existing repository."
