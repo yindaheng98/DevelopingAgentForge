@@ -11,10 +11,8 @@ import {
   Development,
   agentFactories,
   type DevelopmentAgentVariablesByName,
-  type DevelopmentCallback,
+  type DevelopmentInerationCallback,
 } from "./agents/index.js";
-
-export type DevelopingAgentVariablesByName = DevelopmentAgentVariablesByName;
 
 export type DevelopingOptions = {
   targetPath: string;
@@ -24,13 +22,11 @@ export type DevelopingOptions = {
   goalPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
-  iterationCallback?: DevelopingCallback;
+  iterationCallback?: DevelopmentInerationCallback;
 };
 
-export type DevelopingCallback = DevelopmentCallback;
-
 export async function developing(
-  team: AgentTeam<DevelopingAgentVariablesByName>,
+  team: AgentTeam<DevelopmentAgentVariablesByName>,
   options: DevelopingOptions,
 ): Promise<void> {
   const logRecord: RecordCallback = (thread, record) => {
@@ -100,7 +96,7 @@ export const developingPipeline = definePipeline({
   argsOptions: developingArgsOptions,
   agentFactories,
   async run(
-    team: AgentTeam<DevelopingAgentVariablesByName>,
+    team: AgentTeam<DevelopmentAgentVariablesByName>,
     options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "iterationCallback">,
   ) {
     const {
