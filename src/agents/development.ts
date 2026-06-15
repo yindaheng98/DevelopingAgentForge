@@ -11,7 +11,7 @@ export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
 };
 
-export type DevelopmentInerationCallback = (
+export type DevelopmentIterationCallback = (
   agentVariables: DevelopingAgentVariables,
   currentTask: string,
   revisionReports: readonly string[],
@@ -30,7 +30,7 @@ export class Development {
     goal: string,
     maxIterations: number,
     maxRevisionIterations: number,
-    iterationCallback?: DevelopmentInerationCallback,
+    iterationCallback?: DevelopmentIterationCallback,
     logRecord?: RecordCallback,
   ): Promise<void> {
     const resolvedAchiveDir = path.resolve(achiveDir);
