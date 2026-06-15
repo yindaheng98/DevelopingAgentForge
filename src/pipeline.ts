@@ -5,22 +5,16 @@ import {
   type PipelineOptions,
   type RecordCallback,
 } from "coding-agent-forge";
-import { existsSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
+  Development,
   agentFactories,
-  type CodingManagerVariables,
-  type CodeReviewerVariables,
-  type DeveloperVariables,
+  type DevelopmentAgentVariablesByName,
+  type DevelopmentCallback,
 } from "./agents/index.js";
-import type { DevelopingAgentVariables } from "./agents/types.js";
 
-export type DevelopingAgentVariablesByName = {
-  "coding-manager": CodingManagerVariables;
-  developer: DeveloperVariables;
-  "code-reviewer": CodeReviewerVariables;
-};
+export type DevelopingAgentVariablesByName = DevelopmentAgentVariablesByName;
 
 export type DevelopingOptions = {
   targetPath: string;
@@ -30,32 +24,10 @@ export type DevelopingOptions = {
   goalPath: string;
   maxIterations: number;
   maxRevisionIterations: number;
-  hooks?: DevelopingHooks;
+  iterationCallback?: DevelopingCallback;
 };
 
-export type DevelopingHooks = {
-  beforeRevisionLoop?: (
-    agentVariables: DevelopingAgentVariables,
-    currentTask: string,
-  ) => Promise<void> | void;
-  afterRevision?: (
-    revision: number,
-    agentVariables: DevelopingAgentVariables,
-    currentTask: string,
-    developerReport: string,
-    reviewerReport: string,
-    revisionReports: readonly string[],
-  ) => Promise<void> | void;
-  afterTodoUpdate?: (
-    agentVariables: DevelopingAgentVariables,
-    currentTask: string,
-    revisionReport: string,
-    todoUpdateReport: string,
-  ) => Promise<void> | void;
-};
-
-const FINISH_MARK = "FINISHED";
-const ACCEPT_MARK = "ACCEPT";
+export type DevelopingCallback = DevelopmentCallback;
 
 export async function developing(
   team: AgentTeam<DevelopingAgentVariablesByName>,
@@ -65,147 +37,20 @@ export async function developing(
     console.log(thread.recordToPrettyString(record));
   };
 
-  const achiveDir = path.resolve(options.achiveDir);
-  const artifactPath = path.resolve(options.artifactPath);
-  const todoPath = path.join(artifactPath, "TODO.md");
   const goal = await readGoal(options.goalPath);
-  const agentVariables: DevelopingAgentVariables = {
-    targetPath: path.resolve(options.targetPath),
-    codingStyleSkillPath: path.resolve(options.codingStyleSkillPath),
+
+  await new Development().develop(
+    team,
+    options.targetPath,
+    options.achiveDir,
+    options.artifactPath,
+    options.codingStyleSkillPath,
     goal,
-  };
-
-  await mkdir(achiveDir, { recursive: true });
-  await mkdir(artifactPath, { recursive: true });
-  if (!existsSync(todoPath)) {
-    await writeText(todoPath, "# TODO");
-  }
-  await mkdir(agentVariables.targetPath, { recursive: true });
-
-  for (let iteration = 1; iteration <= options.maxIterations; iteration++) {
-    console.log(`\n# Developing iteration ${String(iteration)}\n`);
-    const archiveDir = path.join(achiveDir, new Date().toISOString().replace(/[:.]/g, "-"));
-    await mkdir(archiveDir, { recursive: true });
-
-    const codingManager = await team.createAgent("coding-manager");
-    const developer = await team.createAgent("developer");
-    const codeReviewer = await team.createAgent("code-reviewer");
-
-    const currentTask = (
-      await codingManager.runStreamed(
-        {
-          ...agentVariables,
-          todoPath,
-          finishMark: FINISH_MARK,
-          phase: "select",
-        },
-        logRecord,
-      )
-    ).trim();
-    await writeText(path.join(archiveDir, "current_task.md"), currentTask);
-
-    if (currentTask.trim() === FINISH_MARK) {
-      console.log(`\n# ${FINISH_MARK}\n`);
-      return;
-    }
-
-    let previousReviewerReport = "";
-    const revisionReports: string[] = [];
-
-    await options.hooks?.beforeRevisionLoop?.(agentVariables, currentTask);
-
-    for (let revision = 1; revision <= options.maxRevisionIterations; revision++) {
-      console.log(`\n# Review revision ${String(revision)}\n`);
-
-      const developerVariables: DeveloperVariables = {
-        ...agentVariables,
-        currentTask,
-      };
-      if (previousReviewerReport) {
-        developerVariables.reviewerReport = previousReviewerReport;
-      }
-
-      const developerReport = (await developer.runStreamed(developerVariables, logRecord)).trim();
-      await writeText(
-        path.join(archiveDir, `developer_report_${String(revision).padStart(3, "0")}.md`),
-        developerReport,
-      );
-      revisionReports.push(`Developer report ${String(revision)}:\n${developerReport}`);
-
-      const reviewerReport = (
-        await codeReviewer.runStreamed(
-          {
-            ...agentVariables,
-            acceptMark: ACCEPT_MARK,
-            currentTask,
-            developerReport,
-          },
-          logRecord,
-        )
-      ).trim();
-      await writeText(
-        path.join(archiveDir, `code_review_${String(revision).padStart(3, "0")}.md`),
-        reviewerReport,
-      );
-      revisionReports.push(`Reviewer report ${String(revision)}:\n${reviewerReport}`);
-
-      const accepted = reviewerReport.trim() === ACCEPT_MARK;
-      if (accepted) {
-        revisionReports.push("Reviewer accepted the changes.");
-      }
-
-      if (!accepted && revision === options.maxRevisionIterations) {
-        revisionReports.push("Reviewer did not accept the changes before max revision iterations.");
-      }
-
-      await options.hooks?.afterRevision?.(
-        revision,
-        agentVariables,
-        currentTask,
-        developerReport,
-        reviewerReport,
-        revisionReports,
-      );
-      if (accepted) {
-        break;
-      }
-      previousReviewerReport = reviewerReport;
-    }
-
-    const revisionReport = revisionReports.join("\n\n");
-    await writeText(path.join(archiveDir, "revision_report.md"), revisionReport);
-
-    const todoUpdateReport = (
-      await codingManager.runStreamed(
-        {
-          ...agentVariables,
-          todoPath,
-          finishMark: FINISH_MARK,
-          phase: "update",
-          currentTask,
-          revisionReport,
-        },
-        logRecord,
-      )
-    ).trim();
-    await writeText(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport);
-
-    await options.hooks?.afterTodoUpdate?.(
-      agentVariables,
-      currentTask,
-      revisionReport,
-      todoUpdateReport,
-    );
-  }
-
-  throw new Error(
-    `Reached --max-iterations ${String(options.maxIterations)} before the coding-manager returned ${FINISH_MARK}.`,
+    options.maxIterations,
+    options.maxRevisionIterations,
+    options.iterationCallback,
+    logRecord,
   );
-}
-
-async function writeText(filePath: string, content: string): Promise<void> {
-  await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, `${content.trimEnd()}\n`, "utf8");
 }
 
 async function readGoal(goalPath: string): Promise<string> {
@@ -256,7 +101,7 @@ export const developingPipeline = definePipeline({
   agentFactories,
   async run(
     team: AgentTeam<DevelopingAgentVariablesByName>,
-    options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "hooks">,
+    options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "iterationCallback">,
   ) {
     const {
       "target-path": targetPath,
@@ -266,7 +111,7 @@ export const developingPipeline = definePipeline({
       "goal-path": goalPath,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
-      hooks,
+      iterationCallback,
     } = options;
     if (
       targetPath === undefined ||
@@ -294,7 +139,7 @@ export const developingPipeline = definePipeline({
       goalPath,
       maxIterations: Number(maxIterations),
       maxRevisionIterations: Number(maxRevisionIterations),
-      ...(hooks === undefined ? {} : { hooks }),
+      ...(iterationCallback === undefined ? {} : { iterationCallback }),
     });
   },
 });
