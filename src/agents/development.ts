@@ -11,7 +11,7 @@ export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
 };
 
-export type DevelopmentCallback = (
+export type DevelopmentInerationCallback = (
   agentVariables: DevelopingAgentVariables,
   currentTask: string,
   revisionReports: readonly string[],
@@ -30,7 +30,7 @@ export class Development {
     goal: string,
     maxIterations: number,
     maxRevisionIterations: number,
-    callback?: DevelopmentCallback,
+    iterationCallback?: DevelopmentInerationCallback,
     logRecord?: RecordCallback,
   ): Promise<void> {
     const resolvedAchiveDir = path.resolve(achiveDir);
@@ -104,7 +104,7 @@ export class Development {
       ).trim();
       await writeFile(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport, "utf8");
 
-      await callback?.(agentVariables, currentTask, revisionReports, todoUpdateReport);
+      await iterationCallback?.(agentVariables, currentTask, revisionReports, todoUpdateReport);
     }
 
     throw new Error(

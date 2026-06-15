@@ -4,7 +4,7 @@ export { CodeReviewerAgent, type CodeReviewerVariables } from "./reviewer.js";
 export {
   Development,
   type DevelopmentAgentVariablesByName,
-  type DevelopmentCallback,
+  type DevelopmentInerationCallback as DevelopmentCallback,
 } from "./development.js";
 export { Revision, type RevisionAgentVariablesByName } from "./revision.js";
 export {
