@@ -26,9 +26,8 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
 
     if (variables.phase === "scan") {
       return `
-Read only. Scan the target repository before the Developer starts the current task.
-Target repository: ${variables.targetPath}
-Skill: ${variables.codingStyleSkillPath}
+Work in the target repository at ${variables.targetPath}/.
+Scan the target repository at ${variables.targetPath}/ and the skill at ${variables.codingStyleSkillPath} before the Developer starts the current task. Read only.
 
 ${goalInstructionText}
 

@@ -18,8 +18,8 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
       codingStyleSkillInstructionText +
       `
 
+Work in the target repository at ${targetPath}/.
 Review the current developer task result. Read only.
-Target repository: ${targetPath}
 
 ${goalInstructionText}
 

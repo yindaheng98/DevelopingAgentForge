@@ -30,9 +30,8 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
 ${codingStyleSkillInstructionText}
 
 Update the TODO file after a developer task.
-Work only in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
-Target repository: ${targetPath}
-TODO file: ${todoPath}
+Work in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
+
 ${goalInstructionText}
 
 Current developer task:
@@ -52,8 +51,7 @@ ${codingStyleSkillInstructionText}
 
 Select the next developer task for the target repository.
 Scan the target repository at ${targetPath}/ and the TODO file at ${todoPath}.
-Target repository: ${targetPath}
-TODO file: ${todoPath}
+
 ${goalInstructionText}
 
 Choose exactly one new bounded task for the Developer.

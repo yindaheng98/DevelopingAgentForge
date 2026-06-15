@@ -17,8 +17,7 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
     return `
 ${codingStyleSkillInstructionText}
 
-Work only in the target repository at ${targetPath}/.
-Target repository: ${targetPath}
+Work in the target repository at ${targetPath}/.
 
 ${goalInstructionText}
 
