@@ -6,16 +6,16 @@ import type { DeveloperVariables } from "./developer.js";
 import type { CodeReviewerVariables } from "./reviewer.js";
 import type { DevelopingAgentVariables } from "./types.js";
 
-export type ReviserAgentVariablesByName = {
+export type RevisionAgentVariablesByName = {
   developer: DeveloperVariables;
   "code-reviewer": CodeReviewerVariables;
 };
 
 const ACCEPT_MARK = "ACCEPT";
 
-export class Reviser {
+export class Revision {
   async revise(
-    team: AgentTeam<ReviserAgentVariablesByName>,
+    team: AgentTeam<RevisionAgentVariablesByName>,
     targetPath: string,
     codingStyleSkillPath: string,
     goal: string,
