@@ -11,12 +11,18 @@ export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
 };
 
-export type DevelopmentIterationCallback = (
-  agentVariables: DevelopingAgentVariables,
-  currentTask: string,
-  revisionReports: readonly string[],
-  todoUpdateReport: string,
-) => Promise<void> | void;
+export type DevelopmentCallbacks = {
+  onTaskStart?: (
+    agentVariables: DevelopingAgentVariables,
+    currentTask: string,
+  ) => Promise<void> | void;
+  onTaskFinish?: (
+    agentVariables: DevelopingAgentVariables,
+    currentTask: string,
+    revisionReports: readonly string[],
+    todoUpdateReport: string,
+  ) => Promise<void> | void;
+};
 
 const FINISH_MARK = "FINISHED";
 
@@ -30,7 +36,7 @@ export class Development {
     goal: string,
     maxIterations: number,
     maxRevisionIterations: number,
-    iterationCallback?: DevelopmentIterationCallback,
+    callbacks?: DevelopmentCallbacks,
     logRecord?: RecordCallback,
   ): Promise<void> {
     const resolvedAchiveDir = path.resolve(achiveDir);
@@ -78,6 +84,8 @@ export class Development {
         return;
       }
 
+      await callbacks?.onTaskStart?.(agentVariables, currentTask);
+
       const revisionReports = await revision.revise(
         team,
         agentVariables.targetPath,
@@ -104,7 +112,12 @@ export class Development {
       ).trim();
       await writeFile(path.join(archiveDir, "todo_update_report.md"), todoUpdateReport, "utf8");
 
-      await iterationCallback?.(agentVariables, currentTask, revisionReports, todoUpdateReport);
+      await callbacks?.onTaskFinish?.(
+        agentVariables,
+        currentTask,
+        revisionReports,
+        todoUpdateReport,
+      );
     }
 
     throw new Error(
