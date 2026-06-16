@@ -107,7 +107,7 @@ npm run developing -- \
 
 ## 主流程
 
-[`pipeline.ts`](src/pipeline.ts) 负责解析 CLI 参数，并重复运行外层 coding-manager 选任务循环和内层 developer/reviewer 修复循环。
+[`pipeline/pipeline.ts`](src/pipeline/pipeline.ts) 负责解析 CLI 参数，并把开发循环交给 [`pipeline/development.ts`](src/pipeline/development.ts)。
 
 每轮迭代执行以下步骤：
 
@@ -120,7 +120,7 @@ npm run developing -- \
 
 ## developing-skill 和 Trajectory Feedback
 
-[`develop-skill.sh`](develop-skill.sh) 会调用 [`pipelineskill.ts`](src/pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
+[`develop-skill.sh`](develop-skill.sh) 会调用 [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts) 中的 `developing-skill` pipeline。它复用同一套开发循环，额外传入 `--metaskill-path`，并在 revision loop 前和 TODO 更新后调用 `trajectory-optimizer`，让 coding-style skill 能根据具体开发反馈继续优化。
 
 第一次 `trajectory-optimizer` 调用发生在 developer 开始前，使用 `scan` 模式。它会读取目标 repo、当前 coding-style skill 和 goal context，让 optimizer 拿到和代码编写循环相同的项目上下文。
 
@@ -146,16 +146,18 @@ pipeline 会维护：
 
 ## 重要文件
 
-| 路径                                                                   | 作用                                                                          |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| [`pipeline.ts`](src/pipeline.ts)                                       | 参数解析、循环编排、archive 创建和各 agent 之间的交接。                       |
-| [`pipelineskill.ts`](src/pipelineskill.ts)                             | 给基础开发循环增加 trajectory optimization hooks 的 `developing-skill` 包装。 |
-| [`agents/factory.ts`](src/agents/factory.ts)                           | 注册 developing coding manager、developer 和 reviewer agents。                |
-| [`agents/types.ts`](src/agents/types.ts)                               | 共享的 workspace-aware base class 和变量定义。                                |
-| [`agents/manager.ts`](src/agents/manager.ts)                           | 维护 TODO 文件并选择外层任务。                                                |
-| [`agents/developer.ts`](src/agents/developer.ts)                       | 使用共享 coding-style skill 修改目标 repo。                                   |
-| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | 执行只读代码审阅 gate。                                                       |
-| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。      |
+| 路径                                                                   | 作用                                                                              |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI 参数解析和基础 `developing` pipeline 包装。                                   |
+| [`pipeline/development.ts`](src/pipeline/development.ts)               | 外层开发循环、archive 创建、TODO 更新和各 agent 之间的交接。                      |
+| [`pipeline/revision.ts`](src/pipeline/revision.ts)                     | 针对一个 selected task 的内层 developer/reviewer revision loop。                  |
+| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | 给基础开发循环增加 trajectory optimization callbacks 的 `developing-skill` 包装。 |
+| [`agents/factory.ts`](src/agents/factory.ts)                           | 注册 developing coding manager、developer 和 reviewer agents。                    |
+| [`agents/types.ts`](src/agents/types.ts)                               | 共享的 workspace-aware base class 和变量定义。                                    |
+| [`agents/manager.ts`](src/agents/manager.ts)                           | 维护 TODO 文件并选择外层任务。                                                    |
+| [`agents/developer.ts`](src/agents/developer.ts)                       | 使用共享 coding-style skill 修改目标 repo。                                       |
+| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | 执行只读代码审阅 gate。                                                           |
+| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。          |
 
 ## 常见问题
 

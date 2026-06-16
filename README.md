@@ -107,7 +107,7 @@ The current CLI option name is `--achive-dir`.
 
 ## Main Flow
 
-[`pipeline.ts`](src/pipeline.ts) parses CLI options and repeats an outer coding-manager task loop with an inner developer/reviewer repair loop.
+[`pipeline/pipeline.ts`](src/pipeline/pipeline.ts) parses CLI options and delegates the development loop to [`pipeline/development.ts`](src/pipeline/development.ts).
 
 Each iteration does the following:
 
@@ -120,7 +120,7 @@ Each iteration does the following:
 
 ## Developing-Skill And Trajectory Feedback
 
-[`develop-skill.sh`](develop-skill.sh) calls the related `developing-skill` pipeline in [`pipelineskill.ts`](src/pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
+[`develop-skill.sh`](develop-skill.sh) calls the related `developing-skill` pipeline in [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts). It runs the same development loop, adds `--metaskill-path`, and invokes `trajectory-optimizer` before the revision loop and after TODO updates so the coding-style skill can be improved from concrete development feedback.
 
 The first `trajectory-optimizer` call runs in `scan` mode before the developer starts. It reads the target repository, the current coding-style skill, and the goal context so the optimizer has the same project context as the code-writing loop.
 
@@ -146,16 +146,18 @@ The pipeline maintains:
 
 ## Important Files
 
-| Path                                                                   | Purpose                                                                                   |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [`pipeline.ts`](src/pipeline.ts)                                       | Argument parsing, loop orchestration, archive creation, and per-agent handoff.            |
-| [`pipelineskill.ts`](src/pipelineskill.ts)                             | `developing-skill` wrapper that adds trajectory optimization hooks around the base loop.  |
-| [`agents/factory.ts`](src/agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                  |
-| [`agents/types.ts`](src/agents/types.ts)                               | Shared workspace-aware base class and variables.                                          |
-| [`agents/manager.ts`](src/agents/manager.ts)                           | Maintains the TODO file and selects outer-loop tasks.                                     |
-| [`agents/developer.ts`](src/agents/developer.ts)                       | Edits the target repository using the shared coding-style skill.                          |
-| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | Performs the read-only code review gate.                                                  |
-| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | Scans the trajectory and proposes coding-style skill improvements for `developing-skill`. |
+| Path                                                                   | Purpose                                                                                      |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI argument parsing and the base `developing` pipeline wrapper.                             |
+| [`pipeline/development.ts`](src/pipeline/development.ts)               | Outer development loop, archive creation, TODO updates, and per-agent handoff.               |
+| [`pipeline/revision.ts`](src/pipeline/revision.ts)                     | Inner developer/reviewer revision loop for one selected task.                                |
+| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | `developing-skill` wrapper that adds trajectory optimization callbacks around the base loop. |
+| [`agents/factory.ts`](src/agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                     |
+| [`agents/types.ts`](src/agents/types.ts)                               | Shared workspace-aware base class and variables.                                             |
+| [`agents/manager.ts`](src/agents/manager.ts)                           | Maintains the TODO file and selects outer-loop tasks.                                        |
+| [`agents/developer.ts`](src/agents/developer.ts)                       | Edits the target repository using the shared coding-style skill.                             |
+| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | Performs the read-only code review gate.                                                     |
+| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | Scans the trajectory and proposes coding-style skill improvements for `developing-skill`.    |
 
 ## Troubleshooting
 
