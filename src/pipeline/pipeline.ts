@@ -21,7 +21,8 @@ export type DevelopingOptions = {
   achiveDir: string;
   maxIterations: number;
   maxTaskDevLoopIterations: number;
-  memoryPath: string;
+  projectProgressMemoryPath: string;
+  codeDesignMemoryPath: string;
   maxMemoryRounds: number;
   callbacks?: ProjectDevLoopCallbacks;
 };
@@ -44,7 +45,8 @@ export async function developing(
     options.achiveDir,
     options.maxIterations,
     options.maxTaskDevLoopIterations,
-    options.memoryPath,
+    options.projectProgressMemoryPath,
+    options.codeDesignMemoryPath,
     options.maxMemoryRounds,
     options.callbacks,
     logRecord,
@@ -86,9 +88,13 @@ export const developingArgsOptions = {
     default: "3",
     description: "Maximum developer/reviewer iterations per project iteration",
   },
-  "memory-path": {
+  "project-progress-memory-path": {
     type: "string",
-    description: "Memory directory for development continuity",
+    description: "Memory directory for project progress continuity",
+  },
+  "code-design-memory-path": {
+    type: "string",
+    description: "Memory directory for code design continuity",
   },
   "max-memory-rounds": {
     type: "string",
@@ -113,7 +119,8 @@ export const developingPipeline = definePipeline({
       "achive-dir": achiveDir,
       "max-iterations": maxIterations,
       "max-task-dev-loop-iterations": maxTaskDevLoopIterations,
-      "memory-path": memoryPath,
+      "project-progress-memory-path": projectProgressMemoryPath,
+      "code-design-memory-path": codeDesignMemoryPath,
       "max-memory-rounds": maxMemoryRounds,
       callbacks,
     } = options;
@@ -122,7 +129,8 @@ export const developingPipeline = definePipeline({
       codingStyleSkillPath === undefined ||
       goalPath === undefined ||
       achiveDir === undefined ||
-      memoryPath === undefined
+      projectProgressMemoryPath === undefined ||
+      codeDesignMemoryPath === undefined
     ) {
       throw new Error(
         [
@@ -130,7 +138,8 @@ export const developingPipeline = definePipeline({
           "--coding-style-skill-path",
           "--goal-path",
           "--achive-dir",
-          "--memory-path",
+          "--project-progress-memory-path",
+          "--code-design-memory-path",
         ].join(", ") + " are required",
       );
     }
@@ -142,7 +151,8 @@ export const developingPipeline = definePipeline({
       achiveDir,
       maxIterations: Number(maxIterations),
       maxTaskDevLoopIterations: Number(maxTaskDevLoopIterations),
-      memoryPath,
+      projectProgressMemoryPath,
+      codeDesignMemoryPath,
       maxMemoryRounds: Number(maxMemoryRounds),
       ...(callbacks === undefined ? {} : { callbacks }),
     });

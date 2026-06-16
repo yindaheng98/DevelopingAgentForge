@@ -41,7 +41,8 @@ export class ProjectDevLoop {
     achiveDir: string,
     maxIterations: number,
     maxTaskDevLoopIterations: number,
-    memoryPath: string,
+    projectProgressMemoryPath: string,
+    codeDesignMemoryPath: string,
     maxMemoryRounds: number,
     callbacks?: ProjectDevLoopCallbacks,
     logRecord?: RecordCallback,
@@ -82,7 +83,7 @@ export class ProjectDevLoop {
         await memoryStore.recall(
           team,
           MEMORY_DOMAIN_HINT,
-          memoryPath,
+          projectProgressMemoryPath,
           maxMemoryRounds,
           memoryGuidance,
           logRecord,
@@ -120,7 +121,7 @@ export class ProjectDevLoop {
         archiveDir,
         maxTaskDevLoopIterations,
         currentTask,
-        memoryPath,
+        codeDesignMemoryPath,
         maxMemoryRounds,
         logRecord,
       );
@@ -146,7 +147,7 @@ export class ProjectDevLoop {
       await memoryStore.remember(
         team,
         MEMORY_DOMAIN_HINT,
-        memoryPath,
+        projectProgressMemoryPath,
         maxMemoryRounds,
         thingsToRemember,
         logRecord,

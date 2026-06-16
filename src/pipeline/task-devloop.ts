@@ -31,7 +31,7 @@ export class TaskDevLoop {
     archiveDir: string,
     maxIterations: number,
     currentTask: string,
-    memoryPath: string,
+    codeDesignMemoryPath: string,
     maxMemoryRounds: number,
     logRecord?: RecordCallback,
   ): Promise<string[]> {
@@ -65,7 +65,7 @@ export class TaskDevLoop {
       await memoryStore.recall(
         team,
         MEMORY_DOMAIN_HINT,
-        memoryPath,
+        codeDesignMemoryPath,
         maxMemoryRounds,
         memoryGuidance,
         logRecord,
@@ -156,7 +156,7 @@ export class TaskDevLoop {
     await memoryStore.remember(
       team,
       MEMORY_DOMAIN_HINT,
-      memoryPath,
+      codeDesignMemoryPath,
       maxMemoryRounds,
       thingsToRemember,
       logRecord,
