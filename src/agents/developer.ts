@@ -17,7 +17,7 @@ type UpdateDeveloperVariables = DevelopingAgentVariables & {
   currentTask: string;
   memory: string;
   phase: "update";
-  revisionReport: string;
+  taskDevReport: string;
 };
 
 export type DeveloperVariables =
@@ -59,8 +59,8 @@ ${variables.currentTask}
 Related code design memory before the current task:
 ${variables.memory}
 
-Review revision process for completing the current task:
-${variables.revisionReport}
+Revision process for completing the current task:
+${variables.taskDevReport}
 
 Scan the target repository at ${targetPath}/ and consider what code logic relationships and design reasons should be remembered after the current task.
 

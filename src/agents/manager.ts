@@ -16,7 +16,7 @@ type UpdateCodingManagerVariables = DevelopingAgentVariables & {
   finishMark: string;
   phase: "update";
   currentTask: string;
-  revisionReport: string;
+  taskDevReport: string;
 };
 
 export type CodingManagerVariables =
@@ -49,20 +49,18 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Developer task:
+Developing task:
 ${variables.currentTask}
 
-Related project progress memory before the developer task:
+Related project progress memory before the developing task:
 ${variables.memory}
 
-Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developer task.
+Revision process for completing the developing task:
+${variables.taskDevReport}
 
-Revision report:
-${variables.revisionReport}
+Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developing task.
 
-The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
-
-Remember completed work and current project development progress.
+Remember completed work and current project progress.
 `;
     }
 
@@ -75,11 +73,11 @@ Related project progress memory:
 ${variables.memory}
 
 Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
-Select the next developer task for the target repository.
+Select the next developing task for the target repository.
 
 Choose exactly one new bounded task for the Developer.
 
-When no further developer task is needed, return exactly:
+When no further developing task is needed, return exactly:
 ${variables.finishMark}
 `;
   }

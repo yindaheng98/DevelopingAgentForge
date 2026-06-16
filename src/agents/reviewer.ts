@@ -19,11 +19,11 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
       `
 
 Work in the target repository at ${targetPath}/.
-Review the current developer task result. Read only.
+Review the current code. Read only.
 
 ${goalInstructionText}
 
-Current developer task:
+Current developing task:
 ${variables.currentTask}
 
 Developer report:

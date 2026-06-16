@@ -11,7 +11,7 @@ type ScanTrajectoryOptimizerVariables = DevelopingAgentVariables & {
 type OptimizeTrajectoryOptimizerVariables = DevelopingAgentVariables & {
   phase: "optimize";
   currentTask: string;
-  revisionReport: string;
+  taskDevReport: string;
   metaskillPath: string;
 };
 
@@ -30,7 +30,7 @@ Scan the target repository at ${variables.targetPath}/ and the skill at ${variab
 
 ${goalInstructionText}
 
-Current developer task:
+Current developing task:
 ${variables.currentTask}
 
 Output a concise baseline of the repository state relevant to this task and the main guidance the skill should provide.
@@ -49,11 +49,11 @@ Read:
 - target repository: ${variables.targetPath}
 ${goalInstructionText}
 
-Current developer task:
+Current developing task:
 ${variables.currentTask}
 
-Revision report:
-${variables.revisionReport}
+Revision process for completing the developing task:
+${variables.taskDevReport}
 
 Evaluate whether the skill produced a good modification trajectory, then edit the skill directly. Focus on missing, misleading, or redundant guidance that affected task selection, coding, or review.
 
