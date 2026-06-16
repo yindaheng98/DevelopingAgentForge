@@ -393,7 +393,7 @@ Queue or perform docs sync only when docs are explicitly requested, are part of
 the active workflow, or the accepted change would leave a current documented
 surface materially misleading. If docs are excluded from the source/test task,
 do not promote stale documentation found during validation or TODO maintenance
-into the next developer task unless the user, active workflow, or existing
+into the next developing task unless the user, active workflow, or existing
 trajectory explicitly selects docs sync. Record possible docs staleness as a
 caveat or candidate, not as a selected handoff.
 
@@ -420,7 +420,7 @@ Do not use TODO or handoff files to invent the next source, harness, docs, or
 implementation task. Select a next task only when the user has explicitly selected
 it, the current workflow instruction names that handoff, or an existing active
 trajectory already contains that selected task. Otherwise leave a neutral
-waiting state such as "no next developer task is selected."
+waiting state such as "no next developing task is selected."
 
 When the accepted source/test task explicitly excluded docs, TODO, exports,
 harnesses, or generated outputs, preserve that exclusion in the
@@ -432,7 +432,7 @@ task-selection pass, not a selected next task by themselves. A repository habit,
 recent sequence, or reasonable maintenance preference is not explicit selection
 when the just-finished task excluded that surface. Require selection language
 from the user, a workflow instruction, or an already-active backlog item before
-writing "next developer task: sync docs" or any equivalent handoff after a
+writing "next developing task: sync docs" or any equivalent handoff after a
 source/test task that excluded docs.
 Explicit exclusions in the current task are not backlog seeds. If the user says
 not to add a capability, parser family, registry, export, adapter, harness,
@@ -448,7 +448,7 @@ otherwise leave the trajectory neutral.
 Do not use a docs-only sync that merely documented an accepted helper as the
 reason to select an adjacent implementation task. Newly visible omissions in
 the docs may be recorded as candidates for later selection, but the next
-developer task stays neutral unless the user or active workflow explicitly
+developing task stays neutral unless the user or active workflow explicitly
 selects that implementation work.
 
 If a docs-only sync is explicitly selected, name the exact stale current

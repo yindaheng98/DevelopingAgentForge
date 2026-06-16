@@ -1,9 +1,9 @@
 export {
-  Development,
-  type DevelopmentAgentVariablesByName,
-  type DevelopmentCallbacks,
-} from "./development.js";
-export { Revision, type RevisionAgentVariablesByName } from "./revision.js";
+  ProjectDevLoop,
+  type ProjectDevLoopAgentVariablesByName,
+  type ProjectDevLoopCallbacks,
+} from "./project-devloop.js";
+export { TaskDevLoop, type TaskDevLoopAgentVariablesByName } from "./task-devloop.js";
 export {
   developing,
   developingArgsOptions,

@@ -1,6 +1,6 @@
 export {
-  Development,
-  Revision,
+  ProjectDevLoop,
+  TaskDevLoop,
   developing,
   developingArgsOptions,
   developingPipeline,
@@ -10,12 +10,12 @@ export {
 } from "./pipeline/index.js";
 
 export type {
-  DevelopmentAgentVariablesByName,
-  DevelopmentCallbacks,
   DevelopingOptions,
   DevelopingSkillAgentVariables,
   DevelopingSkillOptions,
-  RevisionAgentVariablesByName,
+  ProjectDevLoopAgentVariablesByName,
+  ProjectDevLoopCallbacks,
+  TaskDevLoopAgentVariablesByName,
 } from "./pipeline/index.js";
 
 export {

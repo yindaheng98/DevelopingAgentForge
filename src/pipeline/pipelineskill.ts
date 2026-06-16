@@ -7,11 +7,14 @@ import {
 } from "coding-agent-forge";
 import type { Agent } from "coding-agent-forge/agent";
 import type { TrajectoryOptimizerVariables } from "../agents/index.js";
-import type { DevelopmentAgentVariablesByName, DevelopmentCallbacks } from "./development.js";
 import { agentFactories } from "./factory.js";
 import { developingArgsOptions, developingPipeline } from "./pipeline.js";
+import type {
+  ProjectDevLoopAgentVariablesByName,
+  ProjectDevLoopCallbacks,
+} from "./project-devloop.js";
 
-export type DevelopingSkillAgentVariables = DevelopmentAgentVariablesByName & {
+export type DevelopingSkillAgentVariables = ProjectDevLoopAgentVariablesByName & {
   "trajectory-optimizer": TrajectoryOptimizerVariables;
 };
 
@@ -56,19 +59,19 @@ export async function developingSkill(
         ).trim();
         console.log(`\n# Skill trajectory repository scan\n${repositoryScan}\n`);
       },
-      onTaskFinish: async (agentVariables, currentTask, revisionReports) => {
+      onTaskFinish: async (agentVariables, currentTask, taskDevReports) => {
         if (trajectoryOptimizer === undefined) {
           throw new Error("Trajectory optimizer must scan the repository before optimizing.");
         }
 
-        const revisionReport = revisionReports.join("\n\n");
+        const taskDevReport = taskDevReports.join("\n\n");
         const optimizerReport = (
           await trajectoryOptimizer.runStreamed(
             {
               ...agentVariables,
               phase: "optimize",
               currentTask,
-              revisionReport,
+              taskDevReport,
               metaskillPath,
             },
             logRecord,
@@ -77,7 +80,7 @@ export async function developingSkill(
 
         console.log(`\n# Skill trajectory optimizer report\n${optimizerReport}\n`);
       },
-    } as const satisfies DevelopmentCallbacks,
+    } as const satisfies ProjectDevLoopCallbacks,
   };
   await developingPipeline.run(team, developingOptions);
 }

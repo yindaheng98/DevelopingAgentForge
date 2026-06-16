@@ -8,10 +8,10 @@ import {
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import {
-  Development,
-  type DevelopmentAgentVariablesByName,
-  type DevelopmentCallbacks,
-} from "./development.js";
+  ProjectDevLoop,
+  type ProjectDevLoopAgentVariablesByName,
+  type ProjectDevLoopCallbacks,
+} from "./project-devloop.js";
 import { agentFactories } from "./factory.js";
 
 export type DevelopingOptions = {
@@ -20,14 +20,14 @@ export type DevelopingOptions = {
   goalPath: string;
   achiveDir: string;
   maxIterations: number;
-  maxRevisionIterations: number;
+  maxTaskDevLoopIterations: number;
   memoryPath: string;
   maxMemoryRounds: number;
-  callbacks?: DevelopmentCallbacks;
+  callbacks?: ProjectDevLoopCallbacks;
 };
 
 export async function developing(
-  team: AgentTeam<DevelopmentAgentVariablesByName>,
+  team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
   options: DevelopingOptions,
 ): Promise<void> {
   const logRecord: RecordCallback = (thread, record) => {
@@ -36,14 +36,14 @@ export async function developing(
 
   const goal = await readGoal(options.goalPath);
 
-  await new Development().develop(
+  await new ProjectDevLoop().develop(
     team,
     options.targetPath,
     options.codingStyleSkillPath,
     goal,
     options.achiveDir,
     options.maxIterations,
-    options.maxRevisionIterations,
+    options.maxTaskDevLoopIterations,
     options.memoryPath,
     options.maxMemoryRounds,
     options.callbacks,
@@ -79,12 +79,12 @@ export const developingArgsOptions = {
   "max-iterations": {
     type: "string",
     default: "10",
-    description: "Maximum number of development iterations",
+    description: "Maximum number of project dev loop iterations",
   },
-  "max-revision-iterations": {
+  "max-task-dev-loop-iterations": {
     type: "string",
     default: "3",
-    description: "Maximum review revisions per development iteration",
+    description: "Maximum developer/reviewer iterations per project iteration",
   },
   "memory-path": {
     type: "string",
@@ -99,11 +99,11 @@ export const developingArgsOptions = {
 
 export const developingPipeline = definePipeline({
   name: "developing",
-  description: "Run the code development loop.",
+  description: "Run the project dev loop.",
   argsOptions: developingArgsOptions,
   agentFactories,
   async run(
-    team: AgentTeam<DevelopmentAgentVariablesByName>,
+    team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
     options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "callbacks">,
   ) {
     const {
@@ -112,7 +112,7 @@ export const developingPipeline = definePipeline({
       "goal-path": goalPath,
       "achive-dir": achiveDir,
       "max-iterations": maxIterations,
-      "max-revision-iterations": maxRevisionIterations,
+      "max-task-dev-loop-iterations": maxTaskDevLoopIterations,
       "memory-path": memoryPath,
       "max-memory-rounds": maxMemoryRounds,
       callbacks,
@@ -141,7 +141,7 @@ export const developingPipeline = definePipeline({
       goalPath,
       achiveDir,
       maxIterations: Number(maxIterations),
-      maxRevisionIterations: Number(maxRevisionIterations),
+      maxTaskDevLoopIterations: Number(maxTaskDevLoopIterations),
       memoryPath,
       maxMemoryRounds: Number(maxMemoryRounds),
       ...(callbacks === undefined ? {} : { callbacks }),
