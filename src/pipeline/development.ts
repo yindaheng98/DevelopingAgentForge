@@ -11,7 +11,7 @@ import type { CodingManagerVariables, DevelopingAgentVariables } from "../agents
 import { Revision, type RevisionAgentVariablesByName } from "./revision.js";
 
 const DEVELOPMENT_MEMORY_DOMAIN_HINT =
-  "Development task memory for goals, completed tasks, task selection context, and current repository state across development iterations.";
+  "Project development progress memory for goals, completed tasks, current status, and task-selection context across development iterations.";
 
 export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
@@ -72,7 +72,11 @@ export class Development {
           logRecord,
         )
       ).trim();
-      await writeFile(path.join(archiveDir, "development_memory_recall_guidance.md"), memoryGuidance, "utf8");
+      await writeFile(
+        path.join(archiveDir, "development_memory_recall_guidance.md"),
+        memoryGuidance,
+        "utf8",
+      );
 
       const memory = (
         await memoryStore.recall(
@@ -134,7 +138,11 @@ export class Development {
           logRecord,
         )
       ).trim();
-      await writeFile(path.join(archiveDir, "development_things_to_remember.md"), thingsToRemember, "utf8");
+      await writeFile(
+        path.join(archiveDir, "development_things_to_remember.md"),
+        thingsToRemember,
+        "utf8",
+      );
       await memoryStore.remember(
         team,
         DEVELOPMENT_MEMORY_DOMAIN_HINT,

@@ -20,7 +20,7 @@ export type RevisionAgentVariablesByName = {
 
 const ACCEPT_MARK = "ACCEPT";
 const REVISION_MEMORY_DOMAIN_HINT =
-  "Developer revision memory for completing a current task, applying review feedback, and remembering code changes in the target repository.";
+  "Code design memory for logic relationships between code, design rationale, invariants, and implementation decisions in the target repository.";
 
 export class Revision {
   async revise(

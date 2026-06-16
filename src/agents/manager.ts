@@ -37,9 +37,9 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Scan the target repository at ${targetPath}/ and decide what memory helps select the next task for the current goal.
+Scan the target repository at ${targetPath}/ and decide what project progress memory helps select the next task for the current goal.
 
-Output concise memory recall guidance.
+Output concise project progress memory recall guidance.
 `;
     }
 
@@ -52,17 +52,17 @@ ${goalInstructionText}
 Developer task:
 ${variables.currentTask}
 
-Related memory before the developer task:
+Related project progress memory before the developer task:
 ${variables.memory}
 
-Scan the target repository at ${targetPath}/ and consider what should be remembered after the developer task.
+Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developer task.
 
 Revision report:
 ${variables.revisionReport}
 
 The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
 
-Remember completed work and current repository state.
+Remember completed work and current project development progress.
 `;
     }
 
@@ -71,10 +71,10 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Related memory:
+Related project progress memory:
 ${variables.memory}
 
-Scan the target repository at ${targetPath}/ and read the memory related to the current goal.
+Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
 Select the next developer task for the target repository.
 
 Choose exactly one new bounded task for the Developer.

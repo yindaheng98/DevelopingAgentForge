@@ -41,9 +41,9 @@ ${goalInstructionText}
 Current task:
 ${variables.currentTask}
 
-Scan the target repository at ${targetPath}/ and decide what memory helps complete the current task.
+Scan the target repository at ${targetPath}/ and decide what code design memory helps complete the current task.
 
-Output concise memory recall guidance.
+Output concise code design memory recall guidance.
 `;
     }
 
@@ -56,13 +56,15 @@ ${goalInstructionText}
 Current task:
 ${variables.currentTask}
 
-Related memory before the current task:
+Related code design memory before the current task:
 ${variables.memory}
 
 Review revision process for completing the current task:
 ${variables.revisionReport}
 
-Scan the target repository at ${targetPath}/ and consider what should be remembered after the current task.
+Scan the target repository at ${targetPath}/ and consider what code logic relationships and design reasons should be remembered after the current task.
+
+Remember code logic relationships and why the current design matches the repository.
 `;
     }
 
@@ -72,7 +74,7 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Related memory:
+Related code design memory:
 ${variables.memory}
 
 Work in the target repository at ${targetPath}/.
