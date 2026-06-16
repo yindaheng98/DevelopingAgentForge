@@ -12,7 +12,6 @@ type OptimizeTrajectoryOptimizerVariables = DevelopingAgentVariables & {
   phase: "optimize";
   currentTask: string;
   revisionReport: string;
-  todoUpdateReport: string;
   metaskillPath: string;
 };
 
@@ -56,10 +55,7 @@ ${variables.currentTask}
 Revision report:
 ${variables.revisionReport}
 
-TODO update report:
-${variables.todoUpdateReport}
-
-Evaluate whether the skill produced a good modification trajectory, then edit the skill directly. Focus on missing, misleading, or redundant guidance that affected task selection, coding, review, or TODO update.
+Evaluate whether the skill produced a good modification trajectory, then edit the skill directly. Focus on missing, misleading, or redundant guidance that affected task selection, coding, or review.
 
 Output a concise optimizer report with the main skill changes.
 `;
