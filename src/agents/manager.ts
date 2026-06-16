@@ -1,36 +1,56 @@
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
+type RecallCodingManagerVariables = DevelopingAgentVariables & {
+  phase: "recall";
+};
+
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
-  todoPath: string;
+  memory: string;
   finishMark: string;
   phase: "select";
 };
 
 type UpdateCodingManagerVariables = DevelopingAgentVariables & {
-  todoPath: string;
+  memory: string;
   finishMark: string;
   phase: "update";
   currentTask: string;
   revisionReport: string;
 };
 
-export type CodingManagerVariables = SelectCodingManagerVariables | UpdateCodingManagerVariables;
+export type CodingManagerVariables =
+  | RecallCodingManagerVariables
+  | SelectCodingManagerVariables
+  | UpdateCodingManagerVariables;
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const todoPath = this.workspaceRelativePath(variables.todoPath);
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
+
+    if (variables.phase === "recall") {
+      return `
+${codingStyleSkillInstructionText}
+
+Scan the target repository at ${targetPath}/ and consider what needs to be recalled to select the next new bounded task for the Developer to implement the goal.
+
+${goalInstructionText}
+
+Output exactly one concise memory recall request.
+`;
+    }
 
     if (variables.phase === "update") {
       return `
 ${codingStyleSkillInstructionText}
 
-Update the TODO file after a developer task.
-Work in the TODO file at ${todoPath}. Scan the target repository at ${targetPath}/ before editing it.
+Scan the target repository at ${targetPath}/ and consider what should be remembered after a developer task.
+
+Related memory before this task:
+${variables.memory}
 
 ${goalInstructionText}
 
@@ -42,7 +62,7 @@ ${variables.revisionReport}
 
 The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
 
-Update the TODO so completed work and future developer tasks match the current repository. If you find a better future plan, update it too.
+Remember completed work and future developer tasks match the current repository. If you find a better future plan, remember it too.
 `;
     }
 
@@ -50,7 +70,10 @@ Update the TODO so completed work and future developer tasks match the current r
 ${codingStyleSkillInstructionText}
 
 Select the next developer task for the target repository.
-Scan the target repository at ${targetPath}/ and the TODO file at ${todoPath}.
+Scan the target repository at ${targetPath}/ and read the related memory below.
+
+Related memory:
+${variables.memory}
 
 ${goalInstructionText}
 
