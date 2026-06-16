@@ -37,9 +37,9 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Scan the target repository at ${targetPath}/ and consider what needs to be recalled to select the next new bounded task for the Developer to implement the goal.
+Scan the target repository at ${targetPath}/ and decide what memory helps select the next task for the current goal.
 
-Output exactly one concise memory recall request.
+Output concise memory recall guidance.
 `;
     }
 
@@ -71,11 +71,11 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Select the next developer task for the target repository.
-Scan the target repository at ${targetPath}/ and read the related memory below.
-
 Related memory:
 ${variables.memory}
+
+Scan the target repository at ${targetPath}/ and read the memory related to the current goal.
+Select the next developer task for the target repository.
 
 Choose exactly one new bounded task for the Developer.
 
