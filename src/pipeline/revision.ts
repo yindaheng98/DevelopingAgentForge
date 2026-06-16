@@ -46,7 +46,7 @@ export class Revision {
     const developer = await team.createAgent("developer");
     const codeReviewer = await team.createAgent("code-reviewer");
     const memoryStore = new Memory(defaultMemoryAgentNames);
-    const developerMemoryGuidance = (
+    const memoryGuidance = (
       await developer.runStreamed(
         {
           ...agentVariables,
@@ -57,8 +57,8 @@ export class Revision {
       )
     ).trim();
     await writeFile(
-      path.join(archiveDir, "developer_memory_recall_guidance.md"),
-      developerMemoryGuidance,
+      path.join(archiveDir, "memory_recall_guidance.md"),
+      memoryGuidance,
       "utf8",
     );
     const memory = (
@@ -67,13 +67,13 @@ export class Revision {
         REVISION_MEMORY_DOMAIN_HINT,
         memoryPath,
         maxMemoryRounds,
-        developerMemoryGuidance,
+        memoryGuidance,
         logRecord,
       )
     )
       .map(({ content }) => content)
       .join("\n\n");
-    await writeFile(path.join(archiveDir, "developer_memory.md"), memory, "utf8");
+    await writeFile(path.join(archiveDir, "memory.md"), memory, "utf8");
 
     let previousReviewerReport = "";
     const revisionReports: string[] = [];
@@ -147,7 +147,7 @@ export class Revision {
       )
     ).trim();
     await writeFile(
-      path.join(archiveDir, "developer_things_to_remember.md"),
+      path.join(archiveDir, "things_to_remember.md"),
       thingsToRemember,
       "utf8",
     );
