@@ -1,16 +1,11 @@
 import {
   AgentTeam,
   definePipeline,
-  type AgentFactoryMap,
   type PipelineArgsOptions,
   type PipelineOptions,
   type RecordCallback,
 } from "coding-agent-forge";
-import {
-  agentFactories,
-  TrajectoryOptimizerAgent,
-  type TrajectoryOptimizerVariables,
-} from "../agents/index.js";
+import { agentFactories, type TrajectoryOptimizerVariables } from "../agents/index.js";
 import type { DevelopmentAgentVariablesByName, DevelopmentCallbacks } from "./development.js";
 import { developingArgsOptions, developingPipeline } from "./pipeline.js";
 
@@ -81,16 +76,11 @@ export async function developingSkill(
   await developingPipeline.run(team, developingOptions);
 }
 
-export const developingSkillAgentFactories: AgentFactoryMap = {
-  ...agentFactories,
-  "trajectory-optimizer": (thread, constants) => new TrajectoryOptimizerAgent(thread, constants),
-};
-
 export const developingSkillPipeline = definePipeline({
   name: "developing-skill",
   description: "Run the code development loop and evolve its skill.",
   argsOptions: developingSkillArgsOptions,
-  agentFactories: developingSkillAgentFactories,
+  agentFactories,
   async run(
     team: AgentTeam<DevelopingSkillAgentVariables>,
     options: PipelineOptions<typeof developingSkillArgsOptions>,
