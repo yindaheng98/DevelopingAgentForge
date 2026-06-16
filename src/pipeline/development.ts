@@ -3,8 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { CodingManagerVariables } from "../agents/manager.js";
-import type { DevelopingAgentVariables } from "../agents/types.js";
+import type { CodingManagerVariables, DevelopingAgentVariables } from "../agents/index.js";
 import { Revision, type RevisionAgentVariablesByName } from "./revision.js";
 
 export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {

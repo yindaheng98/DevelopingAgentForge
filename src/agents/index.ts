@@ -5,4 +5,9 @@ export {
   TrajectoryOptimizerAgent,
   type TrajectoryOptimizerVariables,
 } from "./trajectory-optimizer.js";
+export {
+  DevelopingAgent,
+  type DevelopingAgentConstants,
+  type DevelopingAgentVariables,
+} from "./types.js";
 export { agentFactories } from "./factory.js";

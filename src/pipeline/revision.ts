@@ -2,9 +2,11 @@ import type { AgentTeam, RecordCallback } from "coding-agent-forge";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { DeveloperVariables } from "../agents/developer.js";
-import type { CodeReviewerVariables } from "../agents/reviewer.js";
-import type { DevelopingAgentVariables } from "../agents/types.js";
+import type {
+  CodeReviewerVariables,
+  DeveloperVariables,
+  DevelopingAgentVariables,
+} from "../agents/index.js";
 
 export type RevisionAgentVariablesByName = {
   developer: DeveloperVariables;
