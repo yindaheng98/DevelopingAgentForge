@@ -8,16 +8,16 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { CodingManagerVariables, DevelopingAgentVariables } from "../agents/index.js";
-import { Revision, type RevisionAgentVariablesByName } from "./revision.js";
+import { TaskDevLoop, type TaskDevLoopAgentVariablesByName } from "./task-devloop.js";
 
-const DEVELOPMENT_MEMORY_DOMAIN_HINT =
-  "Project development progress memory for goals, completed tasks, current status, and task-selection context across development iterations.";
+const MEMORY_DOMAIN_HINT =
+  "Project dev loop progress memory for goals, completed tasks, current status, and task-selection context across project iterations.";
 
-export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
+export type ProjectDevLoopAgentVariablesByName = TaskDevLoopAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
 } & MemoryAgentVariablesByName;
 
-export type DevelopmentCallbacks = {
+export type ProjectDevLoopCallbacks = {
   onTaskStart?: (
     agentVariables: DevelopingAgentVariables,
     currentTask: string,
@@ -25,25 +25,25 @@ export type DevelopmentCallbacks = {
   onTaskFinish?: (
     agentVariables: DevelopingAgentVariables,
     currentTask: string,
-    revisionReports: readonly string[],
+    taskDevReports: readonly string[],
     thingsToRemember: string,
   ) => Promise<void> | void;
 };
 
 const FINISH_MARK = "FINISHED";
 
-export class Development {
+export class ProjectDevLoop {
   async develop(
-    team: AgentTeam<DevelopmentAgentVariablesByName>,
+    team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
     targetPath: string,
     codingStyleSkillPath: string,
     goal: string,
     achiveDir: string,
     maxIterations: number,
-    maxRevisionIterations: number,
+    maxTaskDevLoopIterations: number,
     memoryPath: string,
     maxMemoryRounds: number,
-    callbacks?: DevelopmentCallbacks,
+    callbacks?: ProjectDevLoopCallbacks,
     logRecord?: RecordCallback,
   ): Promise<void> {
     const agentVariables: DevelopingAgentVariables = {
@@ -55,10 +55,10 @@ export class Development {
     await mkdir(achiveDir, { recursive: true });
 
     const memoryStore = new Memory(defaultMemoryAgentNames);
-    const revision = new Revision();
+    const taskDevLoop = new TaskDevLoop();
 
     for (let iteration = 1; iteration <= maxIterations; iteration++) {
-      console.log(`\n# Developing iteration ${String(iteration)}\n`);
+      console.log(`\n# Project dev loop iteration ${String(iteration)}\n`);
       const archiveDir = path.join(achiveDir, new Date().toISOString().replace(/[:.]/g, "-"));
       await mkdir(archiveDir, { recursive: true });
 
@@ -73,7 +73,7 @@ export class Development {
         )
       ).trim();
       await writeFile(
-        path.join(archiveDir, "development_memory_recall_guidance.md"),
+        path.join(archiveDir, "project_devloop_memory_recall_guidance.md"),
         memoryGuidance,
         "utf8",
       );
@@ -81,7 +81,7 @@ export class Development {
       const memory = (
         await memoryStore.recall(
           team,
-          DEVELOPMENT_MEMORY_DOMAIN_HINT,
+          MEMORY_DOMAIN_HINT,
           memoryPath,
           maxMemoryRounds,
           memoryGuidance,
@@ -90,7 +90,7 @@ export class Development {
       )
         .map(({ content }) => content)
         .join("\n\n");
-      await writeFile(path.join(archiveDir, "development_recalled_memory.md"), memory, "utf8");
+      await writeFile(path.join(archiveDir, "project_devloop_recalled_memory.md"), memory, "utf8");
 
       const currentTask = (
         await codingManager.runStreamed(
@@ -112,13 +112,13 @@ export class Development {
 
       await callbacks?.onTaskStart?.(agentVariables, currentTask);
 
-      const revisionReports = await revision.revise(
+      const taskDevReports = await taskDevLoop.develop(
         team,
         agentVariables.targetPath,
         agentVariables.codingStyleSkillPath,
         agentVariables.goal,
         archiveDir,
-        maxRevisionIterations,
+        maxTaskDevLoopIterations,
         currentTask,
         memoryPath,
         maxMemoryRounds,
@@ -133,19 +133,19 @@ export class Development {
             finishMark: FINISH_MARK,
             phase: "update",
             currentTask,
-            revisionReport: revisionReports.join("\n\n"),
+            taskDevReport: taskDevReports.join("\n\n"),
           },
           logRecord,
         )
       ).trim();
       await writeFile(
-        path.join(archiveDir, "development_things_to_remember.md"),
+        path.join(archiveDir, "project_devloop_things_to_remember.md"),
         thingsToRemember,
         "utf8",
       );
       await memoryStore.remember(
         team,
-        DEVELOPMENT_MEMORY_DOMAIN_HINT,
+        MEMORY_DOMAIN_HINT,
         memoryPath,
         maxMemoryRounds,
         thingsToRemember,
@@ -155,7 +155,7 @@ export class Development {
       await callbacks?.onTaskFinish?.(
         agentVariables,
         currentTask,
-        revisionReports,
+        taskDevReports,
         thingsToRemember,
       );
     }
