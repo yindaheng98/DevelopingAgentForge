@@ -4,6 +4,9 @@
 #   - the CLI's --target-path
 #   - each developing agent's constants.workspacePath
 #   - the developer/reviewer threads' workingDirectory
+#   - the CLI's --project-progress-memory-path and --code-design-memory-path
+#   - each memory agent's constants.workingDir
+#   - the memory thread's workingDirectory
 #
 # Put provider credentials in secret.yaml (git-ignored) and pass it after this
 # file: --config developing-forge.yaml --config secret.yaml
@@ -41,6 +44,13 @@ threads:
       sandboxMode: danger-full-access
       workingDirectory: .
 
+  memory-runner:
+    runtime: codex
+    options:
+      model: gpt-5.5
+      sandboxMode: danger-full-access
+      workingDirectory: &memoryWorkspace output/developing
+
 agents:
   coding-manager:
     thread: coding-manager-runner
@@ -59,3 +69,28 @@ agents:
 
   trajectory-optimizer:
     thread: trajectory-optimizer-runner
+
+  memory-reader:
+    thread: memory-runner
+    constants:
+      workingDir: *memoryWorkspace
+
+  memory-modify-planner:
+    thread: memory-runner
+    constants:
+      workingDir: *memoryWorkspace
+
+  memory-modifier:
+    thread: memory-runner
+    constants:
+      workingDir: *memoryWorkspace
+
+  memory-create-planner:
+    thread: memory-runner
+    constants:
+      workingDir: *memoryWorkspace
+
+  memory-creator:
+    thread: memory-runner
+    constants:
+      workingDir: *memoryWorkspace

@@ -11,7 +11,7 @@ import type { CodingManagerVariables, DevelopingAgentVariables } from "../agents
 import { TaskDevLoop, type TaskDevLoopAgentVariablesByName } from "./task-devloop.js";
 
 const MEMORY_DOMAIN_HINT =
-  "Project dev loop progress memory for goals, completed tasks, current status, and task-selection context across project iterations.";
+  "Project progress memory for goals, completed tasks, current status, and task-selection context across project iterations.";
 
 export type ProjectDevLoopAgentVariablesByName = TaskDevLoopAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;

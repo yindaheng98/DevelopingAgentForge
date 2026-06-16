@@ -81,12 +81,12 @@ export const developingArgsOptions = {
   "max-iterations": {
     type: "string",
     default: "10",
-    description: "Maximum number of project dev loop iterations",
+    description: "Maximum number of project iterations",
   },
-  "max-task-dev-loop-iterations": {
+  "max-task-devloop-iterations": {
     type: "string",
     default: "3",
-    description: "Maximum developer/reviewer iterations per project iteration",
+    description: "Maximum developer/reviewer attempts per selected task",
   },
   "project-progress-memory-path": {
     type: "string",
@@ -105,7 +105,7 @@ export const developingArgsOptions = {
 
 export const developingPipeline = definePipeline({
   name: "developing",
-  description: "Run the project dev loop.",
+  description: "Run the project development workflow.",
   argsOptions: developingArgsOptions,
   agentFactories,
   async run(
@@ -118,7 +118,7 @@ export const developingPipeline = definePipeline({
       "goal-path": goalPath,
       "achive-dir": achiveDir,
       "max-iterations": maxIterations,
-      "max-task-dev-loop-iterations": maxTaskDevLoopIterations,
+      "max-task-devloop-iterations": maxTaskDevLoopIterations,
       "project-progress-memory-path": projectProgressMemoryPath,
       "code-design-memory-path": codeDesignMemoryPath,
       "max-memory-rounds": maxMemoryRounds,
