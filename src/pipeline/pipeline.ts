@@ -7,21 +7,22 @@ import {
 } from "coding-agent-forge";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { agentFactories } from "../agents/index.js";
 import {
   Development,
   type DevelopmentAgentVariablesByName,
   type DevelopmentCallbacks,
 } from "./development.js";
+import { agentFactories } from "./factory.js";
 
 export type DevelopingOptions = {
   targetPath: string;
-  achiveDir: string;
-  artifactPath: string;
   codingStyleSkillPath: string;
   goalPath: string;
+  achiveDir: string;
   maxIterations: number;
   maxRevisionIterations: number;
+  memoryPath: string;
+  maxMemoryRounds: number;
   callbacks?: DevelopmentCallbacks;
 };
 
@@ -38,12 +39,13 @@ export async function developing(
   await new Development().develop(
     team,
     options.targetPath,
-    options.achiveDir,
-    options.artifactPath,
     options.codingStyleSkillPath,
     goal,
+    options.achiveDir,
     options.maxIterations,
     options.maxRevisionIterations,
+    options.memoryPath,
+    options.maxMemoryRounds,
     options.callbacks,
     logRecord,
   );
@@ -62,14 +64,6 @@ export const developingArgsOptions = {
     type: "string",
     description: "Target repository folder to create or modify",
   },
-  "achive-dir": {
-    type: "string",
-    description: "Archive folder for per-iteration reports",
-  },
-  "artifact-path": {
-    type: "string",
-    description: "Working artifact folder containing TODO.md",
-  },
   "coding-style-skill-path": {
     type: "string",
     description: "Coding style skill path used by the agents",
@@ -77,6 +71,10 @@ export const developingArgsOptions = {
   "goal-path": {
     type: "string",
     description: "Goal document path",
+  },
+  "achive-dir": {
+    type: "string",
+    description: "Archive folder for per-iteration reports",
   },
   "max-iterations": {
     type: "string",
@@ -87,6 +85,15 @@ export const developingArgsOptions = {
     type: "string",
     default: "3",
     description: "Maximum review revisions per development iteration",
+  },
+  "memory-path": {
+    type: "string",
+    description: "Memory directory for development continuity",
+  },
+  "max-memory-rounds": {
+    type: "string",
+    default: "3",
+    description: "Maximum recall and remember refinement rounds",
   },
 } as const satisfies PipelineArgsOptions;
 
@@ -101,40 +108,42 @@ export const developingPipeline = definePipeline({
   ) {
     const {
       "target-path": targetPath,
-      "achive-dir": achiveDir,
-      "artifact-path": artifactPath,
       "coding-style-skill-path": codingStyleSkillPath,
       "goal-path": goalPath,
+      "achive-dir": achiveDir,
       "max-iterations": maxIterations,
       "max-revision-iterations": maxRevisionIterations,
+      "memory-path": memoryPath,
+      "max-memory-rounds": maxMemoryRounds,
       callbacks,
     } = options;
     if (
       targetPath === undefined ||
-      achiveDir === undefined ||
-      artifactPath === undefined ||
       codingStyleSkillPath === undefined ||
-      goalPath === undefined
+      goalPath === undefined ||
+      achiveDir === undefined ||
+      memoryPath === undefined
     ) {
       throw new Error(
         [
           "--target-path",
-          "--achive-dir",
-          "--artifact-path",
           "--coding-style-skill-path",
           "--goal-path",
+          "--achive-dir",
+          "--memory-path",
         ].join(", ") + " are required",
       );
     }
 
     await developing(team, {
       targetPath,
-      achiveDir,
-      artifactPath,
       codingStyleSkillPath,
       goalPath,
+      achiveDir,
       maxIterations: Number(maxIterations),
       maxRevisionIterations: Number(maxRevisionIterations),
+      memoryPath,
+      maxMemoryRounds: Number(maxMemoryRounds),
       ...(callbacks === undefined ? {} : { callbacks }),
     });
   },
