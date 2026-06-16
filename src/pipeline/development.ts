@@ -3,9 +3,9 @@ import { existsSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type { CodingManagerVariables } from "./manager.js";
+import type { CodingManagerVariables } from "../agents/manager.js";
+import type { DevelopingAgentVariables } from "../agents/types.js";
 import { Revision, type RevisionAgentVariablesByName } from "./revision.js";
-import type { DevelopingAgentVariables } from "./types.js";
 
 export type DevelopmentAgentVariablesByName = RevisionAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;

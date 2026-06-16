@@ -8,11 +8,10 @@ import {
 } from "coding-agent-forge";
 import {
   agentFactories,
-  type DevelopmentAgentVariablesByName,
-  type DevelopmentCallbacks,
   TrajectoryOptimizerAgent,
   type TrajectoryOptimizerVariables,
-} from "./agents/index.js";
+} from "../agents/index.js";
+import type { DevelopmentAgentVariablesByName, DevelopmentCallbacks } from "./development.js";
 import { developingArgsOptions, developingPipeline } from "./pipeline.js";
 
 export type DevelopingSkillAgentVariables = DevelopmentAgentVariablesByName & {

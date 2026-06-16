@@ -7,12 +7,12 @@ import {
 } from "coding-agent-forge";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { agentFactories } from "../agents/index.js";
 import {
   Development,
-  agentFactories,
   type DevelopmentAgentVariablesByName,
   type DevelopmentCallbacks,
-} from "./agents/index.js";
+} from "./development.js";
 
 export type DevelopingOptions = {
   targetPath: string;
