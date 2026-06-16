@@ -62,7 +62,7 @@ ${variables.revisionReport}
 
 The revision report lists each Developer report and Reviewer report from the review loop, ending with whether the Reviewer accepted the changes or the loop reached the max revision iterations.
 
-Remember completed work and future developer tasks match the current repository. If you find a better future plan, remember it too.
+Remember completed work and current repository state.
 `;
     }
 
