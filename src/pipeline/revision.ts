@@ -57,7 +57,7 @@ export class Revision {
       )
     ).trim();
     await writeFile(
-      path.join(archiveDir, "memory_recall_guidance.md"),
+      path.join(archiveDir, "revision_memory_recall_guidance.md"),
       memoryGuidance,
       "utf8",
     );
@@ -73,7 +73,7 @@ export class Revision {
     )
       .map(({ content }) => content)
       .join("\n\n");
-    await writeFile(path.join(archiveDir, "memory.md"), memory, "utf8");
+    await writeFile(path.join(archiveDir, "revision_recalled_memory.md"), memory, "utf8");
 
     let previousReviewerReport = "";
     const revisionReports: string[] = [];
@@ -147,7 +147,7 @@ export class Revision {
       )
     ).trim();
     await writeFile(
-      path.join(archiveDir, "things_to_remember.md"),
+      path.join(archiveDir, "revision_things_to_remember.md"),
       thingsToRemember,
       "utf8",
     );
