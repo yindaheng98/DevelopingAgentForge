@@ -1,96 +1,76 @@
-# Sample configuration for developing-agent-forge.
-#
-# Keep these paths consistent:
-#   - the CLI's --target-path
-#   - each developing agent's constants.workspacePath
-#   - the developer/reviewer threads' workingDirectory
-#   - the CLI's --project-progress-memory-path and --code-design-memory-path
-#   - each memory agent's constants.workingDir
-#   - the memory thread's workingDirectory
-#
-# Put provider credentials in secret.yaml (git-ignored) and pass it after this
-# file: --config developing-forge.yaml --config secret.yaml
-
 runtimes:
   codex:
     kind: codex
 
 threads:
-  coding-manager-runner:
-    runtime: codex
-    options:
-      model: gpt-5.5
-      sandboxMode: danger-full-access
-      workingDirectory: &targetWorkspace output/codebase
-
-  developer-runner:
-    runtime: codex
-    options:
-      model: gpt-5.3-codex-spark
-      sandboxMode: danger-full-access
-      workingDirectory: *targetWorkspace
-
-  code-reviewer-runner:
-    runtime: codex
-    options:
-      model: gpt-5.5
-      sandboxMode: danger-full-access # read-only review agent
-      workingDirectory: *targetWorkspace
-
-  trajectory-optimizer-runner:
+  skill:
     runtime: codex
     options:
       model: gpt-5.5
       sandboxMode: danger-full-access
       workingDirectory: .
 
-  memory-runner:
+  develop:
     runtime: codex
     options:
       model: gpt-5.5
       sandboxMode: danger-full-access
-      workingDirectory: &memoryWorkspace output/developing
+      workingDirectory: &developerWorkspacePath output/codebase
+
+  develop-cheap:
+    runtime: codex
+    options:
+      model: gpt-5.3-codex-spark
+      sandboxMode: danger-full-access
+      workingDirectory: *developerWorkspacePath
+
+  memory:
+    runtime: codex
+    options:
+      model: gpt-5.5
+      sandboxMode: danger-full-access
+      workingDirectory: &memoryWorkingDir output/developing
 
 agents:
   coding-manager:
-    thread: coding-manager-runner
+    thread: develop
     constants:
-      workspacePath: *targetWorkspace
+      workspacePath: *developerWorkspacePath
 
   developer:
-    thread: developer-runner
+    thread: develop-cheap
     constants:
-      workspacePath: *targetWorkspace
+      workspacePath: *developerWorkspacePath
 
   code-reviewer:
-    thread: code-reviewer-runner
+    thread: develop
     constants:
-      workspacePath: *targetWorkspace
+      workspacePath: *developerWorkspacePath
 
   trajectory-optimizer:
-    thread: trajectory-optimizer-runner
+    thread: skill
 
   memory-reader:
-    thread: memory-runner
+    thread: memory
     constants:
-      workingDir: *memoryWorkspace
+      workingDir: *memoryWorkingDir
 
   memory-modify-planner:
-    thread: memory-runner
+    thread: memory
     constants:
-      workingDir: *memoryWorkspace
+      workingDir: *memoryWorkingDir
 
   memory-modifier:
-    thread: memory-runner
+    thread: memory
     constants:
-      workingDir: *memoryWorkspace
+      workingDir: *memoryWorkingDir
 
   memory-create-planner:
-    thread: memory-runner
+    thread: memory
     constants:
-      workingDir: *memoryWorkspace
+      workingDir: *memoryWorkingDir
 
   memory-creator:
-    thread: memory-runner
+    thread: memory
     constants:
-      workingDir: *memoryWorkspace
+      workingDir: *memoryWorkingDir
