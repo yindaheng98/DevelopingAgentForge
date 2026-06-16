@@ -49,13 +49,13 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Scan the target repository at ${targetPath}/ and consider what should be remembered after a developer task.
+Developer task:
+${variables.currentTask}
 
-Related memory before this task:
+Related memory before the developer task:
 ${variables.memory}
 
-Current developer task:
-${variables.currentTask}
+Scan the target repository at ${targetPath}/ and consider what should be remembered after the developer task.
 
 Revision report:
 ${variables.revisionReport}
