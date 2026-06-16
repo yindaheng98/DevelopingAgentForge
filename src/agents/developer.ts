@@ -1,27 +1,83 @@
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
-export type DeveloperVariables = DevelopingAgentVariables & {
+type RecallDeveloperVariables = DevelopingAgentVariables & {
   currentTask: string;
+  phase: "recall";
+};
+
+type DevelopDeveloperVariables = DevelopingAgentVariables & {
+  currentTask: string;
+  memory: string;
+  phase: "develop";
   reviewerReport?: string;
 };
+
+type UpdateDeveloperVariables = DevelopingAgentVariables & {
+  currentTask: string;
+  memory: string;
+  phase: "update";
+  revisionReport: string;
+};
+
+export type DeveloperVariables =
+  | RecallDeveloperVariables
+  | DevelopDeveloperVariables
+  | UpdateDeveloperVariables;
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const reviewerReport = variables.reviewerReport ?? "(none)";
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
-    return `
+    if (variables.phase === "recall") {
+      return `
 ${codingStyleSkillInstructionText}
-
-Work in the target repository at ${targetPath}/.
 
 ${goalInstructionText}
 
-Current developer task:
+Current task:
+${variables.currentTask}
+
+Scan the target repository at ${targetPath}/ and decide what memory helps complete the current task.
+
+Output concise memory recall guidance.
+`;
+    }
+
+    if (variables.phase === "update") {
+      return `
+${codingStyleSkillInstructionText}
+
+${goalInstructionText}
+
+Current task:
+${variables.currentTask}
+
+Related memory before the current task:
+${variables.memory}
+
+Review revision process for completing the current task:
+${variables.revisionReport}
+
+Scan the target repository at ${targetPath}/ and consider what should be remembered after the current task.
+`;
+    }
+
+    const reviewerReport = variables.reviewerReport ?? "(none)";
+    return `
+${codingStyleSkillInstructionText}
+
+${goalInstructionText}
+
+Related memory:
+${variables.memory}
+
+Work in the target repository at ${targetPath}/.
+
+Current task:
 ${variables.currentTask}
 
 Reviewer report:
