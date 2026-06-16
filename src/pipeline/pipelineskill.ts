@@ -5,6 +5,7 @@ import {
   type PipelineOptions,
   type RecordCallback,
 } from "coding-agent-forge";
+import type { Agent } from "coding-agent-forge/agent";
 import { agentFactories, type TrajectoryOptimizerVariables } from "../agents/index.js";
 import type { DevelopmentAgentVariablesByName, DevelopmentCallbacks } from "./development.js";
 import { developingArgsOptions, developingPipeline } from "./pipeline.js";
@@ -35,12 +36,13 @@ export async function developingSkill(
   const logRecord: RecordCallback = (thread, record) => {
     console.log(thread.recordToPrettyString(record));
   };
-  const trajectoryOptimizer = await team.createAgent("trajectory-optimizer");
+  let trajectoryOptimizer: Agent<TrajectoryOptimizerVariables> | undefined;
 
   const developingOptions = {
     ...options,
     callbacks: {
       onTaskStart: async (agentVariables, currentTask) => {
+        trajectoryOptimizer = await team.createAgent("trajectory-optimizer");
         const repositoryScan = (
           await trajectoryOptimizer.runStreamed(
             {
@@ -54,6 +56,10 @@ export async function developingSkill(
         console.log(`\n# Skill trajectory repository scan\n${repositoryScan}\n`);
       },
       onTaskFinish: async (agentVariables, currentTask, revisionReports, todoUpdateReport) => {
+        if (trajectoryOptimizer === undefined) {
+          throw new Error("Trajectory optimizer must scan the repository before optimizing.");
+        }
+
         const revisionReport = revisionReports.join("\n\n");
         const optimizerReport = (
           await trajectoryOptimizer.runStreamed(
