@@ -18,14 +18,14 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
     onRecord?: RecordCallback,
   ): Promise<string> {
     let reviewerReport = await super.runStreamed(variables, onRecord);
-    if (this.parseDecision(reviewerReport.trim()) !== undefined) {
+    try {
+      this.parseDecision(reviewerReport);
       return reviewerReport;
-    }
-
-    for (let attempt = 1; attempt <= MAX_FORMAT_CORRECTION_ATTEMPTS; attempt++) {
-      reviewerReport = (
-        await this.thread.runStreamed(
-          `
+    } catch {
+      for (let attempt = 1; attempt <= MAX_FORMAT_CORRECTION_ATTEMPTS; attempt++) {
+        reviewerReport = (
+          await this.thread.runStreamed(
+            `
 Previous review output did not follow the required format.
 The output must start with exactly one of:
 ACCEPT
@@ -37,22 +37,30 @@ ${reviewerReport}
 
 Please correct it.
 `,
-          onRecord,
-        )
-      ).trim();
-      if (this.parseDecision(reviewerReport.trim()) !== undefined) {
-        return reviewerReport;
+            onRecord,
+          )
+        ).trim();
+        try {
+          this.parseDecision(reviewerReport);
+          return reviewerReport;
+        } catch {
+          if (attempt === MAX_FORMAT_CORRECTION_ATTEMPTS) {
+            throw new Error(
+              `code-reviewer did not output a valid first-line decision after ${String(MAX_FORMAT_CORRECTION_ATTEMPTS)} correction attempts.`,
+            );
+          }
+        }
       }
     }
-
-    throw new Error(
-      `code-reviewer did not output a valid first-line decision after ${String(MAX_FORMAT_CORRECTION_ATTEMPTS)} correction attempts.`,
-    );
+    throw new Error("Unreachable code-reviewer format correction state.");
   }
 
-  parseDecision(reviewerReport: string): ReviewDecision | undefined {
+  parseDecision(reviewerReport: string): ReviewDecision {
     const match = REVIEW_DECISION_PATTERN.exec(reviewerReport.trimStart());
-    return match?.[1] as ReviewDecision | undefined;
+    if (match === null) {
+      throw new Error("Review report must start with ACCEPT, REVISE, or REDIRECT.");
+    }
+    return match[1] as ReviewDecision;
   }
 
   protected buildPrompt(variables: Readonly<CodeReviewerVariables>): string {
