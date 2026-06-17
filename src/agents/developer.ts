@@ -114,6 +114,7 @@ ${reviewerReport}
 Improve the repository according to the Task Brief. If a reviewer report is present, update the code according to that report.
 
 Use your own judgment to inspect, edit, and verify. If you make no changes, explain why no change is appropriate on disk.
+Make sure your report matches the actual on-disk repository state after your work.
 
 Output a concise developer report with:
 - what you changed
@@ -121,7 +122,9 @@ Output a concise developer report with:
 - what commands you ran
 - why the result addresses the Objective
 - any blockers or uncertainty
-- any code relationships or design lessons that should be remembered
+
+List any code relationships or design lessons that should be remembered separately under:
+## Memory Candidates
 `;
 }
 
@@ -150,5 +153,6 @@ ${taskRoundSummary}
 Scan the target repository at ${targetPath}/ and consider what reusable code logic relationships and design reasons should be remembered after this task.
 
 Remember only reusable code/design memory: module relationships, architecture constraints, invariants, interface design, review rules, and pitfalls. Do not store long transcripts, one-off command output, runtime noise, or project progress state.
+When reviewer memory candidates and developer memory candidates conflict, prefer reviewer candidates for code quality, design constraints, and pitfalls.
 `;
 }

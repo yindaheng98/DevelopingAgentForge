@@ -11,7 +11,7 @@ export type CodeReviewerVariables = DevelopingAgentVariables & {
 
 export type ReviewDecision = "ACCEPT" | "REVISE" | "REDIRECT";
 const REVIEW_DECISION_PATTERN = /^(ACCEPT|REVISE|REDIRECT)/;
-const MAX_FORMAT_CORRECTION_ATTEMPTS = 8;
+const MAX_FORMAT_CORRECTION_ATTEMPTS = 3;
 
 export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
   override async runStreamed(
@@ -107,7 +107,12 @@ Use ACCEPT when the result is good enough.
 Use REVISE when the Developer can improve the result within the same task direction.
 Use REDIRECT when the task direction, scope, dependency, or premise should be reconsidered by the Manager.
 
-After the decision, give concise feedback unless ACCEPT. Also list any reusable memory candidates.
+For REVISE, give the smallest actionable feedback for the same task direction.
+For REDIRECT, explain the manager-level reason in one short paragraph.
+
+After the decision, give concise feedback unless ACCEPT.
+List any reusable memory candidates separately under:
+## Memory Candidates
 `;
   }
 }
