@@ -1,3 +1,4 @@
+import type { RecordCallback } from "coding-agent-forge";
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -24,8 +25,54 @@ export type CodingManagerVariables =
 
 export type CodingManagerDecision = "FINISHED" | "TASK_BRIEF";
 const MANAGER_DECISION_PATTERN = /^(FINISHED|# Task Brief)/;
+const MAX_FORMAT_CORRECTION_ATTEMPTS = 8;
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
+  override async runStreamed(
+    variables: CodingManagerVariables,
+    onRecord?: RecordCallback,
+  ): Promise<string> {
+    let managerOutput = await super.runStreamed(variables, onRecord);
+    if (variables.phase !== "select") {
+      return managerOutput;
+    }
+
+    try {
+      this.parseDecision(managerOutput);
+      return managerOutput;
+    } catch {
+      for (let attempt = 1; attempt <= MAX_FORMAT_CORRECTION_ATTEMPTS; attempt++) {
+        managerOutput = (
+          await this.thread.runStreamed(
+            `
+Previous manager output did not follow the required format.
+The output must start with exactly one of:
+FINISHED
+# Task Brief
+
+Previous output:
+${managerOutput}
+
+Please correct it.
+`,
+            onRecord,
+          )
+        ).trim();
+        try {
+          this.parseDecision(managerOutput);
+          return managerOutput;
+        } catch {
+          if (attempt === MAX_FORMAT_CORRECTION_ATTEMPTS) {
+            throw new Error(
+              `coding-manager did not output a valid select decision after ${String(MAX_FORMAT_CORRECTION_ATTEMPTS)} correction attempts.`,
+            );
+          }
+        }
+      }
+    }
+    throw new Error("Unreachable coding-manager format correction state.");
+  }
+
   parseDecision(managerOutput: string): CodingManagerDecision {
     const match = MANAGER_DECISION_PATTERN.exec(managerOutput.trimStart());
     if (match === null) {
