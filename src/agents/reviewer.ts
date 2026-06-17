@@ -1,3 +1,4 @@
+import type { RecordCallback } from "coding-agent-forge";
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -7,7 +8,53 @@ export type CodeReviewerVariables = DevelopingAgentVariables & {
   codeDesignMemory: string;
 };
 
+export type ReviewDecision = "ACCEPT" | "REVISE" | "REDIRECT";
+const REVIEW_DECISION_PATTERN = /^(ACCEPT|REVISE|REDIRECT)/;
+const MAX_FORMAT_CORRECTION_ATTEMPTS = 8;
+
 export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
+  override async runStreamed(
+    variables: CodeReviewerVariables,
+    onRecord?: RecordCallback,
+  ): Promise<string> {
+    let reviewerReport = await super.runStreamed(variables, onRecord);
+    if (this.parseDecision(reviewerReport.trim()) !== undefined) {
+      return reviewerReport;
+    }
+
+    for (let attempt = 1; attempt <= MAX_FORMAT_CORRECTION_ATTEMPTS; attempt++) {
+      reviewerReport = (
+        await this.thread.runStreamed(
+          `
+Previous review output did not follow the required format.
+The output must start with exactly one of:
+ACCEPT
+REVISE
+REDIRECT
+
+Previous output:
+${reviewerReport}
+
+Please correct it.
+`,
+          onRecord,
+        )
+      ).trim();
+      if (this.parseDecision(reviewerReport.trim()) !== undefined) {
+        return reviewerReport;
+      }
+    }
+
+    throw new Error(
+      `code-reviewer did not output a valid first-line decision after ${String(MAX_FORMAT_CORRECTION_ATTEMPTS)} correction attempts.`,
+    );
+  }
+
+  parseDecision(reviewerReport: string): ReviewDecision | undefined {
+    const match = REVIEW_DECISION_PATTERN.exec(reviewerReport.trimStart());
+    return match?.[1] as ReviewDecision | undefined;
+  }
+
   protected buildPrompt(variables: Readonly<CodeReviewerVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
