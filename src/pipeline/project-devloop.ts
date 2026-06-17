@@ -18,7 +18,7 @@ import {
   type TaskDevLoopResult,
 } from "./task-devloop.js";
 
-const MEMORY_DOMAIN_HINT =
+const PROJECT_STATE_MEMORY_DOMAIN_HINT =
   "Project progress memory for goals, completed tasks, current status, and task-selection context across project iterations.";
 
 export type ProjectDevLoopAgentVariablesByName = TaskDevLoopAgentVariablesByName & {
@@ -90,7 +90,7 @@ export class ProjectDevLoop {
       const projectProgressMemory = (
         await memoryStore.recall(
           team,
-          MEMORY_DOMAIN_HINT,
+          PROJECT_STATE_MEMORY_DOMAIN_HINT,
           projectProgressMemoryPath,
           maxMemoryRounds,
           projectProgressMemoryGuidance,
@@ -163,7 +163,7 @@ export class ProjectDevLoop {
       );
       await memoryStore.remember(
         team,
-        MEMORY_DOMAIN_HINT,
+        PROJECT_STATE_MEMORY_DOMAIN_HINT,
         projectProgressMemoryPath,
         maxMemoryRounds,
         thingsToRemember,
