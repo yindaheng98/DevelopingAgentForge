@@ -4,11 +4,13 @@ import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallCodingManagerVariables = DevelopingAgentVariables & {
   phase: "recall";
+  lastTaskRoundSummary?: string;
 };
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
   projectProgressMemory: string;
   phase: "select";
+  lastTaskRoundSummary?: string;
 };
 
 type UpdateCodingManagerVariables = DevelopingAgentVariables & {
@@ -86,16 +88,27 @@ Please correct it.
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
+    const lastTaskRoundSummary =
+      "lastTaskRoundSummary" in variables && variables.lastTaskRoundSummary
+        ? `Last task round summary:
+${variables.lastTaskRoundSummary}`
+        : "";
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(codingStyleSkillInstructionText, goalInstructionText, targetPath);
+        return buildRecallPrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          lastTaskRoundSummary,
+        );
       case "select":
         return buildSelectPrompt(
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
           variables.projectProgressMemory,
+          lastTaskRoundSummary,
         );
       case "update":
         return buildUpdatePrompt(
@@ -114,11 +127,14 @@ function buildRecallPrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
+  lastTaskRoundSummary: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
+
+${lastTaskRoundSummary}
 
 Scan the target repository at ${targetPath}/ and decide what project progress memory helps select the next task for the current goal.
 
@@ -131,6 +147,7 @@ function buildSelectPrompt(
   goalInstructionText: string,
   targetPath: string,
   projectProgressMemory: string,
+  lastTaskRoundSummary: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
@@ -139,6 +156,8 @@ ${goalInstructionText}
 
 Related project progress memory:
 ${projectProgressMemory}
+
+${lastTaskRoundSummary}
 
 Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
 Select the next developing task for the target repository.
