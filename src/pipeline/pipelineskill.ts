@@ -45,33 +45,32 @@ export async function developingSkill(
   const developingOptions = {
     ...options,
     callbacks: {
-      onTaskStart: async (agentVariables, currentTask) => {
+      onTaskStart: async (agentVariables, taskBrief) => {
         trajectoryOptimizer = await team.createAgent("trajectory-optimizer");
         const repositoryScan = (
           await trajectoryOptimizer.runStreamed(
             {
               ...agentVariables,
               phase: "scan",
-              currentTask,
+              taskBrief,
             },
             logRecord,
           )
         ).trim();
         console.log(`\n# Skill trajectory repository scan\n${repositoryScan}\n`);
       },
-      onTaskFinish: async (agentVariables, currentTask, taskDevReports) => {
+      onTaskFinish: async (agentVariables, taskBrief, taskResult) => {
         if (trajectoryOptimizer === undefined) {
           throw new Error("Trajectory optimizer must scan the repository before optimizing.");
         }
 
-        const taskDevReport = taskDevReports.join("\n\n");
         const optimizerReport = (
           await trajectoryOptimizer.runStreamed(
             {
               ...agentVariables,
               phase: "optimize",
-              currentTask,
-              taskDevReport,
+              taskBrief,
+              taskRoundSummary: taskResult.taskRoundSummary,
               metaskillPath,
             },
             logRecord,
