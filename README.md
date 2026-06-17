@@ -119,7 +119,8 @@ Each iteration does the following:
 3. `code-reviewer` reads the Task Brief, Developer report, and recalled code-design memory, then returns `ACCEPT`, `REVISE`, or `REDIRECT`. If its output does not start with one of those decisions, the reviewer agent asks the same thread to correct the format.
 4. `REVISE` sends feedback back to `developer`; `REDIRECT` returns control to `coding-manager`; `ACCEPT` finishes the task.
 5. After the review loop ends, the pipeline archives the full transcript, writes `task_round_summary.md` with the Task Brief, final decision, and Developer/Reviewer report text, asks the memory update prompts what should be remembered, and stores that content through `memory-agent-forge`.
-6. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
+6. On the next project iteration, `coding-manager` receives the previous `task_round_summary.md` content as `lastTaskRoundSummary` during recall and task selection, so a `REDIRECT` can directly guide the next Task Brief.
+7. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
 
 ## Developing-Skill And Trajectory Feedback
 
@@ -152,7 +153,7 @@ The pipeline maintains:
 | Path                                                                   | Purpose                                                                                                                  |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI argument parsing and the base `developing` pipeline wrapper.                                                         |
-| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | Outer project workflow, archive creation, memory recall/update, and per-agent handoff.                                   |
+| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | Outer project workflow, archive creation, memory recall/update, last task summary handoff, and per-agent coordination.   |
 | [`pipeline/task-devloop.ts`](src/pipeline/task-devloop.ts)             | Inner developer/reviewer loop for one selected task.                                                                     |
 | [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | `developing-skill` wrapper that adds trajectory optimization callbacks around the base loop.                             |
 | [`agents/factory.ts`](src/agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                                                 |
@@ -164,9 +165,10 @@ The pipeline maintains:
 
 ## Troubleshooting
 
-| Problem                                 | Likely cause                                                   | Fix                                                                                              |
-| --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| The loop stops with `FINISHED`          | `coding-manager` decided no further developing task is needed. | Inspect the memory directory and the latest archive.                                             |
-| A task keeps returning `REVISE`         | The inner developer/reviewer loop has not reached `ACCEPT`.    | Read the Developer reports and Reviewer feedback in the timestamped archive folder.              |
-| A new goal keeps inheriting old context | One of the memory directories still contains old task state.   | Update `--goal-path`; if needed, edit or delete stale memory files before rerunning the wrapper. |
-| The archive option looks misspelled     | The current CLI option name is `--achive-dir`.                 | Use the current option name until the CLI changes.                                               |
+| Problem                                 | Likely cause                                                      | Fix                                                                                              |
+| --------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| The loop stops with `FINISHED`          | `coding-manager` decided no further developing task is needed.    | Inspect the memory directory and the latest archive.                                             |
+| A task keeps returning `REVISE`         | The inner developer/reviewer loop has not reached `ACCEPT`.       | Read the Developer reports and Reviewer feedback in the timestamped archive folder.              |
+| A task returns `REDIRECT`               | The reviewer decided the task direction or premise should change. | Inspect `task_round_summary.md`; its contents are passed into the next manager selection round.  |
+| A new goal keeps inheriting old context | One of the memory directories still contains old task state.      | Update `--goal-path`; if needed, edit or delete stale memory files before rerunning the wrapper. |
+| The archive option looks misspelled     | The current CLI option name is `--achive-dir`.                    | Use the current option name until the CLI changes.                                               |

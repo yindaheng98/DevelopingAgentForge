@@ -63,6 +63,7 @@ export class ProjectDevLoop {
 
     const memoryStore = new Memory(defaultMemoryAgentNames);
     const taskDevLoop = new TaskDevLoop();
+    let lastTaskRoundSummary: string | undefined;
 
     for (let iteration = 1; iteration <= maxIterations; iteration++) {
       console.log(`\n# Project dev loop iteration ${String(iteration)}\n`);
@@ -75,6 +76,7 @@ export class ProjectDevLoop {
           {
             ...agentVariables,
             phase: "recall",
+            ...(lastTaskRoundSummary === undefined ? {} : { lastTaskRoundSummary }),
           },
           logRecord,
         )
@@ -109,6 +111,7 @@ export class ProjectDevLoop {
             ...agentVariables,
             projectProgressMemory,
             phase: "select",
+            ...(lastTaskRoundSummary === undefined ? {} : { lastTaskRoundSummary }),
           },
           logRecord,
         )
@@ -135,6 +138,11 @@ export class ProjectDevLoop {
         maxMemoryRounds,
         logRecord,
       );
+      if (taskResult.finalDecision === "REDIRECT" || taskResult.finalDecision === "FAILED") {
+        lastTaskRoundSummary = taskResult.taskRoundSummary;
+      } else {
+        lastTaskRoundSummary = undefined;
+      }
 
       const thingsToRemember = (
         await codingManager.runStreamed(
