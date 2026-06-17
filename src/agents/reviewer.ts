@@ -4,7 +4,6 @@ import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 export type CodeReviewerVariables = DevelopingAgentVariables & {
   taskBrief: string;
   developerReport: string;
-  realityRecord: string;
   codeDesignMemory: string;
 };
 
@@ -33,10 +32,7 @@ ${variables.codeDesignMemory}
 Developer report:
 ${variables.developerReport}
 
-Reality Record:
-${variables.realityRecord}
-
-Review the Developer's result using the Task Brief, Reality Record, code design memory, and Developer report.
+Review the Developer's result using the Task Brief, Developer report, and code design memory.
 
 Focus on:
 - whether the Objective is actually improved
