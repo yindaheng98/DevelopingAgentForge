@@ -48,8 +48,8 @@
     "developing-skill": "tsx src/cli.ts developing-skill"
   },
   "dependencies": {
-    "coding-agent-forge": "^1.3.1",
-    "memory-agent-forge": "^1.0.0"
+    "coding-agent-forge": "^1.3.2",
+    "memory-agent-forge": "^1.0.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
