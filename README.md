@@ -21,11 +21,11 @@ The package exposes a TypeScript API from [`src/index.ts`](src/index.ts) and a C
 
 ## Core Idea: Developing And Coding Style
 
-`src` turns the current goal into a repeatable code-writing trajectory. `coding-manager` reads the current repository, the goal, and remembered context, chooses one concrete developing task, `developer` edits the target repository, and `code-reviewer` either returns `ACCEPT` or sends task feedback back into the same task.
+`src` turns the current goal into a repeatable code-writing trajectory. `coding-manager` reads the current repository, the goal, and remembered context, writes one bounded Task Brief or `FINISHED`, `developer` edits the target repository, and `code-reviewer` returns `ACCEPT`, `REVISE`, or `REDIRECT`.
 
 The coding-style skill is [`skills/coding-style/SKILL.md`](skills/coding-style/SKILL.md). Its job is to control the code-writing agent's code structure and style. The upstream user task decides what to implement; this skill decides how to keep the implementation readable, local, low-coupling, and consistent with the current framework.
 
-Every developer run loads the configured coding-style skill through `--coding-style-skill-path`. [`agents/developer.ts`](src/agents/developer.ts) prepends the instruction from [`agents/prompts.ts`](src/agents/prompts.ts): load and follow that skill before reading the repository, current goal, context documents named by the goal, and current task. That makes the writing agent use the same code-structure and style preferences across features, refactors, harness/test work, exports, and framework docs.
+Every developer run loads the configured coding-style skill through `--coding-style-skill-path`. [`agents/developer.ts`](src/agents/developer.ts) prepends the instruction from [`agents/prompts.ts`](src/agents/prompts.ts): load and follow that skill before reading the repository, current goal, context documents named by the goal, and Task Brief. That makes the writing agent use the same code-structure and style preferences across features, refactors, harness/test work, exports, and framework docs.
 
 `coding-style` is generic for code-writing tasks. It does not decide task priority or repository template initialization. It only keeps code concise, readable, low-friction, easy to modify, and aligned with the existing repository structure.
 
@@ -105,7 +105,7 @@ The current CLI option name is `--achive-dir`.
 | `--coding-style-skill-path`      | Configured coding-style skill.                                        |
 | `--goal-path`                    | Markdown file containing the current objective and task context.      |
 | `--max-iterations`               | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
-| `--max-task-devloop-iterations` | Limits developer/reviewer attempts for each selected task.            |
+| `--max-task-devloop-iterations`  | Limits developer/reviewer attempts for each selected task.            |
 | `--max-memory-rounds`            | Limits memory recall and remember refinement rounds.                  |
 
 ## Main Flow
@@ -114,11 +114,11 @@ The current CLI option name is `--achive-dir`.
 
 Each iteration does the following:
 
-1. `coding-manager` decides what should be recalled, the pipeline recalls the matching memory, then `coding-manager` scans the current repository, the goal from `--goal-path`, and remembered context before choosing one developing task.
+1. `coding-manager` decides what should be recalled, the pipeline recalls the matching memory, then `coding-manager` scans the current repository, the goal from `--goal-path`, and remembered context before writing one Markdown Task Brief or `FINISHED`. If its select output does not start with `FINISHED` or `# Task Brief`, the manager agent asks the same thread to correct the format.
 2. `developer` loads the configured coding-style skill, edits the repository, and reports what changed for review.
-3. `code-reviewer` reads the code and developer report, then returns exactly `ACCEPT` or task feedback.
-4. If the reviewer returns feedback, `developer` fixes the same task and `code-reviewer` reviews again.
-5. After the review loop ends, the pipeline archives the task and reports, asks `coding-manager` to output what should be remembered, and stores that content through `memory-agent-forge`.
+3. `code-reviewer` reads the Task Brief, Developer report, and recalled code-design memory, then returns `ACCEPT`, `REVISE`, or `REDIRECT`. If its output does not start with one of those decisions, the reviewer agent asks the same thread to correct the format.
+4. `REVISE` sends feedback back to `developer`; `REDIRECT` returns control to `coding-manager`; `ACCEPT` finishes the task.
+5. After the review loop ends, the pipeline archives the full transcript, writes `task_round_summary.md` with the Task Brief, final decision, and Developer/Reviewer report text, asks the memory update prompts what should be remembered, and stores that content through `memory-agent-forge`.
 6. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
 
 ## Developing-Skill And Trajectory Feedback
@@ -127,7 +127,7 @@ Each iteration does the following:
 
 The first `trajectory-optimizer` call runs in `scan` mode before the developer starts. It reads the target repository, the current coding-style skill, and the goal context so the optimizer has the same project context as the code-writing loop.
 
-The second `trajectory-optimizer` call runs in `optimize` mode after the iteration finishes. It reads the metaskill, target repository, goal context, current task, and the Developer reports and Reviewer feedback; evaluates whether the skill produced a good modification trajectory; then edits the coding-style skill directly. The prompt focuses the optimizer on missing, misleading, or redundant guidance that affected task selection, coding, or review.
+The second `trajectory-optimizer` call runs in `optimize` mode after the iteration finishes. It reads the metaskill, target repository, goal context, Task Brief, and task round summary; evaluates whether the skill produced a good modification trajectory; then edits the coding-style skill directly. The prompt focuses the optimizer on missing, misleading, or redundant guidance that affected task selection, coding, or review.
 
 The intended loop is:
 
@@ -142,31 +142,31 @@ This is the coding-style version of skill self-improvement: the metaskill states
 
 The pipeline maintains:
 
-| Artifact                    | Where it lives                                                                                                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Memory files                | Under the configured project progress and code design memory directories; maintained by `memory-agent-forge`.                                                               |
-| Timestamped archive folders | Under the configured archive directory; contains each selected task, memory recall guidance, recalled memory, Developer reports, Reviewer feedback, and things to remember. |
+| Artifact                    | Where it lives                                                                                                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Memory files                | Under the configured project progress and code design memory directories; maintained by `memory-agent-forge`.                                                                       |
+| Timestamped archive folders | Under the configured archive directory; contains each Task Brief, memory recall guidance, recalled memory, Developer reports, Reviewer feedback, summaries, and things to remember. |
 
 ## Important Files
 
-| Path                                                                   | Purpose                                                                                      |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI argument parsing and the base `developing` pipeline wrapper.                             |
-| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | Outer project workflow, archive creation, memory recall/update, and per-agent handoff.       |
-| [`pipeline/task-devloop.ts`](src/pipeline/task-devloop.ts)             | Inner developer/reviewer loop for one selected task.                                         |
-| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | `developing-skill` wrapper that adds trajectory optimization callbacks around the base loop. |
-| [`agents/factory.ts`](src/agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                     |
-| [`agents/types.ts`](src/agents/types.ts)                               | Shared workspace-aware base class and variables.                                             |
-| [`agents/manager.ts`](src/agents/manager.ts)                           | Decides what to recall, selects outer-loop tasks, and outputs what should be remembered.     |
-| [`agents/developer.ts`](src/agents/developer.ts)                       | Edits the target repository using the shared coding-style skill.                             |
-| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | Performs the read-only code review gate.                                                     |
-| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | Scans the trajectory and proposes coding-style skill improvements for `developing-skill`.    |
+| Path                                                                   | Purpose                                                                                                                  |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI argument parsing and the base `developing` pipeline wrapper.                                                         |
+| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | Outer project workflow, archive creation, memory recall/update, and per-agent handoff.                                   |
+| [`pipeline/task-devloop.ts`](src/pipeline/task-devloop.ts)             | Inner developer/reviewer loop for one selected task.                                                                     |
+| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | `developing-skill` wrapper that adds trajectory optimization callbacks around the base loop.                             |
+| [`agents/factory.ts`](src/agents/factory.ts)                           | Registers the developing coding manager, developer, and reviewer agents.                                                 |
+| [`agents/types.ts`](src/agents/types.ts)                               | Shared workspace-aware base class and variables.                                                                         |
+| [`agents/manager.ts`](src/agents/manager.ts)                           | Decides what to recall, selects outer-loop tasks, validates select output format, and outputs what should be remembered. |
+| [`agents/developer.ts`](src/agents/developer.ts)                       | Edits the target repository using the shared coding-style skill.                                                         |
+| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | Performs the read-only code review gate, validates review output format, and returns `ACCEPT`, `REVISE`, or `REDIRECT`.  |
+| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | Scans the trajectory and proposes coding-style skill improvements for `developing-skill`.                                |
 
 ## Troubleshooting
 
 | Problem                                 | Likely cause                                                   | Fix                                                                                              |
 | --------------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
 | The loop stops with `FINISHED`          | `coding-manager` decided no further developing task is needed. | Inspect the memory directory and the latest archive.                                             |
-| A task keeps returning task feedback    | The inner developer/reviewer loop has not reached `ACCEPT`.    | Read the Developer reports and Reviewer feedback in the timestamped archive folder.              |
+| A task keeps returning `REVISE`         | The inner developer/reviewer loop has not reached `ACCEPT`.    | Read the Developer reports and Reviewer feedback in the timestamped archive folder.              |
 | A new goal keeps inheriting old context | One of the memory directories still contains old task state.   | Update `--goal-path`; if needed, edit or delete stale memory files before rerunning the wrapper. |
 | The archive option looks misspelled     | The current CLI option name is `--achive-dir`.                 | Use the current option name until the CLI changes.                                               |

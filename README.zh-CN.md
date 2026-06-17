@@ -21,11 +21,11 @@ TypeScript API 从 [`src/index.ts`](src/index.ts) 导出，CLI 入口在 [`src/c
 
 ## 核心思想：Developing 和 Coding Style
 
-`src` 会把当前 goal 变成一条可重复执行的代码编写 trajectory。`coding-manager` 读取当前 repo、goal 和记下来的上下文，选择一个具体 developing task；`developer` 修改目标 repo；`code-reviewer` 返回严格的 `ACCEPT`，或者把 task feedback 送回同一个 task。
+`src` 会把当前 goal 变成一条可重复执行的代码编写 trajectory。`coding-manager` 读取当前 repo、goal 和记下来的上下文，写出一个有边界的 Task Brief 或 `FINISHED`；`developer` 修改目标 repo；`code-reviewer` 返回 `ACCEPT`、`REVISE` 或 `REDIRECT`。
 
 coding-style skill 是 [`skills/coding-style/SKILL.md`](skills/coding-style/SKILL.md)。它的功能是控制写代码 agent 的代码结构和代码风格。上游用户任务决定要实现什么；这个 skill 决定如何让实现保持 readable、local、low-coupling，并和当前 framework 保持一致。
 
-每次 developer run 都会通过 `--coding-style-skill-path` 加载配置的 coding-style skill。[`agents/developer.ts`](src/agents/developer.ts) 会把 [`agents/prompts.ts`](src/agents/prompts.ts) 里的说明放到 developer prompt 前面：先 load and follow 这个 skill，再读取 repo、current goal、goal 中提到的上下文文档和 current task。这样负责写代码的 agent 在 feature、refactor、harness/test work、result exports 和 framework docs 等各种任务里，都会用同一套代码结构和风格偏好，保证输出的代码结构和风格统一。
+每次 developer run 都会通过 `--coding-style-skill-path` 加载配置的 coding-style skill。[`agents/developer.ts`](src/agents/developer.ts) 会把 [`agents/prompts.ts`](src/agents/prompts.ts) 里的说明放到 developer prompt 前面：先 load and follow 这个 skill，再读取 repo、current goal、goal 中提到的上下文文档和 Task Brief。这样负责写代码的 agent 在 feature、refactor、harness/test work、result exports 和 framework docs 等各种任务里，都会用同一套代码结构和风格偏好，保证输出的代码结构和风格统一。
 
 `coding-style` 对代码编写任务是通用的。它不决定 task priority 或 repository template initialization；它只关心代码结构和风格，让代码 concise、readable、low-friction、easy to modify，并贴合现有 repo 结构。
 
@@ -105,7 +105,7 @@ npm run developing -- \
 | `--coding-style-skill-path`      | 配置的 coding-style skill。                                      |
 | `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件。 |
 | `--max-iterations`               | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。         |
-| `--max-task-devloop-iterations` | 限制每个 selected task 的 developer/reviewer 尝试次数。          |
+| `--max-task-devloop-iterations`  | 限制每个 selected task 的 developer/reviewer 尝试次数。          |
 | `--max-memory-rounds`            | 限制 memory recall 和 remember 的 refinement 轮数。              |
 
 ## 主流程
@@ -114,11 +114,11 @@ npm run developing -- \
 
 每轮迭代执行以下步骤：
 
-1. `coding-manager` 先判断需要回忆什么，pipeline 再召回匹配的记忆，然后 `coding-manager` 扫描当前 repo、`--goal-path` 中的 goal 和记下来的上下文，选择一个 developing task。
+1. `coding-manager` 先判断需要回忆什么，pipeline 再召回匹配的记忆，然后 `coding-manager` 扫描当前 repo、`--goal-path` 中的 goal 和记下来的上下文，写出一个 Markdown Task Brief 或 `FINISHED`。如果 select 输出不是以 `FINISHED` 或 `# Task Brief` 开头，manager agent 会要求同一个 thread 修正格式。
 2. `developer` 加载配置的 coding-style skill，修改 repo，并报告自己改了哪些内容给 reviewer。
-3. `code-reviewer` 阅读代码和 developer report，返回严格的 `ACCEPT` 或 task feedback。
-4. 如果 reviewer 返回 feedback，`developer` 继续修同一个任务，然后 `code-reviewer` 再审。
-5. review 循环结束后，pipeline 归档 task 和 reports，让 `coding-manager` 输出有什么需要记下，并通过 `memory-agent-forge` 写入记忆。
+3. `code-reviewer` 阅读 Task Brief、Developer report 和召回的 code-design memory，返回 `ACCEPT`、`REVISE` 或 `REDIRECT`。如果输出不是以这三个决策之一开头，reviewer agent 会要求同一个 thread 修正格式。
+4. `REVISE` 会把反馈送回 `developer`；`REDIRECT` 会把控制权交回 `coding-manager`；`ACCEPT` 表示当前 task 完成。
+5. review 循环结束后，pipeline 归档完整 transcript，写出包含 Task Brief、最终决策和 Developer/Reviewer report 正文的 `task_round_summary.md`，让 memory update prompts 输出有什么需要记下，并通过 `memory-agent-forge` 写入记忆。
 6. 当 `coding-manager` 返回 `FINISHED` 或达到 `--max-iterations` 时停止。
 
 ## developing-skill 和 Trajectory Feedback
@@ -127,7 +127,7 @@ npm run developing -- \
 
 第一次 `trajectory-optimizer` 调用发生在 developer 开始前，使用 `scan` 模式。它会读取目标 repo、当前 coding-style skill 和 goal context，让 optimizer 拿到和代码编写循环相同的项目上下文。
 
-第二次 `trajectory-optimizer` 调用发生在迭代结束后，使用 `optimize` 模式。它会读取 metaskill、target repo、goal context、current task、Developer reports 和 Reviewer feedback；根据 [`metaskills/coding-style/METASKILL.md`](metaskills/coding-style/METASKILL.md) 中写的偏好评估这次修改 trajectory 的质量；然后直接修改 coding-style skill。这个 prompt 会重点检查哪些 guidance 缺失、误导或冗余，并看这些问题是否影响 task selection、coding 或 review。
+第二次 `trajectory-optimizer` 调用发生在迭代结束后，使用 `optimize` 模式。它会读取 metaskill、target repo、goal context、Task Brief 和 task round summary；根据 [`metaskills/coding-style/METASKILL.md`](metaskills/coding-style/METASKILL.md) 中写的偏好评估这次修改 trajectory 的质量；然后直接修改 coding-style skill。这个 prompt 会重点检查哪些 guidance 缺失、误导或冗余，并看这些问题是否影响 task selection、coding 或 review。
 
 推荐的使用循环是：
 
@@ -142,31 +142,31 @@ npm run developing -- \
 
 pipeline 会维护：
 
-| Artifact             | 位置                                                                                                                                             |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Memory files         | 配置的 project progress 和 code design memory 目录下，由 `memory-agent-forge` 维护。                                                             |
-| 按时间戳归档的文件夹 | 配置的 archive 目录下，保存 selected task、memory recall guidance、recalled memory、Developer reports、Reviewer feedback 和 things to remember。 |
+| Artifact             | 位置                                                                                                                                                     |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Memory files         | 配置的 project progress 和 code design memory 目录下，由 `memory-agent-forge` 维护。                                                                     |
+| 按时间戳归档的文件夹 | 配置的 archive 目录下，保存 Task Brief、memory recall guidance、recalled memory、Developer reports、Reviewer feedback、summaries 和 things to remember。 |
 
 ## 重要文件
 
-| 路径                                                                   | 作用                                                                              |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI 参数解析和基础 `developing` pipeline 包装。                                   |
-| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | 外层 project workflow、archive 创建、memory recall/update 和各 agent 之间的交接。 |
-| [`pipeline/task-devloop.ts`](src/pipeline/task-devloop.ts)             | 针对一个 selected task 的内层 developer/reviewer 循环。                           |
-| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | 给基础开发循环增加 trajectory optimization callbacks 的 `developing-skill` 包装。 |
-| [`agents/factory.ts`](src/agents/factory.ts)                           | 注册 developing coding manager、developer 和 reviewer agents。                    |
-| [`agents/types.ts`](src/agents/types.ts)                               | 共享的 workspace-aware base class 和变量定义。                                    |
-| [`agents/manager.ts`](src/agents/manager.ts)                           | 判断需要回忆什么、选择外层任务，并输出有什么需要记下。                            |
-| [`agents/developer.ts`](src/agents/developer.ts)                       | 使用共享 coding-style skill 修改目标 repo。                                       |
-| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | 执行只读代码审阅 gate。                                                           |
-| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。          |
+| 路径                                                                   | 作用                                                                                   |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [`pipeline/pipeline.ts`](src/pipeline/pipeline.ts)                     | CLI 参数解析和基础 `developing` pipeline 包装。                                        |
+| [`pipeline/project-devloop.ts`](src/pipeline/project-devloop.ts)       | 外层 project workflow、archive 创建、memory recall/update 和各 agent 之间的交接。      |
+| [`pipeline/task-devloop.ts`](src/pipeline/task-devloop.ts)             | 针对一个 selected task 的内层 developer/reviewer 循环。                                |
+| [`pipeline/pipelineskill.ts`](src/pipeline/pipelineskill.ts)           | 给基础开发循环增加 trajectory optimization callbacks 的 `developing-skill` 包装。      |
+| [`agents/factory.ts`](src/agents/factory.ts)                           | 注册 developing coding manager、developer 和 reviewer agents。                         |
+| [`agents/types.ts`](src/agents/types.ts)                               | 共享的 workspace-aware base class 和变量定义。                                         |
+| [`agents/manager.ts`](src/agents/manager.ts)                           | 判断需要回忆什么、选择外层任务、校验 select 输出格式，并输出有什么需要记下。           |
+| [`agents/developer.ts`](src/agents/developer.ts)                       | 使用共享 coding-style skill 修改目标 repo。                                            |
+| [`agents/reviewer.ts`](src/agents/reviewer.ts)                         | 执行只读代码审阅 gate、校验 review 输出格式，并返回 `ACCEPT`、`REVISE` 或 `REDIRECT`。 |
+| [`agents/trajectory-optimizer.ts`](src/agents/trajectory-optimizer.ts) | 扫描开发轨迹，并为 `developing-skill` 提出 coding-style skill 优化建议。               |
 
 ## 常见问题
 
-| 问题                           | 常见原因                                              | 解决办法                                                                   |
-| ------------------------------ | ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| Loop 以 `FINISHED` 停止        | `coding-manager` 判断不需要继续选择 developing task。 | 检查 memory 目录和最新 archive。                                           |
-| 某个任务持续返回 task feedback | 内层 developer/reviewer 循环尚未达到 `ACCEPT`。       | 阅读按时间戳归档的 Developer reports 和 Reviewer feedback。                |
-| 新 goal 仍然继承旧上下文       | 某个 memory 目录里还保留旧任务状态。                  | 更新 `--goal-path`；必要时编辑或删除过时 memory 文件，再重新运行 wrapper。 |
-| Archive 参数看起来拼错         | 当前 CLI 参数名就是 `--achive-dir`。                  | 在 CLI 改名前继续使用当前参数名。                                          |
+| 问题                      | 常见原因                                              | 解决办法                                                                   |
+| ------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------- |
+| Loop 以 `FINISHED` 停止   | `coding-manager` 判断不需要继续选择 developing task。 | 检查 memory 目录和最新 archive。                                           |
+| 某个任务持续返回 `REVISE` | 内层 developer/reviewer 循环尚未达到 `ACCEPT`。       | 阅读按时间戳归档的 Developer reports 和 Reviewer feedback。                |
+| 新 goal 仍然继承旧上下文  | 某个 memory 目录里还保留旧任务状态。                  | 更新 `--goal-path`；必要时编辑或删除过时 memory 文件，再重新运行 wrapper。 |
+| Archive 参数看起来拼错    | 当前 CLI 参数名就是 `--achive-dir`。                  | 在 CLI 改名前继续使用当前参数名。                                          |
