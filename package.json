@@ -1,6 +1,6 @@
 {
   "name": "developing-agent-forge",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Goal-driven code development pipelines for coding agents, built on coding-agent-forge.",
   "repository": {
     "type": "git",

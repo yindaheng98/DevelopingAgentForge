@@ -1,4 +1,6 @@
-# Developing Pipeline
+# developing-agent-forge
+
+Goal-driven code development pipelines for coding agents, built on `coding-agent-forge`.
 
 [`src`](src) implements a goal-driven code-writing loop.
 
@@ -17,7 +19,22 @@ The usual entry point is [`develop.sh`](develop.sh), which calls `npm run develo
 
 The pipeline works in the configured `--target-path`, reads the current high-level objective from `--goal-path`, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts under the configured archive directory.
 
-The package exposes a TypeScript API from [`src/index.ts`](src/index.ts) and a CLI from [`src/cli.ts`](src/cli.ts).
+## Package Surface
+
+`package.json` publishes an ESM package named `developing-agent-forge` for Node.js `>=20.19`.
+
+- CLI bin: `developing-agent-forge`, backed by [`src/cli.ts`](src/cli.ts), with `developing` and `developing-skill` pipelines.
+- Public imports: `developing-agent-forge`, `developing-agent-forge/agents`, and `developing-agent-forge/pipeline`.
+- Runtime dependencies: `coding-agent-forge` for agent/pipeline CLI execution and `memory-agent-forge` for durable memory.
+- Published assets include `dist`, `developing-forge.yaml`, `skills`, `metaskills`, both READMEs, and `LICENSE`.
+
+TypeScript API import examples:
+
+```ts
+import { developingPipeline, developingSkillPipeline } from "developing-agent-forge";
+import { CodingManagerAgent } from "developing-agent-forge/agents";
+import { ProjectDevLoop } from "developing-agent-forge/pipeline";
+```
 
 ## Core Idea: Developing And Coding Style
 
@@ -52,7 +69,7 @@ The prepared wrapper passes `--goal-path "output/goal.md"`. Use that file to des
 
 ## TypeScript Development
 
-This repository follows the same npm-based framework as `memory-forge` and `agent-forge`.
+This repository requires Node.js `>=20.19` and follows the npm-based TypeScript workflow defined in `package.json`.
 
 ```bash
 npm ci
@@ -62,7 +79,12 @@ npm run format:check
 npm run build
 ```
 
-For local CLI development, use `npm run dev -- developing ...` or the prepared `npm run developing` and `npm run developing-skill` script aliases.
+Useful local script entry points:
+
+- `npm run dev -- ...` runs `tsx src/cli.ts`.
+- `npm run developing -- ...` runs `tsx src/cli.ts developing`.
+- `npm run developing-skill -- ...` runs `tsx src/cli.ts developing-skill`.
+- `npm run clean`, `npm run format`, and `npm run format:check` handle generated output and formatting.
 
 ## Goal File And Memory Context
 
@@ -92,6 +114,8 @@ npm run developing -- \
 ```
 
 The current CLI option name is `--achive-dir`.
+
+When using the published package bin directly, replace `npm run developing --` with `developing-agent-forge developing` and keep the same pipeline options.
 
 ## Options Reference
 

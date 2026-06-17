@@ -1,4 +1,6 @@
-# Developing Pipeline
+# developing-agent-forge
+
+基于 `coding-agent-forge` 构建的 goal-driven 代码开发 pipeline，用于 coding agents。
 
 [`src`](src) 实现一个 goal-driven 的代码编写循环。
 
@@ -17,7 +19,22 @@
 
 pipeline 会在配置的 `--target-path` 中继续写代码，从 `--goal-path` 读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物归档到 archive 目录。
 
-TypeScript API 从 [`src/index.ts`](src/index.ts) 导出，CLI 入口在 [`src/cli.ts`](src/cli.ts)。
+## 包公开面
+
+`package.json` 发布的是名为 `developing-agent-forge` 的 ESM package，要求 Node.js `>=20.19`。
+
+- CLI bin：`developing-agent-forge`，由 [`src/cli.ts`](src/cli.ts) 提供，包含 `developing` 和 `developing-skill` 两个 pipeline。
+- 公开 import：`developing-agent-forge`、`developing-agent-forge/agents` 和 `developing-agent-forge/pipeline`。
+- 运行时依赖：`coding-agent-forge` 负责 agent/pipeline CLI 执行，`memory-agent-forge` 负责持久化 memory。
+- 发布内容包含 `dist`、`developing-forge.yaml`、`skills`、`metaskills`、两份 README 和 `LICENSE`。
+
+TypeScript API import 示例：
+
+```ts
+import { developingPipeline, developingSkillPipeline } from "developing-agent-forge";
+import { CodingManagerAgent } from "developing-agent-forge/agents";
+import { ProjectDevLoop } from "developing-agent-forge/pipeline";
+```
 
 ## 核心思想：Developing 和 Coding Style
 
@@ -52,7 +69,7 @@ bash develop.sh
 
 ## TypeScript 开发
 
-这个仓库使用和 `memory-forge`、`agent-forge` 相同的 npm TypeScript 框架。
+这个仓库要求 Node.js `>=20.19`，并使用 `package.json` 中定义的 npm TypeScript 工作流。
 
 ```bash
 npm ci
@@ -62,7 +79,12 @@ npm run format:check
 npm run build
 ```
 
-本地调试 CLI 时，可以使用 `npm run dev -- developing ...`，也可以继续使用预设的 `npm run developing` 和 `npm run developing-skill` 脚本别名。
+常用本地脚本入口：
+
+- `npm run dev -- ...` 运行 `tsx src/cli.ts`。
+- `npm run developing -- ...` 运行 `tsx src/cli.ts developing`。
+- `npm run developing-skill -- ...` 运行 `tsx src/cli.ts developing-skill`。
+- `npm run clean`、`npm run format` 和 `npm run format:check` 分别处理生成产物和格式化。
 
 ## Goal 文件和 Memory 上下文
 
@@ -92,6 +114,8 @@ npm run developing -- \
 ```
 
 当前 CLI 参数名是 `--achive-dir`。
+
+如果直接使用发布后的 package bin，把 `npm run developing --` 替换成 `developing-agent-forge developing`，其余 pipeline 参数保持不变。
 
 ## 参数参考
 
