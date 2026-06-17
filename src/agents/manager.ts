@@ -7,13 +7,11 @@ type RecallCodingManagerVariables = DevelopingAgentVariables & {
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
   projectProgressMemory: string;
-  finishMark: string;
   phase: "select";
 };
 
 type UpdateCodingManagerVariables = DevelopingAgentVariables & {
   projectProgressMemory: string;
-  finishMark: string;
   phase: "update";
   taskBrief: string;
   taskRoundSummary: string;
@@ -24,7 +22,18 @@ export type CodingManagerVariables =
   | SelectCodingManagerVariables
   | UpdateCodingManagerVariables;
 
+export type CodingManagerDecision = "FINISHED" | "TASK_BRIEF";
+const MANAGER_DECISION_PATTERN = /^(FINISHED|# Task Brief)/;
+
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
+  parseDecision(managerOutput: string): CodingManagerDecision {
+    const match = MANAGER_DECISION_PATTERN.exec(managerOutput.trimStart());
+    if (match === null) {
+      throw new Error("Coding manager output must start with FINISHED or # Task Brief.");
+    }
+    return match[1] === "FINISHED" ? "FINISHED" : "TASK_BRIEF";
+  }
+
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
     const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
@@ -40,7 +49,6 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
           goalInstructionText,
           targetPath,
           variables.projectProgressMemory,
-          variables.finishMark,
         );
       case "update":
         return buildUpdatePrompt(
@@ -76,7 +84,6 @@ function buildSelectPrompt(
   goalInstructionText: string,
   targetPath: string,
   projectProgressMemory: string,
-  finishMark: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
@@ -114,7 +121,7 @@ What the reviewer should pay attention to.
 Keep the brief bounded enough for one Developer attempt. Use natural language; do not introduce task-type schemas, check schemas, or mode enums unless they are simply part of the prose.
 
 When no further developing task is needed, return exactly:
-${finishMark}
+FINISHED
 `;
 }
 

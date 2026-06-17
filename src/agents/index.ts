@@ -1,4 +1,8 @@
-export { CodingManagerAgent, type CodingManagerVariables } from "./manager.js";
+export {
+  CodingManagerAgent,
+  type CodingManagerDecision,
+  type CodingManagerVariables,
+} from "./manager.js";
 export { DeveloperAgent, type DeveloperVariables } from "./developer.js";
 export { CodeReviewerAgent, type CodeReviewerVariables, type ReviewDecision } from "./reviewer.js";
 export {
