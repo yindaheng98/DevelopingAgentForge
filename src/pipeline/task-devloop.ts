@@ -19,14 +19,13 @@ export type TaskDevLoopAgentVariablesByName = {
   "code-reviewer": CodeReviewerVariables;
 } & MemoryAgentVariablesByName;
 
-const MEMORY_DOMAIN_HINT =
+const CODE_DESIGN_MEMORY_DOMAIN_HINT =
   "Code design memory for logic relationships between code, design rationale, invariants, and implementation decisions in the target repository.";
 
 type TaskRoundFinalDecision = "ACCEPT" | "REDIRECT" | "FAILED";
 
 export type TaskDevLoopResult = {
   finalDecision: TaskRoundFinalDecision;
-  reports: string[];
   taskRoundSummary: string;
 };
 
@@ -72,7 +71,7 @@ export class TaskDevLoop {
     const codeDesignMemory = (
       await memoryStore.recall(
         team,
-        MEMORY_DOMAIN_HINT,
+        CODE_DESIGN_MEMORY_DOMAIN_HINT,
         codeDesignMemoryPath,
         maxMemoryRounds,
         codeDesignMemoryGuidance,
@@ -82,7 +81,7 @@ export class TaskDevLoop {
       .map(({ content }) => content)
       .join("\n\n");
     await writeFile(
-      path.join(archiveDir, "task_devloop_recalled_memory.md"),
+      path.join(archiveDir, "task_devloop_memory_recalled.md"),
       codeDesignMemory,
       "utf8",
     );
@@ -189,7 +188,7 @@ ${taskDevReport}
     );
     await memoryStore.remember(
       team,
-      MEMORY_DOMAIN_HINT,
+      CODE_DESIGN_MEMORY_DOMAIN_HINT,
       codeDesignMemoryPath,
       maxMemoryRounds,
       thingsToRemember,
@@ -197,7 +196,6 @@ ${taskDevReport}
     );
     return {
       finalDecision,
-      reports: taskDevReports,
       taskRoundSummary,
     };
   }
