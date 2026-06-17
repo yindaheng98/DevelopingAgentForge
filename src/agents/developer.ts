@@ -1,3 +1,4 @@
+import { ponytailSkillPrompt } from "./polytail.js";
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -93,6 +94,8 @@ function buildDevelopPrompt(
   reviewerReport: string,
 ): string {
   return `
+${ponytailSkillPrompt}
+
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}

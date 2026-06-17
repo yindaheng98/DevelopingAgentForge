@@ -1,3 +1,4 @@
+// https://github.com/DietrichGebert/ponytail/blob/45f7d2f83fb430a65fd512a98ad7b14d79e06636/skills/ponytail/SKILL.md
 export const ponytailSkillPrompt = `---
 name: ponytail
 description: >
@@ -100,6 +101,7 @@ changed or session end.
 The shortest path to done is the right path.
 `;
 
+// https://github.com/DietrichGebert/ponytail/blob/45f7d2f83fb430a65fd512a98ad7b14d79e06636/skills/ponytail-review/SKILL.md
 export const ponytailReviewSkillPrompt = `---
 name: ponytail-review
 description: >

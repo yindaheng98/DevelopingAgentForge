@@ -1,4 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
+import { ponytailReviewSkillPrompt } from "./polytail.js";
 import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -70,6 +71,8 @@ Please correct it.
     const goalInstructionText = goalInstruction(variables.goal);
 
     return `
+${ponytailReviewSkillPrompt}
+
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
