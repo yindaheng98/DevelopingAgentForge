@@ -6,17 +6,17 @@ type RecallCodingManagerVariables = DevelopingAgentVariables & {
 };
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
-  memory: string;
+  projectProgressMemory: string;
   finishMark: string;
   phase: "select";
 };
 
 type UpdateCodingManagerVariables = DevelopingAgentVariables & {
-  memory: string;
+  projectProgressMemory: string;
   finishMark: string;
   phase: "update";
-  currentTask: string;
-  taskDevReport: string;
+  taskBrief: string;
+  taskRoundSummary: string;
 };
 
 export type CodingManagerVariables =
@@ -39,7 +39,7 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
-          variables.memory,
+          variables.projectProgressMemory,
           variables.finishMark,
         );
       case "update":
@@ -47,9 +47,9 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
-          variables.memory,
-          variables.currentTask,
-          variables.taskDevReport,
+          variables.projectProgressMemory,
+          variables.taskBrief,
+          variables.taskRoundSummary,
         );
     }
   }
@@ -75,7 +75,7 @@ function buildSelectPrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
-  memory: string,
+  projectProgressMemory: string,
   finishMark: string,
 ): string {
   return `
@@ -84,12 +84,34 @@ ${codingStyleSkillInstructionText}
 ${goalInstructionText}
 
 Related project progress memory:
-${memory}
+${projectProgressMemory}
 
 Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
 Select the next developing task for the target repository.
 
 Choose exactly one new bounded task for the Developer.
+
+Output the task as Markdown with this shape:
+
+# Task Brief
+
+## Objective
+
+What should become better in the repository.
+
+## Context
+
+Relevant project state or memory that explains why this task is useful now.
+
+## Boundaries
+
+Known constraints, scope limits, risks, or paths to pay attention to. Leave empty if unknown.
+
+## Reviewer Focus
+
+What the reviewer should pay attention to.
+
+Keep the brief bounded enough for one Developer attempt. Use natural language; do not introduce task-type schemas, check schemas, or mode enums unless they are simply part of the prose.
 
 When no further developing task is needed, return exactly:
 ${finishMark}
@@ -100,26 +122,26 @@ function buildUpdatePrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
-  memory: string,
-  currentTask: string,
-  taskDevReport: string,
+  projectProgressMemory: string,
+  taskBrief: string,
+  taskRoundSummary: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Developing task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
 Related project progress memory before the developing task:
-${memory}
+${projectProgressMemory}
 
-Revision process for completing the developing task:
-${taskDevReport}
+Reality-aware task round summary:
+${taskRoundSummary}
 
 Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developing task.
 
-Remember completed work and current project progress.
+Remember only reusable project state: current goal progress, completed direction, blockers or redirect reasons, and useful next-step context. Do not store long transcripts, one-off runtime noise, or code-design details that belong in code design memory.
 `;
 }

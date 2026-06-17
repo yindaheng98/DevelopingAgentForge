@@ -2,22 +2,22 @@ import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallDeveloperVariables = DevelopingAgentVariables & {
-  currentTask: string;
+  taskBrief: string;
   phase: "recall";
 };
 
 type DevelopDeveloperVariables = DevelopingAgentVariables & {
-  currentTask: string;
-  memory: string;
+  taskBrief: string;
+  codeDesignMemory: string;
   phase: "develop";
   reviewerReport?: string;
 };
 
 type UpdateDeveloperVariables = DevelopingAgentVariables & {
-  currentTask: string;
-  memory: string;
+  taskBrief: string;
+  codeDesignMemory: string;
   phase: "update";
-  taskDevReport: string;
+  taskRoundSummary: string;
 };
 
 export type DeveloperVariables =
@@ -38,7 +38,7 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
-          variables.currentTask,
+          variables.taskBrief,
         );
       case "develop": {
         const reviewerReport = variables.reviewerReport ?? "(none)";
@@ -46,8 +46,8 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
-          variables.currentTask,
-          variables.memory,
+          variables.taskBrief,
+          variables.codeDesignMemory,
           reviewerReport,
         );
       }
@@ -56,9 +56,9 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
           codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
-          variables.currentTask,
-          variables.memory,
-          variables.taskDevReport,
+          variables.taskBrief,
+          variables.codeDesignMemory,
+          variables.taskRoundSummary,
         );
     }
   }
@@ -68,17 +68,17 @@ function buildRecallPrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
-  currentTask: string,
+  taskBrief: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Current task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
-Scan the target repository at ${targetPath}/ and decide what code design memory helps complete the current task.
+Scan the target repository at ${targetPath}/ and decide what code design memory helps complete the Task Brief.
 
 Output concise code design memory recall guidance.
 `;
@@ -88,8 +88,8 @@ function buildDevelopPrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
-  currentTask: string,
-  memory: string,
+  taskBrief: string,
+  codeDesignMemory: string,
   reviewerReport: string,
 ): string {
   return `
@@ -98,19 +98,27 @@ ${codingStyleSkillInstructionText}
 ${goalInstructionText}
 
 Related code design memory:
-${memory}
+${codeDesignMemory}
 
 Work in the target repository at ${targetPath}/.
 
-Current task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
 Reviewer report:
 ${reviewerReport}
 
-Modify the target repository code for the current task. If a reviewer report is present, update the code according to that report.
+Improve the repository according to the Task Brief. If a reviewer report is present, update the code according to that report.
 
-Output a concise developer report with the main changes.
+Use your own judgment to inspect, edit, and verify. If you make no changes, explain why no change is appropriate on disk.
+
+Output a concise developer report with:
+- what you changed
+- what you inspected
+- what commands you ran
+- why the result addresses the Objective
+- any blockers or uncertainty
+- any code relationships or design lessons that should be remembered
 `;
 }
 
@@ -118,26 +126,26 @@ function buildUpdatePrompt(
   codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
-  currentTask: string,
-  memory: string,
-  taskDevReport: string,
+  taskBrief: string,
+  codeDesignMemory: string,
+  taskRoundSummary: string,
 ): string {
   return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
-Current task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
-Related code design memory before the current task:
-${memory}
+Related code design memory before the task:
+${codeDesignMemory}
 
-Revision process for completing the current task:
-${taskDevReport}
+Reality-aware task round summary:
+${taskRoundSummary}
 
-Scan the target repository at ${targetPath}/ and consider what code logic relationships and design reasons should be remembered after the current task.
+Scan the target repository at ${targetPath}/ and consider what reusable code logic relationships and design reasons should be remembered after this task.
 
-Remember code logic relationships and why the current design matches the repository.
+Remember only reusable code/design memory: module relationships, architecture constraints, invariants, interface design, review rules, and pitfalls. Do not store long transcripts, one-off command output, runtime noise, or project progress state.
 `;
 }

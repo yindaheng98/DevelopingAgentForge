@@ -2,9 +2,10 @@ import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
-  acceptMark: string;
-  currentTask: string;
+  taskBrief: string;
   developerReport: string;
+  realityRecord: string;
+  codeDesignMemory: string;
 };
 
 export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
@@ -23,16 +24,37 @@ Review the current code. Read only.
 
 ${goalInstructionText}
 
-Current developing task:
-${variables.currentTask}
+Task Brief:
+${variables.taskBrief}
+
+Related code design memory:
+${variables.codeDesignMemory}
 
 Developer report:
 ${variables.developerReport}
 
-If the code for the current task is complete and needs no more changes, output exactly:
-${variables.acceptMark}
+Reality Record:
+${variables.realityRecord}
 
-Otherwise output the revision feedback for the Developer.
+Review the Developer's result using the Task Brief, Reality Record, code design memory, and Developer report.
+
+Focus on:
+- whether the Objective is actually improved
+- whether the evidence supports the Developer's claims
+- whether the code quality and design remain healthy
+- whether the change respects existing code relationships and design memory
+- whether the next action should be revision, manager redirection, or acceptance
+
+On the first non-empty line, output exactly one decision:
+ACCEPT
+REVISE
+REDIRECT
+
+Use ACCEPT when the result is good enough.
+Use REVISE when the Developer can improve the result within the same task direction.
+Use REDIRECT when the task direction, scope, dependency, or premise should be reconsidered by the Manager.
+
+After the decision, give concise feedback unless ACCEPT. Also list any reusable memory candidates.
 `
     );
   }

@@ -5,13 +5,13 @@ import type { DevelopingAgentVariables } from "./types.js";
 
 type ScanTrajectoryOptimizerVariables = DevelopingAgentVariables & {
   phase: "scan";
-  currentTask: string;
+  taskBrief: string;
 };
 
 type OptimizeTrajectoryOptimizerVariables = DevelopingAgentVariables & {
   phase: "optimize";
-  currentTask: string;
-  taskDevReport: string;
+  taskBrief: string;
+  taskRoundSummary: string;
   metaskillPath: string;
 };
 
@@ -29,7 +29,7 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
           variables.targetPath,
           variables.codingStyleSkillPath,
           goalInstructionText,
-          variables.currentTask,
+          variables.taskBrief,
         );
       case "optimize": {
         const metaskill = readFileSync(variables.metaskillPath, "utf8");
@@ -37,8 +37,8 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
           variables.targetPath,
           variables.codingStyleSkillPath,
           goalInstructionText,
-          variables.currentTask,
-          variables.taskDevReport,
+          variables.taskBrief,
+          variables.taskRoundSummary,
           metaskill,
         );
       }
@@ -50,16 +50,16 @@ function buildScanPrompt(
   targetPath: string,
   codingStyleSkillPath: string,
   goalInstructionText: string,
-  currentTask: string,
+  taskBrief: string,
 ): string {
   return `
 Work in the target repository at ${targetPath}/.
-Scan the target repository at ${targetPath}/ and the skill at ${codingStyleSkillPath} before the Developer starts the current task. Read only.
+Scan the target repository at ${targetPath}/ and the skill at ${codingStyleSkillPath} before the Developer starts the Task Brief. Read only.
 
 ${goalInstructionText}
 
-Current developing task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
 Output a concise baseline of the repository state relevant to this task and the main guidance the skill should provide.
 `;
@@ -69,8 +69,8 @@ function buildOptimizePrompt(
   targetPath: string,
   codingStyleSkillPath: string,
   goalInstructionText: string,
-  currentTask: string,
-  taskDevReport: string,
+  taskBrief: string,
+  taskRoundSummary: string,
   metaskill: string,
 ): string {
   return `
@@ -84,11 +84,11 @@ Read:
 - target repository: ${targetPath}
 ${goalInstructionText}
 
-Current developing task:
-${currentTask}
+Task Brief:
+${taskBrief}
 
-Revision process for completing the developing task:
-${taskDevReport}
+Reality-aware task round summary:
+${taskRoundSummary}
 
 Evaluate whether the skill produced a good modification trajectory, then edit the skill directly. Focus on missing, misleading, or redundant guidance that affected task selection, coding, or review.
 
