@@ -80,8 +80,10 @@ The metaskill below contains the design goals and tips of this skill:
 
 ${metaskill}
 
-Read:
-- target repository: ${targetPath}
+The sections below describe the task this skill just executed and what happened during that round.
+
+Target repository at ${targetPath}/.
+
 ${goalInstructionText}
 
 Task Brief:

@@ -69,14 +69,13 @@ Please correct it.
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
-    return (
-      codingStyleSkillInstructionText +
-      `
+    return `
+${codingStyleSkillInstructionText}
+
+${goalInstructionText}
 
 Work in the target repository at ${targetPath}/.
 Review the current code. Read only.
-
-${goalInstructionText}
 
 Task Brief:
 ${variables.taskBrief}
@@ -106,7 +105,6 @@ Use REVISE when the Developer can improve the result within the same task direct
 Use REDIRECT when the task direction, scope, dependency, or premise should be reconsidered by the Manager.
 
 After the decision, give concise feedback unless ACCEPT. Also list any reusable memory candidates.
-`
-    );
+`;
   }
 }
