@@ -26,7 +26,7 @@ export type CodingManagerVariables =
   | UpdateCodingManagerVariables;
 
 export type CodingManagerDecision = "FINISHED" | "TASK_BRIEF";
-const MANAGER_DECISION_PATTERN = /^(FINISHED|# Task Brief)/;
+const MANAGER_DECISION_PATTERN = /^(FINISHED|# Task Brief)\b/;
 const MAX_FORMAT_CORRECTION_ATTEMPTS = 3;
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
