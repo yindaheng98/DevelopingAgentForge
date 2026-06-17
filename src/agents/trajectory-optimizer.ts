@@ -23,24 +23,26 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
   protected buildPrompt(variables: Readonly<TrajectoryOptimizerVariables>): string {
     const goalInstructionText = goalInstruction(variables.goal);
 
-    if (variables.phase === "scan") {
-      return buildScanPrompt(
-        variables.targetPath,
-        variables.codingStyleSkillPath,
-        goalInstructionText,
-        variables.currentTask,
-      );
+    switch (variables.phase) {
+      case "scan":
+        return buildScanPrompt(
+          variables.targetPath,
+          variables.codingStyleSkillPath,
+          goalInstructionText,
+          variables.currentTask,
+        );
+      case "optimize": {
+        const metaskill = readFileSync(variables.metaskillPath, "utf8");
+        return buildOptimizePrompt(
+          variables.targetPath,
+          variables.codingStyleSkillPath,
+          goalInstructionText,
+          variables.currentTask,
+          variables.taskDevReport,
+          metaskill,
+        );
+      }
     }
-
-    const metaskill = readFileSync(variables.metaskillPath, "utf8");
-    return buildOptimizePrompt(
-      variables.targetPath,
-      variables.codingStyleSkillPath,
-      goalInstructionText,
-      variables.currentTask,
-      variables.taskDevReport,
-      metaskill,
-    );
   }
 }
 

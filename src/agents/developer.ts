@@ -32,35 +32,35 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
-    if (variables.phase === "recall") {
-      return buildRecallPrompt(
-        codingStyleSkillInstructionText,
-        goalInstructionText,
-        targetPath,
-        variables.currentTask,
-      );
+    switch (variables.phase) {
+      case "recall":
+        return buildRecallPrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          variables.currentTask,
+        );
+      case "update":
+        return buildUpdatePrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          variables.currentTask,
+          variables.memory,
+          variables.taskDevReport,
+        );
+      case "develop": {
+        const reviewerReport = variables.reviewerReport ?? "(none)";
+        return buildDevelopPrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          variables.currentTask,
+          variables.memory,
+          reviewerReport,
+        );
+      }
     }
-
-    if (variables.phase === "update") {
-      return buildUpdatePrompt(
-        codingStyleSkillInstructionText,
-        goalInstructionText,
-        targetPath,
-        variables.currentTask,
-        variables.memory,
-        variables.taskDevReport,
-      );
-    }
-
-    const reviewerReport = variables.reviewerReport ?? "(none)";
-    return buildDevelopPrompt(
-      codingStyleSkillInstructionText,
-      goalInstructionText,
-      targetPath,
-      variables.currentTask,
-      variables.memory,
-      reviewerReport,
-    );
   }
 }
 

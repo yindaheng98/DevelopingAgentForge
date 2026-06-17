@@ -31,28 +31,27 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
-    if (variables.phase === "recall") {
-      return buildRecallPrompt(codingStyleSkillInstructionText, goalInstructionText, targetPath);
+    switch (variables.phase) {
+      case "recall":
+        return buildRecallPrompt(codingStyleSkillInstructionText, goalInstructionText, targetPath);
+      case "update":
+        return buildUpdatePrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          variables.memory,
+          variables.currentTask,
+          variables.taskDevReport,
+        );
+      case "select":
+        return buildSelectPrompt(
+          codingStyleSkillInstructionText,
+          goalInstructionText,
+          targetPath,
+          variables.memory,
+          variables.finishMark,
+        );
     }
-
-    if (variables.phase === "update") {
-      return buildUpdatePrompt(
-        codingStyleSkillInstructionText,
-        goalInstructionText,
-        targetPath,
-        variables.memory,
-        variables.currentTask,
-        variables.taskDevReport,
-      );
-    }
-
-    return buildSelectPrompt(
-      codingStyleSkillInstructionText,
-      goalInstructionText,
-      targetPath,
-      variables.memory,
-      variables.finishMark,
-    );
   }
 }
 
