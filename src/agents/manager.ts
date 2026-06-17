@@ -32,7 +32,36 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     const goalInstructionText = goalInstruction(variables.goal);
 
     if (variables.phase === "recall") {
-      return `
+      return buildRecallPrompt(codingStyleSkillInstructionText, goalInstructionText, targetPath);
+    }
+
+    if (variables.phase === "update") {
+      return buildUpdatePrompt(
+        codingStyleSkillInstructionText,
+        goalInstructionText,
+        targetPath,
+        variables.memory,
+        variables.currentTask,
+        variables.taskDevReport,
+      );
+    }
+
+    return buildSelectPrompt(
+      codingStyleSkillInstructionText,
+      goalInstructionText,
+      targetPath,
+      variables.memory,
+      variables.finishMark,
+    );
+  }
+}
+
+function buildRecallPrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
@@ -41,36 +70,50 @@ Scan the target repository at ${targetPath}/ and decide what project progress me
 
 Output concise project progress memory recall guidance.
 `;
-    }
+}
 
-    if (variables.phase === "update") {
-      return `
+function buildUpdatePrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+  memory: string,
+  currentTask: string,
+  taskDevReport: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
 Developing task:
-${variables.currentTask}
+${currentTask}
 
 Related project progress memory before the developing task:
-${variables.memory}
+${memory}
 
 Revision process for completing the developing task:
-${variables.taskDevReport}
+${taskDevReport}
 
 Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developing task.
 
 Remember completed work and current project progress.
 `;
-    }
+}
 
-    return `
+function buildSelectPrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+  memory: string,
+  finishMark: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
 Related project progress memory:
-${variables.memory}
+${memory}
 
 Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
 Select the next developing task for the target repository.
@@ -78,7 +121,6 @@ Select the next developing task for the target repository.
 Choose exactly one new bounded task for the Developer.
 
 When no further developing task is needed, return exactly:
-${variables.finishMark}
+${finishMark}
 `;
-  }
 }

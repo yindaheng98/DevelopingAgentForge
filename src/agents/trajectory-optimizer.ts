@@ -24,40 +24,72 @@ export class TrajectoryOptimizerAgent extends Agent<TrajectoryOptimizerVariables
     const goalInstructionText = goalInstruction(variables.goal);
 
     if (variables.phase === "scan") {
-      return `
-Work in the target repository at ${variables.targetPath}/.
-Scan the target repository at ${variables.targetPath}/ and the skill at ${variables.codingStyleSkillPath} before the Developer starts the current task. Read only.
+      return buildScanPrompt(
+        variables.targetPath,
+        variables.codingStyleSkillPath,
+        goalInstructionText,
+        variables.currentTask,
+      );
+    }
+
+    const metaskill = readFileSync(variables.metaskillPath, "utf8");
+    return buildOptimizePrompt(
+      variables.targetPath,
+      variables.codingStyleSkillPath,
+      goalInstructionText,
+      variables.currentTask,
+      variables.taskDevReport,
+      metaskill,
+    );
+  }
+}
+
+function buildScanPrompt(
+  targetPath: string,
+  codingStyleSkillPath: string,
+  goalInstructionText: string,
+  currentTask: string,
+): string {
+  return `
+Work in the target repository at ${targetPath}/.
+Scan the target repository at ${targetPath}/ and the skill at ${codingStyleSkillPath} before the Developer starts the current task. Read only.
 
 ${goalInstructionText}
 
 Current developing task:
-${variables.currentTask}
+${currentTask}
 
 Output a concise baseline of the repository state relevant to this task and the main guidance the skill should provide.
 `;
-    }
+}
 
-    const metaskill = readFileSync(variables.metaskillPath, "utf8");
-    return `
-Revise the skill at ${variables.codingStyleSkillPath} so it produces better development trajectories.
+function buildOptimizePrompt(
+  targetPath: string,
+  codingStyleSkillPath: string,
+  goalInstructionText: string,
+  currentTask: string,
+  taskDevReport: string,
+  metaskill: string,
+): string {
+  return `
+Revise the skill at ${codingStyleSkillPath} so it produces better development trajectories.
 
 The metaskill below contains the design goals and tips of this skill:
 
 ${metaskill}
 
 Read:
-- target repository: ${variables.targetPath}
+- target repository: ${targetPath}
 ${goalInstructionText}
 
 Current developing task:
-${variables.currentTask}
+${currentTask}
 
 Revision process for completing the developing task:
-${variables.taskDevReport}
+${taskDevReport}
 
 Evaluate whether the skill produced a good modification trajectory, then edit the skill directly. Focus on missing, misleading, or redundant guidance that affected task selection, coding, or review.
 
 Output a concise optimizer report with the main skill changes.
 `;
-  }
 }

@@ -33,54 +33,105 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
     const goalInstructionText = goalInstruction(variables.goal);
 
     if (variables.phase === "recall") {
-      return `
+      return buildRecallPrompt(
+        codingStyleSkillInstructionText,
+        goalInstructionText,
+        targetPath,
+        variables.currentTask,
+      );
+    }
+
+    if (variables.phase === "update") {
+      return buildUpdatePrompt(
+        codingStyleSkillInstructionText,
+        goalInstructionText,
+        targetPath,
+        variables.currentTask,
+        variables.memory,
+        variables.taskDevReport,
+      );
+    }
+
+    const reviewerReport = variables.reviewerReport ?? "(none)";
+    return buildDevelopPrompt(
+      codingStyleSkillInstructionText,
+      goalInstructionText,
+      targetPath,
+      variables.currentTask,
+      variables.memory,
+      reviewerReport,
+    );
+  }
+}
+
+function buildRecallPrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+  currentTask: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
 Current task:
-${variables.currentTask}
+${currentTask}
 
 Scan the target repository at ${targetPath}/ and decide what code design memory helps complete the current task.
 
 Output concise code design memory recall guidance.
 `;
-    }
+}
 
-    if (variables.phase === "update") {
-      return `
+function buildUpdatePrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+  currentTask: string,
+  memory: string,
+  taskDevReport: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
 Current task:
-${variables.currentTask}
+${currentTask}
 
 Related code design memory before the current task:
-${variables.memory}
+${memory}
 
 Revision process for completing the current task:
-${variables.taskDevReport}
+${taskDevReport}
 
 Scan the target repository at ${targetPath}/ and consider what code logic relationships and design reasons should be remembered after the current task.
 
 Remember code logic relationships and why the current design matches the repository.
 `;
-    }
+}
 
-    const reviewerReport = variables.reviewerReport ?? "(none)";
-    return `
+function buildDevelopPrompt(
+  codingStyleSkillInstructionText: string,
+  goalInstructionText: string,
+  targetPath: string,
+  currentTask: string,
+  memory: string,
+  reviewerReport: string,
+): string {
+  return `
 ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
 Related code design memory:
-${variables.memory}
+${memory}
 
 Work in the target repository at ${targetPath}/.
 
 Current task:
-${variables.currentTask}
+${currentTask}
 
 Reviewer report:
 ${reviewerReport}
@@ -89,5 +140,4 @@ Modify the target repository code for the current task. If a reviewer report is 
 
 Output a concise developer report with the main changes.
 `;
-  }
 }
