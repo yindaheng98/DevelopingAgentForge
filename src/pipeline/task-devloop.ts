@@ -7,10 +7,11 @@ import {
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import type {
-  CodeReviewerVariables,
-  DeveloperVariables,
-  DevelopingAgentVariables,
+import {
+  type CodeReviewerAgent,
+  type CodeReviewerVariables,
+  type DeveloperVariables,
+  type DevelopingAgentVariables,
 } from "../agents/index.js";
 
 export type TaskDevLoopAgentVariablesByName = {
@@ -18,9 +19,16 @@ export type TaskDevLoopAgentVariablesByName = {
   "code-reviewer": CodeReviewerVariables;
 } & MemoryAgentVariablesByName;
 
-const ACCEPT_MARK = "ACCEPT";
 const MEMORY_DOMAIN_HINT =
   "Code design memory for logic relationships between code, design rationale, invariants, and implementation decisions in the target repository.";
+
+type TaskRoundFinalDecision = "ACCEPT" | "REDIRECT" | "FAILED";
+
+export type TaskDevLoopResult = {
+  finalDecision: TaskRoundFinalDecision;
+  reports: string[];
+  taskRoundSummary: string;
+};
 
 export class TaskDevLoop {
   async develop(
@@ -30,11 +38,11 @@ export class TaskDevLoop {
     goal: string,
     archiveDir: string,
     maxIterations: number,
-    currentTask: string,
+    taskBrief: string,
     codeDesignMemoryPath: string,
     maxMemoryRounds: number,
     logRecord?: RecordCallback,
-  ): Promise<string[]> {
+  ): Promise<TaskDevLoopResult> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath,
       codingStyleSkillPath,
@@ -44,13 +52,13 @@ export class TaskDevLoop {
     await mkdir(archiveDir, { recursive: true });
 
     const developer = await team.createAgent("developer");
-    const codeReviewer = await team.createAgent("code-reviewer");
+    const codeReviewer = (await team.createAgent("code-reviewer")) as CodeReviewerAgent;
     const memoryStore = new Memory(defaultMemoryAgentNames);
-    const memoryGuidance = (
+    const codeDesignMemoryGuidance = (
       await developer.runStreamed(
         {
           ...agentVariables,
-          currentTask,
+          taskBrief,
           phase: "recall",
         },
         logRecord,
@@ -58,33 +66,38 @@ export class TaskDevLoop {
     ).trim();
     await writeFile(
       path.join(archiveDir, "task_devloop_memory_recall_guidance.md"),
-      memoryGuidance,
+      codeDesignMemoryGuidance,
       "utf8",
     );
-    const memory = (
+    const codeDesignMemory = (
       await memoryStore.recall(
         team,
         MEMORY_DOMAIN_HINT,
         codeDesignMemoryPath,
         maxMemoryRounds,
-        memoryGuidance,
+        codeDesignMemoryGuidance,
         logRecord,
       )
     )
       .map(({ content }) => content)
       .join("\n\n");
-    await writeFile(path.join(archiveDir, "task_devloop_recalled_memory.md"), memory, "utf8");
+    await writeFile(
+      path.join(archiveDir, "task_devloop_recalled_memory.md"),
+      codeDesignMemory,
+      "utf8",
+    );
 
     let previousReviewerReport = "";
     const taskDevReports: string[] = [];
+    let finalDecision: TaskRoundFinalDecision = "FAILED";
 
     for (let iteration = 1; iteration <= maxIterations; iteration++) {
       console.log(`\n# Developer/reviewer iteration ${String(iteration)}\n`);
 
       const developerVariables: DeveloperVariables = {
         ...agentVariables,
-        currentTask,
-        memory,
+        taskBrief,
+        codeDesignMemory,
         phase: "develop",
       };
       if (previousReviewerReport) {
@@ -103,9 +116,9 @@ export class TaskDevLoop {
         await codeReviewer.runStreamed(
           {
             ...agentVariables,
-            acceptMark: ACCEPT_MARK,
-            currentTask,
+            taskBrief,
             developerReport,
+            codeDesignMemory,
           },
           logRecord,
         )
@@ -117,33 +130,54 @@ export class TaskDevLoop {
       );
       taskDevReports.push(`Reviewer report ${String(iteration)}:\n${reviewerReport}`);
 
-      const accepted = reviewerReport.trim() === ACCEPT_MARK;
-      if (accepted) {
+      const reviewDecision = codeReviewer.parseDecision(reviewerReport);
+
+      if (reviewDecision === "ACCEPT") {
         taskDevReports.push("Reviewer accepted the changes.");
+        finalDecision = "ACCEPT";
+        break;
       }
 
-      if (!accepted && iteration === maxIterations) {
+      if (reviewDecision === "REDIRECT") {
+        taskDevReports.push("Reviewer redirected the task to the Manager.");
+        finalDecision = "REDIRECT";
+        break;
+      }
+
+      if (iteration === maxIterations) {
         taskDevReports.push(
           "Reviewer did not accept the changes before the maximum review attempts.",
         );
-      }
-
-      if (accepted) {
+        finalDecision = "FAILED";
         break;
       }
+
       previousReviewerReport = reviewerReport;
     }
 
     const taskDevReport = taskDevReports.join("\n\n");
     await writeFile(path.join(archiveDir, "task_devloop_report.md"), taskDevReport, "utf8");
+    const taskRoundSummary = `# Task Round Summary
+
+## Task Brief
+${taskBrief}
+
+## Final Decision
+${finalDecision}
+
+## Developer/Reviewer Reports
+${taskDevReport}
+`;
+    await writeFile(path.join(archiveDir, "task_round_summary.md"), taskRoundSummary, "utf8");
+
     const thingsToRemember = (
       await developer.runStreamed(
         {
           ...agentVariables,
-          currentTask,
-          memory,
+          taskBrief,
+          codeDesignMemory,
           phase: "update",
-          taskDevReport,
+          taskRoundSummary,
         },
         logRecord,
       )
@@ -161,6 +195,10 @@ export class TaskDevLoop {
       thingsToRemember,
       logRecord,
     );
-    return taskDevReports;
+    return {
+      finalDecision,
+      reports: taskDevReports,
+      taskRoundSummary,
+    };
   }
 }
