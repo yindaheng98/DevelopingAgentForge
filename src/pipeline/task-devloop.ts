@@ -40,6 +40,7 @@ export class TaskDevLoop {
     taskBrief: string,
     codeDesignMemoryPath: string,
     maxMemoryRounds: number,
+    cleanMemory?: boolean,
     logRecord?: RecordCallback,
   ): Promise<TaskDevLoopResult> {
     const agentVariables: DevelopingAgentVariables = {
@@ -194,6 +195,15 @@ ${taskDevReport}
       thingsToRemember,
       logRecord,
     );
+    if (cleanMemory) {
+      console.log("\n# Cleaning code design memory\n");
+      await memoryStore.clean(
+        team,
+        CODE_DESIGN_MEMORY_DOMAIN_HINT,
+        codeDesignMemoryPath,
+        logRecord,
+      );
+    }
     return {
       finalDecision,
       taskRoundSummary,
