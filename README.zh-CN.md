@@ -110,7 +110,8 @@ npm run developing -- \
   --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-task-devloop-iterations "10" \
-  --max-memory-rounds "3"
+  --max-memory-rounds "3" \
+  --memory-clean-interval "0"
 ```
 
 当前 CLI 参数名是 `--achive-dir`。
@@ -119,18 +120,19 @@ npm run developing -- \
 
 ## 参数参考
 
-| 参数                             | 说明                                                             |
-| -------------------------------- | ---------------------------------------------------------------- |
-| `--config`                       | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。      |
-| `--target-path`                  | 目标代码库目录。                                                 |
-| `--achive-dir`                   | Project development archive 目录。                               |
-| `--project-progress-memory-path` | 用于保持项目进度连续性的 memory 目录。                           |
-| `--code-design-memory-path`      | 用于保持代码设计连续性的 memory 目录。                           |
-| `--coding-style-skill-path`      | 配置的 coding-style skill。                                      |
-| `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件。 |
-| `--max-iterations`               | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。         |
-| `--max-task-devloop-iterations`  | 限制每个 selected task 的 developer/reviewer 尝试次数。          |
-| `--max-memory-rounds`            | 限制 memory recall 和 remember 的 refinement 轮数。              |
+| 参数                             | 说明                                                               |
+| -------------------------------- | ------------------------------------------------------------------ |
+| `--config`                       | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。        |
+| `--target-path`                  | 目标代码库目录。                                                   |
+| `--achive-dir`                   | Project development archive 目录。                                 |
+| `--project-progress-memory-path` | 用于保持项目进度连续性的 memory 目录。                             |
+| `--code-design-memory-path`      | 用于保持代码设计连续性的 memory 目录。                             |
+| `--coding-style-skill-path`      | 配置的 coding-style skill。                                        |
+| `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件。   |
+| `--max-iterations`               | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。           |
+| `--max-task-devloop-iterations`  | 限制每个 selected task 的 developer/reviewer 尝试次数。            |
+| `--max-memory-rounds`            | 限制 memory recall 和 remember 的 refinement 轮数。                |
+| `--memory-clean-interval`        | 每隔多少轮 project iteration 自动清理 memory；`0` 表示不自动清理。 |
 
 ## 主流程
 
@@ -143,8 +145,9 @@ npm run developing -- \
 3. `code-reviewer` 阅读 Task Brief、Developer report 和召回的 code-design memory，返回 `ACCEPT`、`REVISE` 或 `REDIRECT`。如果输出不是以这三个决策之一开头，reviewer agent 会要求同一个 thread 修正格式。
 4. `REVISE` 会把反馈送回 `developer`；`REDIRECT` 会把控制权交回 `coding-manager`；`ACCEPT` 表示当前 task 完成。
 5. review 循环结束后，pipeline 归档完整 transcript，写出包含 Task Brief、最终决策和 Developer/Reviewer report 正文的 `task_round_summary.md`，让 memory update prompts 输出有什么需要记下，并通过 `memory-agent-forge` 写入记忆。
-6. 下一轮 project iteration 里，`coding-manager` 的 recall 和 task selection 会收到上一轮 `task_round_summary.md` 正文作为 `lastTaskRoundSummary`，所以 `REDIRECT` 可以直接影响下一次 Task Brief。
-7. 当 `coding-manager` 返回 `FINISHED` 或达到 `--max-iterations` 时停止。
+6. 如果 `--memory-clean-interval` 是正数，且刚完成的 project iteration 是它的倍数，pipeline 会清理两个已配置的 memory 目录。
+7. 下一轮 project iteration 里，`coding-manager` 的 recall 和 task selection 会收到上一轮 `task_round_summary.md` 正文作为 `lastTaskRoundSummary`，所以 `REDIRECT` 可以直接影响下一次 Task Brief。
+8. 当 `coding-manager` 返回 `FINISHED` 或达到 `--max-iterations` 时停止。
 
 ## developing-skill 和 Trajectory Feedback
 

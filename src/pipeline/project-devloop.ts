@@ -50,6 +50,7 @@ export class ProjectDevLoop {
     projectProgressMemoryPath: string,
     codeDesignMemoryPath: string,
     maxMemoryRounds: number,
+    memoryCleanInterval: number,
     callbacks?: ProjectDevLoopCallbacks,
     logRecord?: RecordCallback,
   ): Promise<void> {
@@ -126,6 +127,7 @@ export class ProjectDevLoop {
 
       await callbacks?.onTaskStart?.(agentVariables, taskBrief);
 
+      const cleanMemory = memoryCleanInterval > 0 && iteration % memoryCleanInterval === 0;
       const taskResult = await taskDevLoop.develop(
         team,
         agentVariables.targetPath,
@@ -136,6 +138,7 @@ export class ProjectDevLoop {
         taskBrief,
         codeDesignMemoryPath,
         maxMemoryRounds,
+        cleanMemory,
         logRecord,
       );
       if (taskResult.finalDecision === "REDIRECT" || taskResult.finalDecision === "FAILED") {
@@ -171,6 +174,18 @@ export class ProjectDevLoop {
       );
 
       await callbacks?.onTaskFinish?.(agentVariables, taskBrief, taskResult, thingsToRemember);
+
+      if (cleanMemory) {
+        console.log(
+          `\n# Cleaning project progress memory after project dev loop iteration ${String(iteration)}\n`,
+        );
+        await memoryStore.clean(
+          team,
+          PROJECT_STATE_MEMORY_DOMAIN_HINT,
+          projectProgressMemoryPath,
+          logRecord,
+        );
+      }
     }
 
     throw new Error(

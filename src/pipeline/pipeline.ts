@@ -24,6 +24,7 @@ export type DevelopingOptions = {
   projectProgressMemoryPath: string;
   codeDesignMemoryPath: string;
   maxMemoryRounds: number;
+  memoryCleanInterval: number;
   callbacks?: ProjectDevLoopCallbacks;
 };
 
@@ -48,6 +49,7 @@ export async function developing(
     options.projectProgressMemoryPath,
     options.codeDesignMemoryPath,
     options.maxMemoryRounds,
+    options.memoryCleanInterval,
     options.callbacks,
     logRecord,
   );
@@ -101,6 +103,11 @@ export const developingArgsOptions = {
     default: "3",
     description: "Maximum recall and remember refinement rounds",
   },
+  "memory-clean-interval": {
+    type: "string",
+    default: "0",
+    description: "Project iterations between memory clean runs; 0 disables automatic clean",
+  },
 } as const satisfies PipelineArgsOptions;
 
 export const developingPipeline = definePipeline({
@@ -122,6 +129,7 @@ export const developingPipeline = definePipeline({
       "project-progress-memory-path": projectProgressMemoryPath,
       "code-design-memory-path": codeDesignMemoryPath,
       "max-memory-rounds": maxMemoryRounds,
+      "memory-clean-interval": memoryCleanInterval,
       callbacks,
     } = options;
     if (
@@ -154,6 +162,7 @@ export const developingPipeline = definePipeline({
       projectProgressMemoryPath,
       codeDesignMemoryPath,
       maxMemoryRounds: Number(maxMemoryRounds),
+      memoryCleanInterval: Number(memoryCleanInterval),
       ...(callbacks === undefined ? {} : { callbacks }),
     });
   },

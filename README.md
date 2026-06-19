@@ -110,7 +110,8 @@ npm run developing -- \
   --goal-path "output/goal.md" \
   --max-iterations "100" \
   --max-task-devloop-iterations "10" \
-  --max-memory-rounds "3"
+  --max-memory-rounds "3" \
+  --memory-clean-interval "0"
 ```
 
 The current CLI option name is `--achive-dir`.
@@ -131,6 +132,7 @@ When using the published package bin directly, replace `npm run developing --` w
 | `--max-iterations`               | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
 | `--max-task-devloop-iterations`  | Limits developer/reviewer attempts for each selected task.            |
 | `--max-memory-rounds`            | Limits memory recall and remember refinement rounds.                  |
+| `--memory-clean-interval`        | Project iterations between automatic memory clean runs; `0` disables. |
 
 ## Main Flow
 
@@ -143,8 +145,9 @@ Each iteration does the following:
 3. `code-reviewer` reads the Task Brief, Developer report, and recalled code-design memory, then returns `ACCEPT`, `REVISE`, or `REDIRECT`. If its output does not start with one of those decisions, the reviewer agent asks the same thread to correct the format.
 4. `REVISE` sends feedback back to `developer`; `REDIRECT` returns control to `coding-manager`; `ACCEPT` finishes the task.
 5. After the review loop ends, the pipeline archives the full transcript, writes `task_round_summary.md` with the Task Brief, final decision, and Developer/Reviewer report text, asks the memory update prompts what should be remembered, and stores that content through `memory-agent-forge`.
-6. On the next project iteration, `coding-manager` receives the previous `task_round_summary.md` content as `lastTaskRoundSummary` during recall and task selection, so a `REDIRECT` can directly guide the next Task Brief.
-7. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
+6. If `--memory-clean-interval` is positive and the completed project iteration is a multiple of it, the pipeline cleans both configured memory directories.
+7. On the next project iteration, `coding-manager` receives the previous `task_round_summary.md` content as `lastTaskRoundSummary` during recall and task selection, so a `REDIRECT` can directly guide the next Task Brief.
+8. The pipeline stops when `coding-manager` returns `FINISHED` or `--max-iterations` is reached.
 
 ## Developing-Skill And Trajectory Feedback
 
