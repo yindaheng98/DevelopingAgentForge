@@ -53,10 +53,11 @@ function buildScanPrompt(
   taskBrief: string,
 ): string {
   return `
-Work in the target repository at ${targetPath}/.
-Scan the target repository at ${targetPath}/ and the skill at ${codingStyleSkillPath} before the Developer starts the Task Brief. Read only.
+Scan the target repository and the skill at ${codingStyleSkillPath} before the Developer starts the Task. Read only.
 
 ${goalInstructionText}
+
+Target repository: ${targetPath}/.
 
 Task Brief:
 ${taskBrief}

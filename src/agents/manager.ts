@@ -134,9 +134,11 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
+Target repository: ${targetPath}/.
+
 ${lastTaskRoundSummary}
 
-Scan the target repository at ${targetPath}/ and decide what project progress memory helps select the next task for the current goal.
+Decide what project progress memory helps select the next task for the current goal.
 
 Output concise project progress memory recall guidance.
 `;
@@ -154,13 +156,14 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
+Target repository: ${targetPath}/.
+
 Related project progress memory:
 ${projectProgressMemory}
 
 ${lastTaskRoundSummary}
 
-Scan the target repository at ${targetPath}/ and read the project progress memory related to the current goal.
-Select the next developing task for the target repository.
+Select the next developing task for the current goal.
 
 Choose exactly one new bounded task for the Developer.
 
@@ -204,6 +207,8 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
+Target repository: ${targetPath}/.
+
 Task Brief:
 ${taskBrief}
 
@@ -213,7 +218,7 @@ ${projectProgressMemory}
 Reality-aware task round summary:
 ${taskRoundSummary}
 
-Scan the target repository at ${targetPath}/ and consider what project progress should be remembered after the developing task.
+Consider what project progress should be remembered after the developing task.
 
 Remember only reusable project state: current goal progress, completed direction, blockers or redirect reasons, and useful next-step context. Do not store long transcripts, one-off runtime noise, or code-design details that belong in code design memory.
 `;

@@ -76,10 +76,12 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
+Target repository: ${targetPath}/.
+
 Task Brief:
 ${taskBrief}
 
-Scan the target repository at ${targetPath}/ and decide what code design memory helps complete the Task Brief.
+Decide what code design memory helps complete the Task.
 
 Output concise code design memory recall guidance.
 `;
@@ -141,6 +143,8 @@ ${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
+Target repository: ${targetPath}/.
+
 Task Brief:
 ${taskBrief}
 
@@ -150,7 +154,7 @@ ${codeDesignMemory}
 Reality-aware task round summary:
 ${taskRoundSummary}
 
-Scan the target repository at ${targetPath}/ and consider what reusable code logic relationships and design reasons should be remembered after this task.
+Consider what reusable code logic relationships and design reasons should be remembered after this task.
 
 Remember only reusable code/design memory: module relationships, architecture constraints, invariants, interface design, review rules, and pitfalls. Do not store long transcripts, one-off command output, runtime noise, or project progress state.
 When reviewer memory candidates and developer memory candidates conflict, prefer reviewer candidates for code quality, design constraints, and pitfalls.
