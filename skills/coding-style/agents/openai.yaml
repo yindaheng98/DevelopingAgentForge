@@ -1,4 +1,0 @@
-interface:
-  display_name: "Coding Style"
-  short_description: "Keep code changes clean and local"
-  default_prompt: "Use $coding-style while making this code or framework change so the implementation stays readable, local, low-coupling, and consistent with the existing repository."

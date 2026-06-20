@@ -6,10 +6,6 @@ export {
 export { DeveloperAgent, type DeveloperVariables } from "./developer.js";
 export { CodeReviewerAgent, type CodeReviewerVariables, type ReviewDecision } from "./reviewer.js";
 export {
-  TrajectoryOptimizerAgent,
-  type TrajectoryOptimizerVariables,
-} from "./trajectory-optimizer.js";
-export {
   DevelopingAgent,
   type DevelopingAgentConstants,
   type DevelopingAgentVariables,

@@ -4,15 +4,10 @@ export {
   developing,
   developingArgsOptions,
   developingPipeline,
-  developingSkill,
-  developingSkillArgsOptions,
-  developingSkillPipeline,
 } from "./pipeline/index.js";
 
 export type {
   DevelopingOptions,
-  DevelopingSkillAgentVariables,
-  DevelopingSkillOptions,
   ProjectDevLoopAgentVariablesByName,
   ProjectDevLoopCallbacks,
   TaskDevLoopAgentVariablesByName,
@@ -23,7 +18,6 @@ export {
   CodingManagerAgent,
   DeveloperAgent,
   DevelopingAgent,
-  TrajectoryOptimizerAgent,
   agentFactories,
 } from "./agents/index.js";
 
@@ -33,5 +27,4 @@ export type {
   DeveloperVariables,
   DevelopingAgentConstants,
   DevelopingAgentVariables,
-  TrajectoryOptimizerVariables,
 } from "./agents/index.js";

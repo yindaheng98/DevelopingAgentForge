@@ -16,7 +16,6 @@ import { agentFactories } from "./factory.js";
 
 export type DevelopingOptions = {
   targetPath: string;
-  codingStyleSkillPath: string;
   goalPath: string;
   achiveDir: string;
   maxIterations: number;
@@ -41,7 +40,6 @@ export async function developing(
   await new ProjectDevLoop().develop(
     team,
     options.targetPath,
-    options.codingStyleSkillPath,
     goal,
     options.achiveDir,
     options.maxIterations,
@@ -67,10 +65,6 @@ export const developingArgsOptions = {
   "target-path": {
     type: "string",
     description: "Target repository folder to create or modify",
-  },
-  "coding-style-skill-path": {
-    type: "string",
-    description: "Coding style skill path used by the agents",
   },
   "goal-path": {
     type: "string",
@@ -121,7 +115,6 @@ export const developingPipeline = definePipeline({
   ) {
     const {
       "target-path": targetPath,
-      "coding-style-skill-path": codingStyleSkillPath,
       "goal-path": goalPath,
       "achive-dir": achiveDir,
       "max-iterations": maxIterations,
@@ -134,7 +127,6 @@ export const developingPipeline = definePipeline({
     } = options;
     if (
       targetPath === undefined ||
-      codingStyleSkillPath === undefined ||
       goalPath === undefined ||
       achiveDir === undefined ||
       projectProgressMemoryPath === undefined ||
@@ -143,7 +135,6 @@ export const developingPipeline = definePipeline({
       throw new Error(
         [
           "--target-path",
-          "--coding-style-skill-path",
           "--goal-path",
           "--achive-dir",
           "--project-progress-memory-path",
@@ -154,7 +145,6 @@ export const developingPipeline = definePipeline({
 
     await developing(team, {
       targetPath,
-      codingStyleSkillPath,
       goalPath,
       achiveDir,
       maxIterations: Number(maxIterations),

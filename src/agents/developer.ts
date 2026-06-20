@@ -1,5 +1,5 @@
 import { ponytailSkillPrompt } from "./polytail.js";
-import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
+import { goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallDeveloperVariables = DevelopingAgentVariables & {
@@ -28,23 +28,15 @@ export type DeveloperVariables =
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
-    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(
-          codingStyleSkillInstructionText,
-          goalInstructionText,
-          targetPath,
-          variables.taskBrief,
-        );
+        return buildRecallPrompt(goalInstructionText, targetPath, variables.taskBrief);
       case "develop": {
         const reviewerReport = variables.reviewerReport ?? "(none)";
         return buildDevelopPrompt(
-          codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
           variables.taskBrief,
@@ -54,7 +46,6 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
       }
       case "update":
         return buildUpdatePrompt(
-          codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
           variables.taskBrief,
@@ -66,14 +57,11 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
 }
 
 function buildRecallPrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
 ): string {
   return `
-${codingStyleSkillInstructionText}
-
 ${goalInstructionText}
 
 Target repository: ${targetPath}/.
@@ -88,7 +76,6 @@ Output concise code design memory recall guidance.
 }
 
 function buildDevelopPrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
@@ -97,8 +84,6 @@ function buildDevelopPrompt(
 ): string {
   return `
 ${ponytailSkillPrompt}
-
-${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 
@@ -131,7 +116,6 @@ List any code relationships or design lessons that should be remembered separate
 }
 
 function buildUpdatePrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
@@ -139,8 +123,6 @@ function buildUpdatePrompt(
   taskRoundSummary: string,
 ): string {
   return `
-${codingStyleSkillInstructionText}
-
 ${goalInstructionText}
 
 Target repository: ${targetPath}/.

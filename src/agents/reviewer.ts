@@ -1,6 +1,6 @@
 import type { RecordCallback } from "coding-agent-forge";
 import { ponytailReviewSkillPrompt } from "./polytail.js";
-import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
+import { goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
@@ -65,15 +65,11 @@ Please correct it.
   }
 
   protected buildPrompt(variables: Readonly<CodeReviewerVariables>): string {
-    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
     return `
 ${ponytailReviewSkillPrompt}
-
-${codingStyleSkillInstructionText}
 
 ${goalInstructionText}
 

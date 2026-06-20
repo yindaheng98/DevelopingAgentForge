@@ -1,5 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { codingStyleSkillInstruction, goalInstruction } from "./prompts.js";
+import { goalInstruction } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallCodingManagerVariables = DevelopingAgentVariables & {
@@ -84,9 +84,7 @@ Please correct it.
   }
 
   protected buildPrompt(variables: Readonly<CodingManagerVariables>): string {
-    const codingStyleSkillPath = this.workspaceRelativePath(variables.codingStyleSkillPath);
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const codingStyleSkillInstructionText = codingStyleSkillInstruction(codingStyleSkillPath);
     const goalInstructionText = goalInstruction(variables.goal);
     const lastTaskRoundSummary =
       "lastTaskRoundSummary" in variables && variables.lastTaskRoundSummary
@@ -96,15 +94,9 @@ ${variables.lastTaskRoundSummary}`
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(
-          codingStyleSkillInstructionText,
-          goalInstructionText,
-          targetPath,
-          lastTaskRoundSummary,
-        );
+        return buildRecallPrompt(goalInstructionText, targetPath, lastTaskRoundSummary);
       case "select":
         return buildSelectPrompt(
-          codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
           variables.projectProgressMemory,
@@ -112,7 +104,6 @@ ${variables.lastTaskRoundSummary}`
         );
       case "update":
         return buildUpdatePrompt(
-          codingStyleSkillInstructionText,
           goalInstructionText,
           targetPath,
           variables.projectProgressMemory,
@@ -124,14 +115,11 @@ ${variables.lastTaskRoundSummary}`
 }
 
 function buildRecallPrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   lastTaskRoundSummary: string,
 ): string {
   return `
-${codingStyleSkillInstructionText}
-
 ${goalInstructionText}
 
 Target repository: ${targetPath}/.
@@ -145,15 +133,12 @@ Output concise project progress memory recall guidance.
 }
 
 function buildSelectPrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   projectProgressMemory: string,
   lastTaskRoundSummary: string,
 ): string {
   return `
-${codingStyleSkillInstructionText}
-
 ${goalInstructionText}
 
 Target repository: ${targetPath}/.
@@ -195,7 +180,6 @@ FINISHED
 }
 
 function buildUpdatePrompt(
-  codingStyleSkillInstructionText: string,
   goalInstructionText: string,
   targetPath: string,
   projectProgressMemory: string,
@@ -203,8 +187,6 @@ function buildUpdatePrompt(
   taskRoundSummary: string,
 ): string {
   return `
-${codingStyleSkillInstructionText}
-
 ${goalInstructionText}
 
 Target repository: ${targetPath}/.

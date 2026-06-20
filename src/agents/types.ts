@@ -5,7 +5,6 @@ import path from "node:path";
 
 export type DevelopingAgentVariables = {
   targetPath: string;
-  codingStyleSkillPath: string;
   goal: string;
 };
 

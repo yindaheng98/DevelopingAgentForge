@@ -33,7 +33,6 @@ export class TaskDevLoop {
   async develop(
     team: AgentTeam<TaskDevLoopAgentVariablesByName>,
     targetPath: string,
-    codingStyleSkillPath: string,
     goal: string,
     archiveDir: string,
     maxIterations: number,
@@ -45,7 +44,6 @@ export class TaskDevLoop {
   ): Promise<TaskDevLoopResult> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath,
-      codingStyleSkillPath,
       goal,
     };
 

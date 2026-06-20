@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { pathToFileURL } from "node:url";
 import { runPipelinesCli } from "coding-agent-forge";
-import { developingPipeline, developingSkillPipeline } from "./pipeline/index.js";
+import { developingPipeline } from "./pipeline/index.js";
 
 function isDirectCli(): boolean {
   const entry = process.argv[1];
@@ -9,5 +9,5 @@ function isDirectCli(): boolean {
 }
 
 if (isDirectCli()) {
-  await runPipelinesCli([developingPipeline, developingSkillPipeline], process.argv.slice(2));
+  await runPipelinesCli([developingPipeline], process.argv.slice(2));
 }

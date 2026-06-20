@@ -3,13 +3,6 @@ runtimes:
     kind: codex
 
 threads:
-  skill:
-    runtime: codex
-    options:
-      model: gpt-5.5
-      sandboxMode: danger-full-access
-      workingDirectory: .
-
   develop:
     runtime: codex
     options:
@@ -46,9 +39,6 @@ agents:
     thread: develop
     constants:
       workspacePath: *developerWorkspacePath
-
-  trajectory-optimizer:
-    thread: skill
 
   memory-reader:
     thread: memory

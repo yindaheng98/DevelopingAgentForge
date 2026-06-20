@@ -42,7 +42,6 @@ export class ProjectDevLoop {
   async develop(
     team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
     targetPath: string,
-    codingStyleSkillPath: string,
     goal: string,
     achiveDir: string,
     maxIterations: number,
@@ -56,7 +55,6 @@ export class ProjectDevLoop {
   ): Promise<void> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath: path.resolve(targetPath),
-      codingStyleSkillPath: path.resolve(codingStyleSkillPath),
       goal,
     };
 
@@ -131,7 +129,6 @@ export class ProjectDevLoop {
       const taskResult = await taskDevLoop.develop(
         team,
         agentVariables.targetPath,
-        agentVariables.codingStyleSkillPath,
         agentVariables.goal,
         archiveDir,
         maxTaskDevLoopIterations,
