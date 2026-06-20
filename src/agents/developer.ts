@@ -64,14 +64,13 @@ function buildRecallPrompt(
   return `
 ${goalInstructionText}
 
-Target repository: ${targetPath}/.
+Target: ${targetPath}/.
 
-Task Brief:
+Task:
 ${taskBrief}
 
-Decide what code design memory helps complete the Task.
-
-Output concise code design memory recall guidance.
+Output recall guidance only: code/design memory needed for this task.
+No recalled content. No implementation advice.
 `;
 }
 
@@ -87,31 +86,28 @@ ${ponytailSkillPrompt}
 
 ${goalInstructionText}
 
-Related code design memory:
-${codeDesignMemory}
+Target: ${targetPath}/.
 
-Work in the target repository at ${targetPath}/.
-
-Task Brief:
+Task:
 ${taskBrief}
+
+Code/design memory:
+${codeDesignMemory}
 
 Reviewer report:
 ${reviewerReport}
 
-Improve the repository according to the Task Brief. If a reviewer report is present, update the code according to that report.
+Do the task. Address reviewer report unless "(none)".
+Inspect, edit, verify. No disk change? Say why.
 
-Use your own judgment to inspect, edit, and verify. If you make no changes, explain why no change is appropriate on disk.
-Make sure your report matches the actual on-disk repository state after your work.
+Report final state:
+- changed
+- inspected
+- commands
+- why complete
+- blockers
 
-Output a concise developer report with:
-- what you changed
-- what you inspected
-- what commands you ran
-- why the result addresses the Objective
-- any blockers or uncertainty
-
-List any code relationships or design lessons that should be remembered separately under:
-## Memory Candidates
+End with ## Memory Candidates: reusable code/design facts only, empty if none.
 `;
 }
 
@@ -125,20 +121,18 @@ function buildUpdatePrompt(
   return `
 ${goalInstructionText}
 
-Target repository: ${targetPath}/.
+Target: ${targetPath}/.
 
-Task Brief:
+Task:
 ${taskBrief}
 
-Related code design memory before the task:
+Code/design memory before:
 ${codeDesignMemory}
 
-Reality-aware task round summary:
+Round summary:
 ${taskRoundSummary}
 
-Consider what reusable code logic relationships and design reasons should be remembered after this task.
-
-Remember only reusable code/design memory: module relationships, architecture constraints, invariants, interface design, review rules, and pitfalls. Do not store long transcripts, one-off command output, runtime noise, or project progress state.
-When reviewer memory candidates and developer memory candidates conflict, prefer reviewer candidates for code quality, design constraints, and pitfalls.
+Output memory candidates, empty if none: reusable code/design facts (module relationships, constraints, invariants, interfaces, review rules, pitfalls).
+Skip transcripts, command output, runtime noise, and project progress.
 `;
 }

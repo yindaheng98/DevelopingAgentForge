@@ -27,8 +27,7 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
         reviewerReport = (
           await this.thread.runStreamed(
             `
-Previous review output did not follow the required format.
-The output must start with exactly one of:
+Bad format. First non-empty line must equal one of:
 ACCEPT
 REVISE
 REDIRECT
@@ -36,7 +35,7 @@ REDIRECT
 Previous output:
 ${reviewerReport}
 
-Please correct it.
+Correct it.
 `,
             onRecord,
           )
@@ -73,42 +72,30 @@ ${ponytailReviewSkillPrompt}
 
 ${goalInstructionText}
 
-Work in the target repository at ${targetPath}/.
-Review the current code. Read only.
+Target: ${targetPath}/. Read only.
 
-Task Brief:
+Task:
 ${variables.taskBrief}
 
-Related code design memory:
+Code/design memory:
 ${variables.codeDesignMemory}
 
 Developer report:
 ${variables.developerReport}
 
-Review the Developer's result using the Task Brief, Developer report, and code design memory.
+Review: task done, report true, code healthy.
 
-Focus on:
-- whether the Objective is actually improved
-- whether the evidence supports the Developer's claims
-- whether the code quality and design remain healthy
-- whether the change respects existing code relationships and design memory
-- whether the next action should be revision, manager redirection, or acceptance
-
-On the first non-empty line, output exactly one decision:
+First non-empty line must equal one of:
 ACCEPT
 REVISE
 REDIRECT
 
-Use ACCEPT when the result is good enough.
-Use REVISE when the Developer can improve the result within the same task direction.
-Use REDIRECT when the task direction, scope, dependency, or premise should be reconsidered by the Manager.
+ACCEPT: good enough.
+REVISE: smallest same-direction fix.
+REDIRECT: manager must rethink direction, scope, dependency, or premise.
 
-For REVISE, give the smallest actionable feedback for the same task direction.
-For REDIRECT, explain the manager-level reason in one short paragraph.
-
-After the decision, give concise feedback unless ACCEPT.
-List any reusable memory candidates separately under:
-## Memory Candidates
+Feedback only for REVISE or REDIRECT.
+End with ## Memory Candidates: reusable code/design facts only, empty if none.
 `;
   }
 }

@@ -47,15 +47,14 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
         managerOutput = (
           await this.thread.runStreamed(
             `
-Previous manager output did not follow the required format.
-The output must start with exactly one of:
+Bad format. First non-empty line must equal one of:
 FINISHED
 # Task Brief
 
 Previous output:
 ${managerOutput}
 
-Please correct it.
+Correct it.
 `,
             onRecord,
           )
@@ -88,7 +87,7 @@ Please correct it.
     const goalInstructionText = goalInstruction(variables.goal);
     const lastTaskRoundSummary =
       "lastTaskRoundSummary" in variables && variables.lastTaskRoundSummary
-        ? `Last task round summary:
+        ? `Last round:
 ${variables.lastTaskRoundSummary}`
         : "";
 
@@ -122,13 +121,12 @@ function buildRecallPrompt(
   return `
 ${goalInstructionText}
 
-Target repository: ${targetPath}/.
+Target: ${targetPath}/.
 
 ${lastTaskRoundSummary}
 
-Decide what project progress memory helps select the next task for the current goal.
-
-Output concise project progress memory recall guidance.
+Output recall guidance only: project-progress memory needed before choosing next task.
+No recalled content. No task decision.
 `;
 }
 
@@ -141,41 +139,37 @@ function buildSelectPrompt(
   return `
 ${goalInstructionText}
 
-Target repository: ${targetPath}/.
+Target: ${targetPath}/.
 
-Related project progress memory:
+Project progress memory:
 ${projectProgressMemory}
 
 ${lastTaskRoundSummary}
 
-Select the next developing task for the current goal.
+If no task remains, output exactly:
+FINISHED
 
-Choose exactly one new bounded task for the Developer.
-
-Output the task as Markdown with this shape:
+Otherwise output one bounded Developer task:
 
 # Task Brief
 
 ## Objective
 
-What should become better in the repository.
+Concrete repo improvement.
 
 ## Context
 
-Relevant project state or memory that explains why this task is useful now.
+Why now.
 
 ## Boundaries
 
-Known constraints, scope limits, risks, or paths to pay attention to. Leave empty if unknown.
+Scope, risks, key paths. Empty if unknown.
 
 ## Reviewer Focus
 
-What the reviewer should pay attention to.
+What to check.
 
-Keep the brief bounded enough for one Developer attempt. Use natural language; do not introduce task-type schemas, check schemas, or mode enums unless they are simply part of the prose.
-
-When no further developing task is needed, return exactly:
-FINISHED
+One Developer attempt. Natural prose. No schemas/enums unless needed.
 `;
 }
 
@@ -189,19 +183,18 @@ function buildUpdatePrompt(
   return `
 ${goalInstructionText}
 
-Target repository: ${targetPath}/.
+Target: ${targetPath}/.
 
-Task Brief:
+Task:
 ${taskBrief}
 
-Related project progress memory before the developing task:
+Project progress memory before:
 ${projectProgressMemory}
 
-Reality-aware task round summary:
+Round summary:
 ${taskRoundSummary}
 
-Consider what project progress should be remembered after the developing task.
-
-Remember only reusable project state: current goal progress, completed direction, blockers or redirect reasons, and useful next-step context. Do not store long transcripts, one-off runtime noise, or code-design details that belong in code design memory.
+Output memory candidates, empty if none: reusable project progress (goal progress, completed direction, blockers, redirect reasons, next-step context).
+Skip transcripts, runtime noise, and code-design facts.
 `;
 }
