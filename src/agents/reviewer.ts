@@ -27,7 +27,7 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
         reviewerReport = (
           await this.thread.runStreamed(
             `
-Bad format. First non-empty line must equal one of:
+Incorrect format. First non-empty line must be:
 ACCEPT
 REVISE
 REDIRECT
@@ -83,7 +83,7 @@ ${variables.codeDesignMemory}
 Developer report:
 ${variables.developerReport}
 
-Review: task done, report true, code healthy.
+Review: task completion, report accuracy, code health.
 
 First non-empty line must equal one of:
 ACCEPT
@@ -94,8 +94,8 @@ ACCEPT: good enough.
 REVISE: smallest same-direction fix.
 REDIRECT: manager must rethink direction, scope, dependency, or premise.
 
-Feedback only for REVISE or REDIRECT.
-End with ## Memory Candidates: reusable code/design facts only, empty if none.
+Feedback required if REVISE or REDIRECT.
+End with reusable insights under "## Memory Candidates".
 `;
   }
 }

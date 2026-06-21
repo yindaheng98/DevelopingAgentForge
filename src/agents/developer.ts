@@ -97,17 +97,17 @@ ${codeDesignMemory}
 Reviewer report:
 ${reviewerReport}
 
-Do the task. Address reviewer report unless "(none)".
-Inspect, edit, verify. No disk change? Say why.
+Perform the task. Address reviewer concerns unless marked "(none)".
+Inspect, edit, verify. If no changes, explain why.
 
-Report final state:
-- changed
-- inspected
-- commands
-- why complete
-- blockers
+Final state report includes:
+- Changes made
+- Inspection results
+- Commands used
+- Reason for completion
+- Any blockers
 
-End with ## Memory Candidates: reusable code/design facts only, empty if none.
+End with reusable code/design insights under "## Memory Candidates".
 `;
 }
 
@@ -126,13 +126,13 @@ Target: ${targetPath}/.
 Task:
 ${taskBrief}
 
-Code/design memory before:
+Previous code/design memory:
 ${codeDesignMemory}
 
 Round summary:
 ${taskRoundSummary}
 
-Output memory candidates, empty if none: reusable code/design facts (module relationships, constraints, invariants, interfaces, review rules, pitfalls).
-Skip transcripts, command output, runtime noise, and project progress.
+List reusable code/design insights only (interfaces, constraints, rules).
+Exclude execution details.
 `;
 }

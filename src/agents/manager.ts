@@ -47,7 +47,7 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
         managerOutput = (
           await this.thread.runStreamed(
             `
-Bad format. First non-empty line must equal one of:
+Incorrect format. First non-empty line must be:
 FINISHED
 # Task Brief
 
@@ -149,7 +149,7 @@ ${lastTaskRoundSummary}
 If no task remains, output exactly:
 FINISHED
 
-Otherwise output one bounded Developer task:
+Otherwise specify one bounded Developer task:
 
 # Task Brief
 
@@ -168,8 +168,6 @@ Scope, risks, key paths. Empty if unknown.
 ## Reviewer Focus
 
 What to check.
-
-One Developer attempt. Natural prose. No schemas/enums unless needed.
 `;
 }
 
@@ -188,13 +186,13 @@ Target: ${targetPath}/.
 Task:
 ${taskBrief}
 
-Project progress memory before:
+Previous project progress memory:
 ${projectProgressMemory}
 
 Round summary:
 ${taskRoundSummary}
 
-Output memory candidates, empty if none: reusable project progress (goal progress, completed direction, blockers, redirect reasons, next-step context).
-Skip transcripts, runtime noise, and code-design facts.
+Record reusable project progress insights (completed milestones, blockers, next steps).
+Exclude execution details and code specifics.
 `;
 }
