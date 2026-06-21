@@ -3,14 +3,14 @@ runtimes:
     kind: codex
 
 threads:
-  develop:
+  develop-manager:
     runtime: codex
     options:
       model: gpt-5.5
       sandboxMode: danger-full-access
       workingDirectory: &developerWorkspacePath output/codebase
 
-  develop-cheap:
+  develop-coding:
     runtime: codex
     options:
       model: gpt-5.3-codex-spark
@@ -25,42 +25,24 @@ threads:
       workingDirectory: &memoryWorkingDir output/developing
 
 agents:
-  coding-manager:
-    thread: develop
-    constants:
+  coding-manager: &managerAgentConfig
+    thread: develop-manager
+    constants: &developAgentConstants
       workspacePath: *developerWorkspacePath
 
   developer:
-    thread: develop-cheap
-    constants:
-      workspacePath: *developerWorkspacePath
+    thread: develop-coding
+    constants: *developAgentConstants
 
-  code-reviewer:
-    thread: develop
-    constants:
-      workspacePath: *developerWorkspacePath
+  code-reviewer: *managerAgentConfig
 
-  memory-reader:
+  memory-reader: &memoryAgentConfig
     thread: memory
     constants:
       workingDir: *memoryWorkingDir
 
-  memory-modify-planner:
-    thread: memory
-    constants:
-      workingDir: *memoryWorkingDir
-
-  memory-modifier:
-    thread: memory
-    constants:
-      workingDir: *memoryWorkingDir
-
-  memory-create-planner:
-    thread: memory
-    constants:
-      workingDir: *memoryWorkingDir
-
-  memory-creator:
-    thread: memory
-    constants:
-      workingDir: *memoryWorkingDir
+  memory-modify-planner: *memoryAgentConfig
+  memory-modifier: *memoryAgentConfig
+  memory-create-planner: *memoryAgentConfig
+  memory-creator: *memoryAgentConfig
+  memory-cleaner: *memoryAgentConfig
