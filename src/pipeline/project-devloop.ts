@@ -4,6 +4,7 @@ import {
   defaultMemoryAgentNames,
   type MemoryAgentVariablesByName,
 } from "memory-agent-forge";
+import { appendFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -51,7 +52,6 @@ export class ProjectDevLoop {
     maxMemoryRounds: number,
     memoryCleanInterval: number,
     callbacks?: ProjectDevLoopCallbacks,
-    logRecord?: RecordCallback,
   ): Promise<void> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath: path.resolve(targetPath),
@@ -68,6 +68,14 @@ export class ProjectDevLoop {
       console.log(`\n# Project dev loop iteration ${String(iteration)}\n`);
       const archiveDir = path.join(achiveDir, new Date().toISOString().replace(/[:.]/g, "-"));
       await mkdir(archiveDir, { recursive: true });
+      const logRecord: RecordCallback = (thread, record) => {
+        appendFileSync(
+          path.join(archiveDir, "records.jsonl"),
+          `${JSON.stringify(record)}\n`,
+          "utf8",
+        );
+        console.log(thread.recordToPrettyString(record));
+      };
 
       const codingManager = (await team.createAgent("coding-manager")) as CodingManagerAgent;
       const projectProgressMemoryGuidance = (

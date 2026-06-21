@@ -3,7 +3,6 @@ import {
   definePipeline,
   type PipelineArgsOptions,
   type PipelineOptions,
-  type RecordCallback,
 } from "coding-agent-forge";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -31,10 +30,6 @@ export async function developing(
   team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
   options: DevelopingOptions,
 ): Promise<void> {
-  const logRecord: RecordCallback = (thread, record) => {
-    console.log(thread.recordToPrettyString(record));
-  };
-
   const goal = await readGoal(options.goalPath);
 
   await new ProjectDevLoop().develop(
@@ -49,7 +44,6 @@ export async function developing(
     options.maxMemoryRounds,
     options.memoryCleanInterval,
     options.callbacks,
-    logRecord,
   );
 }
 

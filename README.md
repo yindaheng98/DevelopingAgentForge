@@ -16,7 +16,7 @@ The usual entry point is [`develop.sh`](develop.sh), which calls `npm run develo
 - the target codebase directory
 - the development archive directory, passed through the current CLI option name `--achive-dir`
 
-The pipeline works in the configured `--target-path`, reads the current high-level objective from `--goal-path`, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts under the configured archive directory.
+The pipeline works in the configured `--target-path`, reads the current high-level objective from `--goal-path`, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts and streamed agent records under the configured archive directory.
 
 ## Package Surface
 
@@ -144,6 +144,7 @@ The pipeline maintains:
 | Artifact                    | Where it lives                                                                                                                                                                      |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Memory files                | Under the configured project progress and code design memory directories; maintained by `memory-agent-forge`.                                                                       |
+| Agent record log            | `records.jsonl` inside each timestamped archive folder; each streamed agent record is appended while the pretty record output is still printed to stdout.                           |
 | Timestamped archive folders | Under the configured archive directory; contains each Task Brief, memory recall guidance, recalled memory, Developer reports, Reviewer feedback, summaries, and things to remember. |
 
 ## Important Files

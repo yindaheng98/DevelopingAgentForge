@@ -16,7 +16,7 @@
 - 目标代码库目录
 - development archive 目录；当前 CLI 参数名仍是 `--achive-dir`
 
-pipeline 会在配置的 `--target-path` 中继续写代码，从 `--goal-path` 读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物归档到 archive 目录。
+pipeline 会在配置的 `--target-path` 中继续写代码，从 `--goal-path` 读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物和 streamed agent records 归档到 archive 目录。
 
 ## 包公开面
 
@@ -144,6 +144,7 @@ pipeline 会维护：
 | Artifact             | 位置                                                                                                                                                     |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Memory files         | 配置的 project progress 和 code design memory 目录下，由 `memory-agent-forge` 维护。                                                                     |
+| Agent record log     | 每个按时间戳归档的文件夹内的 `records.jsonl`；每条 streamed agent record 会追加写入，同时 pretty record 输出仍会打印到 stdout。                          |
 | 按时间戳归档的文件夹 | 配置的 archive 目录下，保存 Task Brief、memory recall guidance、recalled memory、Developer reports、Reviewer feedback、summaries 和 things to remember。 |
 
 ## 重要文件
