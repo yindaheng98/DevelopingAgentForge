@@ -27,7 +27,7 @@ export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {
         reviewerReport = (
           await this.thread.runStreamed(
             `
-Incorrect format. First non-empty line must be:
+Incorrect format. First non-empty line must be exactly one of the following 3 review marks:
 ACCEPT
 REVISE
 REDIRECT
@@ -58,7 +58,9 @@ Correct it.
   parseDecision(reviewerReport: string): ReviewDecision {
     const match = REVIEW_DECISION_PATTERN.exec(reviewerReport.trimStart());
     if (match === null) {
-      throw new Error("Review report must start with ACCEPT, REVISE, or REDIRECT.");
+      throw new Error(
+        "Review report first non-empty line must be exactly one of the 3 review marks: ACCEPT, REVISE, or REDIRECT.",
+      );
     }
     return match[1] as ReviewDecision;
   }
@@ -85,7 +87,7 @@ ${variables.developerReport}
 
 Review: task completion, report accuracy, code health.
 
-First non-empty line must equal one of:
+First non-empty line must be exactly one of the following 3 review marks:
 ACCEPT
 REVISE
 REDIRECT

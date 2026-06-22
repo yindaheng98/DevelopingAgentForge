@@ -47,7 +47,7 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
         managerOutput = (
           await this.thread.runStreamed(
             `
-Incorrect format. First non-empty line must be:
+Incorrect format. First non-empty line must be exactly one of the following 2 decision marks:
 FINISHED
 # Task Brief
 
@@ -77,7 +77,9 @@ Correct it.
   parseDecision(managerOutput: string): CodingManagerDecision {
     const match = MANAGER_DECISION_PATTERN.exec(managerOutput.trimStart());
     if (match === null) {
-      throw new Error("Coding manager output must start with FINISHED or # Task Brief.");
+      throw new Error(
+        "Coding manager output first non-empty line must be exactly one of the 2 decision marks: FINISHED or # Task Brief.",
+      );
     }
     return match[1] === "FINISHED" ? "FINISHED" : "TASK_BRIEF";
   }
@@ -145,6 +147,10 @@ Project progress memory:
 ${projectProgressMemory}
 
 ${lastTaskRoundSummary}
+
+First non-empty line must be exactly one of the following 2 decision marks:
+FINISHED
+# Task Brief
 
 If no task remains, output exactly:
 FINISHED
