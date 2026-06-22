@@ -1,3 +1,4 @@
+import type { RecordCallback } from "coding-agent-forge";
 import { ponytailSkillPrompt } from "./polytail.js";
 import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
@@ -27,13 +28,24 @@ export type DeveloperVariables =
   | UpdateDeveloperVariables;
 
 export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
+  override async runStreamed(
+    variables: DeveloperVariables,
+    onRecord?: RecordCallback,
+  ): Promise<string> {
+    if (variables.phase === "recall") {
+      return this.buildPrompt(variables);
+    }
+
+    return super.runStreamed(variables, onRecord);
+  }
+
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const goalInstructionText = goalInstruction(variables.goal);
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(goalInstructionText, targetPath, variables.taskBrief);
+        return buildRecallPrompt(goalInstructionText, variables.taskBrief);
       case "develop": {
         const reviewerReport = variables.reviewerReport ?? "(none)";
         return buildDevelopPrompt(
@@ -56,21 +68,14 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   }
 }
 
-function buildRecallPrompt(
-  goalInstructionText: string,
-  targetPath: string,
-  taskBrief: string,
-): string {
+function buildRecallPrompt(goalInstructionText: string, taskBrief: string): string {
   return `
 ${goalInstructionText}
-
-Target: ${targetPath}/.
 
 Task:
 ${quoteBlock(taskBrief)}
 
-Output recall guidance only: code/design memory needed for this task.
-No recalled content. No implementation advice.
+Recall reusable code/design insights needed for this task towards the goal.
 `;
 }
 
