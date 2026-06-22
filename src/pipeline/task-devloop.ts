@@ -109,7 +109,7 @@ export class TaskDevLoop {
         developerReport,
         "utf8",
       );
-      taskDevReports.push(`Developer report ${String(iteration)}:\n${developerReport}`);
+      taskDevReports.push(`Developer report ${String(iteration)}:\n${quoteBlock(developerReport)}`);
 
       const reviewerReport = (
         await codeReviewer.runStreamed(
@@ -127,7 +127,7 @@ export class TaskDevLoop {
         reviewerReport,
         "utf8",
       );
-      taskDevReports.push(`Reviewer report ${String(iteration)}:\n${reviewerReport}`);
+      taskDevReports.push(`Reviewer report ${String(iteration)}:\n${quoteBlock(reviewerReport)}`);
 
       const reviewDecision = codeReviewer.parseDecision(reviewerReport);
 
