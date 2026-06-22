@@ -13,6 +13,7 @@ import {
   type DeveloperVariables,
   type DevelopingAgentVariables,
 } from "../agents/index.js";
+import { quoteBlock } from "../agents/prompts.js";
 
 export type TaskDevLoopAgentVariablesByName = {
   developer: DeveloperVariables;
@@ -158,13 +159,13 @@ export class TaskDevLoop {
     const taskRoundSummary = `# Last Task Round Summary
 
 ## Task Brief
-${taskBrief}
+${quoteBlock(taskBrief)}
 
 ## Final Decision
-${finalDecision}
+${quoteBlock(finalDecision)}
 
 ## Developer/Reviewer Reports
-${taskDevReport}
+${quoteBlock(taskDevReport)}
 `;
     await writeFile(path.join(archiveDir, "task_round_summary.md"), taskRoundSummary, "utf8");
 
