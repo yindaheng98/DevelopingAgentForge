@@ -34,6 +34,10 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
     variables: CodingManagerVariables,
     onRecord?: RecordCallback,
   ): Promise<string> {
+    if (variables.phase === "recall") {
+      return this.buildPrompt(variables);
+    }
+
     let managerOutput = await super.runStreamed(variables, onRecord);
     if (variables.phase !== "select") {
       return managerOutput;
@@ -95,7 +99,7 @@ ${variables.lastTaskRoundSummary}`
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(goalInstructionText, targetPath, lastTaskRoundSummary);
+        return buildRecallPrompt(goalInstructionText, lastTaskRoundSummary);
       case "select":
         return buildSelectPrompt(
           goalInstructionText,
@@ -115,20 +119,13 @@ ${variables.lastTaskRoundSummary}`
   }
 }
 
-function buildRecallPrompt(
-  goalInstructionText: string,
-  targetPath: string,
-  lastTaskRoundSummary: string,
-): string {
+function buildRecallPrompt(goalInstructionText: string, lastTaskRoundSummary: string): string {
   return `
 ${goalInstructionText}
 
-Target: ${targetPath}/.
-
 ${lastTaskRoundSummary}
 
-Output recall guidance only: project-progress memory needed before choosing next task.
-No recalled content. No task decision.
+Recall completed milestones, blockers, and possible next steps towards the goal.
 `;
 }
 

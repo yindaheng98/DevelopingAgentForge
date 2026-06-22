@@ -155,7 +155,7 @@ export class TaskDevLoop {
 
     const taskDevReport = taskDevReports.join("\n\n");
     await writeFile(path.join(archiveDir, "task_devloop_report.md"), taskDevReport, "utf8");
-    const taskRoundSummary = `# Task Round Summary
+    const taskRoundSummary = `# Last Task Round Summary
 
 ## Task Brief
 ${taskBrief}
