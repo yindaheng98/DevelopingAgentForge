@@ -1,5 +1,5 @@
 import { ponytailSkillPrompt } from "./polytail.js";
-import { goalInstruction } from "./prompts.js";
+import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallDeveloperVariables = DevelopingAgentVariables & {
@@ -67,7 +67,7 @@ ${goalInstructionText}
 Target: ${targetPath}/.
 
 Task:
-${taskBrief}
+${quoteBlock(taskBrief)}
 
 Output recall guidance only: code/design memory needed for this task.
 No recalled content. No implementation advice.
@@ -89,13 +89,13 @@ ${goalInstructionText}
 Target: ${targetPath}/.
 
 Task:
-${taskBrief}
+${quoteBlock(taskBrief)}
 
 Code/design memory:
-${codeDesignMemory}
+${quoteBlock(codeDesignMemory)}
 
 Reviewer report:
-${reviewerReport}
+${quoteBlock(reviewerReport)}
 
 Perform the task. Address reviewer concerns unless marked "(none)".
 Inspect, edit, verify. If no changes, explain why.
@@ -124,13 +124,13 @@ ${goalInstructionText}
 Target: ${targetPath}/.
 
 Task:
-${taskBrief}
+${quoteBlock(taskBrief)}
 
 Previous code/design memory:
-${codeDesignMemory}
+${quoteBlock(codeDesignMemory)}
 
 Round summary:
-${taskRoundSummary}
+${quoteBlock(taskRoundSummary)}
 
 List reusable code/design insights only (interfaces, constraints, rules).
 Exclude execution details.

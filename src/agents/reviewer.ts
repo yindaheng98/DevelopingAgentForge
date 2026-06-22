@@ -1,6 +1,6 @@
 import type { RecordCallback } from "coding-agent-forge";
 import { ponytailReviewSkillPrompt } from "./polytail.js";
-import { goalInstruction } from "./prompts.js";
+import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
@@ -33,7 +33,7 @@ REVISE
 REDIRECT
 
 Previous output:
-${reviewerReport}
+${quoteBlock(reviewerReport)}
 
 Correct it.
 `,
@@ -77,13 +77,13 @@ ${goalInstructionText}
 Target: ${targetPath}/. Read only.
 
 Task:
-${variables.taskBrief}
+${quoteBlock(variables.taskBrief)}
 
 Code/design memory:
-${variables.codeDesignMemory}
+${quoteBlock(variables.codeDesignMemory)}
 
 Developer report:
-${variables.developerReport}
+${quoteBlock(variables.developerReport)}
 
 Review: task completion, report accuracy, code health.
 

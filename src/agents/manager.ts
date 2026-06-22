@@ -1,5 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { goalInstruction } from "./prompts.js";
+import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallCodingManagerVariables = DevelopingAgentVariables & {
@@ -56,7 +56,7 @@ FINISHED
 # Task Brief
 
 Previous output:
-${managerOutput}
+${quoteBlock(managerOutput)}
 
 Correct it.
 `,
@@ -94,7 +94,7 @@ Correct it.
     const lastTaskRoundSummary =
       "lastTaskRoundSummary" in variables && variables.lastTaskRoundSummary
         ? `Last round:
-${variables.lastTaskRoundSummary}`
+${quoteBlock(variables.lastTaskRoundSummary)}`
         : "";
 
     switch (variables.phase) {
@@ -141,7 +141,7 @@ ${goalInstructionText}
 Target: ${targetPath}/.
 
 Project progress memory:
-${projectProgressMemory}
+${quoteBlock(projectProgressMemory)}
 
 ${lastTaskRoundSummary}
 
@@ -187,13 +187,13 @@ ${goalInstructionText}
 Target: ${targetPath}/.
 
 Task:
-${taskBrief}
+${quoteBlock(taskBrief)}
 
 Previous project progress memory:
-${projectProgressMemory}
+${quoteBlock(projectProgressMemory)}
 
 Round summary:
-${taskRoundSummary}
+${quoteBlock(taskRoundSummary)}
 
 Record reusable project progress insights (completed milestones, blockers, next steps).
 Exclude execution details and code specifics.
