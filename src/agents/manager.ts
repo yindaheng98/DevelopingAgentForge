@@ -130,7 +130,7 @@ ${goalInstructionText}
 
 ${lastTaskRoundSummary}
 
-Recall project progress relevant to the Goal:
+Recall project progress relevant to the current goal:
 - completed milestones
 - blockers
 - possible next steps
@@ -153,32 +153,22 @@ ${quoteBlock(projectProgressMemory)}
 
 ${lastTaskRoundSummary}
 
-First non-empty line must be exactly one of the following 2 decision marks:
-FINISHED
-# Task Brief
-
-If no task remains, output exactly:
-FINISHED
-
-Otherwise specify one bounded Developer task:
+Task:
+Decide the next step for the current goal.
+Return FINISHED if no useful bounded task remains for the current goal.
+Otherwise return one bounded task towards the current goal in this format:
 
 # Task Brief
-
 ## Objective
-
-Concrete repo improvement.
-
+Concrete task outcome.
 ## Context
-
 Why now.
-
 ## Boundaries
-
 Scope, risks, key paths. Empty if unknown.
-
 ## Reviewer Focus
-
 What to check.
+
+Return only: FINISHED | Markdown starting with "# Task Brief".
 `;
 }
 

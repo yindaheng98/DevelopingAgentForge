@@ -7,7 +7,7 @@ export function quoteBlock(content: string): string {
 
 export function goalInstruction(goal: string): string {
   return `
-Goal:
+Current goal:
 ${quoteBlock(goal)}
 `;
 }
