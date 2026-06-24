@@ -130,7 +130,10 @@ ${goalInstructionText}
 
 ${lastTaskRoundSummary}
 
-Recall completed milestones, blockers, and possible next steps towards the goal.
+Recall project progress relevant to the Goal:
+- completed milestones
+- blockers
+- possible next steps
 `;
 }
 
