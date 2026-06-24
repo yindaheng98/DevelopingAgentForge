@@ -146,7 +146,7 @@ function buildSelectPrompt(
   return `
 ${goalInstructionText}
 
-Target: ${targetPath}/.
+Project root: ${targetPath}/.
 
 Project progress memory:
 ${quoteBlock(projectProgressMemory)}
@@ -182,7 +182,7 @@ function buildUpdatePrompt(
   return `
 ${goalInstructionText}
 
-Target: ${targetPath}/.
+Project root: ${targetPath}/.
 
 Task:
 ${quoteBlock(taskBrief)}
