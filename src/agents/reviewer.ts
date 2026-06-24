@@ -82,7 +82,7 @@ ${quoteBlock(variables.taskBrief)}
 Code/design memory:
 ${quoteBlock(variables.codeDesignMemory)}
 
-Developer report:
+Task report:
 ${quoteBlock(variables.developerReport)}
 
 Review: task completion, report accuracy, code health.
