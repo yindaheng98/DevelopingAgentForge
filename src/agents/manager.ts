@@ -51,14 +51,19 @@ export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> 
         managerOutput = (
           await this.thread.runStreamed(
             `
-Incorrect format. First non-empty line must be exactly one of the following 2 decision marks:
-FINISHED
-# Task Brief
+Bad format.
+
+Valid output:
+- exactly FINISHED
+- Markdown starting with "# Task Brief"
 
 Previous output:
 ${quoteBlock(managerOutput)}
 
-Correct it.
+Task:
+Fix format only. Keep the same decision and content.
+
+Return only corrected output.
 `,
             onRecord,
           )
