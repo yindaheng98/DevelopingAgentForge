@@ -65,7 +65,6 @@ ${quoteBlock(variables.reviewerReport)}`
           goalInstructionText,
           targetPath,
           variables.taskBrief,
-          variables.codeDesignMemory,
           variables.taskRoundSummary,
         );
     }
@@ -126,8 +125,6 @@ Developer Report format:
 - <commands run and results, or why not run>
 ## Completion
 - <why the task is complete, or what blocked it>
-## Memory Candidates
-- <reusable code/design insight>
 
 Return only: Markdown starting with "# Developer Report".
 `;
@@ -137,7 +134,6 @@ function buildUpdatePrompt(
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
-  codeDesignMemory: string,
   taskRoundSummary: string,
 ): string {
   return `
@@ -148,13 +144,20 @@ Project root: ${targetPath}/.
 Task:
 ${quoteBlock(taskBrief)}
 
-Previous code/design memory:
-${quoteBlock(codeDesignMemory)}
-
 Round summary:
 ${quoteBlock(taskRoundSummary)}
 
-List reusable code/design insights only (interfaces, constraints, rules).
+Extract reusable code/design memory from this task round.
+
+Include:
+- interfaces
+- constraints
+- invariants
+- repo conventions
+- implementation decisions that should affect future work
+
 Exclude execution details.
+
+Return only the code/design memory.
 `;
 }
