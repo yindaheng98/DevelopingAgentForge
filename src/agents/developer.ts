@@ -42,12 +42,16 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const targetPath = this.workspaceRelativePath(variables.targetPath);
     const goalInstructionText = goalInstruction(variables.goal);
+    const reviewerReport =
+      "reviewerReport" in variables && variables.reviewerReport
+        ? `Reviewer report:
+${quoteBlock(variables.reviewerReport)}`
+        : "";
 
     switch (variables.phase) {
       case "recall":
         return buildRecallPrompt(goalInstructionText, variables.taskBrief);
       case "develop": {
-        const reviewerReport = variables.reviewerReport ?? "(none)";
         return buildDevelopPrompt(
           goalInstructionText,
           targetPath,
@@ -86,6 +90,8 @@ function buildDevelopPrompt(
   codeDesignMemory: string,
   reviewerReport: string,
 ): string {
+  const reviewerInstruction = reviewerReport ? " Address reviewer concerns." : "";
+
   return `
 ${ponytailSkillPrompt}
 
@@ -99,10 +105,9 @@ ${quoteBlock(taskBrief)}
 Code/design memory:
 ${quoteBlock(codeDesignMemory)}
 
-Reviewer report:
-${quoteBlock(reviewerReport)}
+${reviewerReport}
 
-Perform the task. Address reviewer concerns unless marked "(none)".
+Perform the task.${reviewerInstruction}
 Inspect, edit, verify. If no changes, explain why.
 
 Final state report includes:
