@@ -21,7 +21,7 @@ export type TaskDevLoopAgentVariablesByName = {
 } & MemoryAgentVariablesByName;
 
 const CODE_DESIGN_MEMORY_DOMAIN_HINT =
-  "Code design memory for logic relationships between code, design rationale, invariants, and implementation decisions in the target repository.";
+  "Durable code/design memory: interfaces, constraints, invariants, repo conventions, and implementation decisions.";
 
 type TaskRoundFinalDecision = "ACCEPT" | "REDIRECT" | "FAILED";
 

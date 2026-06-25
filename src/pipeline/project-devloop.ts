@@ -19,8 +19,8 @@ import {
   type TaskDevLoopResult,
 } from "./task-devloop.js";
 
-const PROJECT_STATE_MEMORY_DOMAIN_HINT =
-  "Project progress memory for goals, completed tasks, current status, and task-selection context across project iterations.";
+const PROJECT_PROGRESS_MEMORY_DOMAIN_HINT =
+  "Durable project progress memory: goals, completed milestones, blockers, current status, and next steps across project iterations.";
 
 export type ProjectDevLoopAgentVariablesByName = TaskDevLoopAgentVariablesByName & {
   "coding-manager": CodingManagerVariables;
@@ -97,7 +97,7 @@ export class ProjectDevLoop {
       const projectProgressMemory = (
         await memoryStore.recall(
           team,
-          PROJECT_STATE_MEMORY_DOMAIN_HINT,
+          PROJECT_PROGRESS_MEMORY_DOMAIN_HINT,
           projectProgressMemoryPath,
           maxMemoryRounds,
           projectProgressMemoryGuidance,
@@ -171,7 +171,7 @@ export class ProjectDevLoop {
       );
       await memoryStore.remember(
         team,
-        PROJECT_STATE_MEMORY_DOMAIN_HINT,
+        PROJECT_PROGRESS_MEMORY_DOMAIN_HINT,
         projectProgressMemoryPath,
         maxMemoryRounds,
         thingsToRemember,
@@ -186,7 +186,7 @@ export class ProjectDevLoop {
         );
         await memoryStore.clean(
           team,
-          PROJECT_STATE_MEMORY_DOMAIN_HINT,
+          PROJECT_PROGRESS_MEMORY_DOMAIN_HINT,
           projectProgressMemoryPath,
           logRecord,
         );
