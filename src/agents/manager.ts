@@ -116,7 +116,6 @@ ${quoteBlock(variables.lastTaskRoundSummary)}`
         return buildUpdatePrompt(
           goalInstructionText,
           targetPath,
-          variables.projectProgressMemory,
           variables.taskBrief,
           variables.taskRoundSummary,
         );
@@ -175,7 +174,6 @@ Return only: FINISHED | Markdown starting with "# Task Brief".
 function buildUpdatePrompt(
   goalInstructionText: string,
   targetPath: string,
-  projectProgressMemory: string,
   taskBrief: string,
   taskRoundSummary: string,
 ): string {
@@ -187,13 +185,19 @@ Project root: ${targetPath}/.
 Task:
 ${quoteBlock(taskBrief)}
 
-Previous project progress memory:
-${quoteBlock(projectProgressMemory)}
-
 Round summary:
 ${quoteBlock(taskRoundSummary)}
 
-Record reusable project progress insights (completed milestones, blockers, next steps).
+Task:
+Extract project progress memory from this task round for the current goal.
+
+Include:
+- completed milestones
+- blockers
+- possible next steps
+
 Exclude execution details and code specifics.
+
+Return only the project progress memory.
 `;
 }
