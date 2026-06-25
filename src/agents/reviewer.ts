@@ -74,7 +74,7 @@ ${ponytailReviewSkillPrompt}
 
 ${goalInstructionText}
 
-Target: ${targetPath}/. Read only.
+Project root: ${targetPath}/. Read only.
 
 Task:
 ${quoteBlock(variables.taskBrief)}
@@ -82,7 +82,7 @@ ${quoteBlock(variables.taskBrief)}
 Code/design memory:
 ${quoteBlock(variables.codeDesignMemory)}
 
-Task report:
+Developer report:
 ${quoteBlock(variables.developerReport)}
 
 Review: task completion, report accuracy, code health.
@@ -97,7 +97,6 @@ REVISE: smallest same-direction fix.
 REDIRECT: manager must rethink direction, scope, dependency, or premise.
 
 Feedback required if REVISE or REDIRECT.
-End with reusable insights under "## Memory Candidates".
 `;
   }
 }
