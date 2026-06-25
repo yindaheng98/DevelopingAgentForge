@@ -102,7 +102,7 @@ ${ponytailSkillPrompt}
 
 ${goalInstructionText}
 
-Target: ${targetPath}/.
+Project root: ${targetPath}/.
 
 Task:
 ${quoteBlock(taskBrief)}
@@ -112,17 +112,24 @@ ${quoteBlock(codeDesignMemory)}
 
 ${reviewerReport}
 
-Perform the task.${reviewerInstruction}
-Inspect, edit, verify. If no changes, explain why.
+Complete the task in project root and return a Developer Report.
+${reviewerInstruction}
+If no change is needed, explain why in the report.
 
-Final state report includes:
-- Changes made
-- Inspection results
-- Commands used
-- Reason for completion
-- Any blockers
+Developer Report format:
+# Developer Report
+## Changes
+- <changed files and behavior>
+## Inspection
+- <what was checked>
+## Verification
+- <commands run and results, or why not run>
+## Completion
+- <why the task is complete, or what blocked it>
+## Memory Candidates
+- <reusable code/design insight>
 
-End with reusable code/design insights under "## Memory Candidates".
+Return only: Markdown starting with "# Developer Report".
 `;
 }
 
@@ -136,7 +143,7 @@ function buildUpdatePrompt(
   return `
 ${goalInstructionText}
 
-Target: ${targetPath}/.
+Project root: ${targetPath}/.
 
 Task:
 ${quoteBlock(taskBrief)}
