@@ -60,7 +60,6 @@ Valid output:
 Previous output:
 ${quoteBlock(managerOutput)}
 
-Task:
 Fix format only. Keep the same decision and content.
 
 Return only corrected output.
@@ -150,7 +149,6 @@ ${quoteBlock(projectProgressMemory)}
 
 ${lastTaskRoundSummary}
 
-Task:
 Decide the next step for the current goal.
 Return FINISHED if no useful bounded task remains for the current goal.
 Otherwise return one bounded task towards the current goal in this format:
@@ -186,7 +184,6 @@ ${quoteBlock(taskBrief)}
 Round summary:
 ${quoteBlock(taskRoundSummary)}
 
-Task:
 Extract project progress memory from this task round for the current goal.
 
 Include:
