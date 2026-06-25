@@ -79,7 +79,12 @@ ${goalInstructionText}
 Task:
 ${quoteBlock(taskBrief)}
 
-Recall reusable code/design insights needed for this task towards the goal.
+Recall code/design memory relevant to the task:
+- interfaces
+- constraints
+- repo conventions
+- prior implementation decisions
+- useful similar code paths
 `;
 }
 
