@@ -104,7 +104,7 @@ ${quoteBlock(variables.lastTaskRoundSummary)}`
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(goalInstructionText, lastTaskRoundSummary);
+        return buildRecallPrompt(goalInstructionText);
       case "select":
         return buildSelectPrompt(
           goalInstructionText,
@@ -123,11 +123,9 @@ ${quoteBlock(variables.lastTaskRoundSummary)}`
   }
 }
 
-function buildRecallPrompt(goalInstructionText: string, lastTaskRoundSummary: string): string {
+function buildRecallPrompt(goalInstructionText: string): string {
   return `
 ${goalInstructionText}
-
-${lastTaskRoundSummary}
 
 Recall project progress relevant to the current goal:
 - completed milestones
