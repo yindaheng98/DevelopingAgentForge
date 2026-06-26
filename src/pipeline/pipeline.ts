@@ -93,7 +93,7 @@ export const developingArgsOptions = {
   },
   "memory-clean-interval": {
     type: "string",
-    default: "0",
+    default: "1",
     description: "Project iterations between memory clean runs; 0 disables automatic clean",
   },
 } as const satisfies PipelineArgsOptions;
