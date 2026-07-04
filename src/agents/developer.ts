@@ -1,5 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { ponytailSkillPrompt } from "./polytail.js";
+import { ponytailSkillPrompt } from "./ponytail.js";
 import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
