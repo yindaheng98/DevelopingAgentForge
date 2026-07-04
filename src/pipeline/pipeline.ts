@@ -15,7 +15,7 @@ import { agentFactories } from "./factory.js";
 
 export type DevelopingOptions = {
   targetPath: string;
-  goalPath: string;
+  goalPath: string[];
   achiveDir: string;
   maxIterations: number;
   maxTaskDevLoopIterations: number;
@@ -47,12 +47,20 @@ export async function developing(
   );
 }
 
-async function readGoal(goalPath: string): Promise<string> {
-  const goal = (await readFile(path.resolve(goalPath), "utf8")).trim();
-  if (goal === "") {
-    throw new Error(`Goal file must not be empty: ${goalPath}`);
+async function readGoal(goalPaths: string[]): Promise<string> {
+  if (goalPaths.length === 0) {
+    throw new Error("--goal-path is required");
   }
-  return goal;
+
+  const goals: string[] = [];
+  for (const goalPath of goalPaths) {
+    const goal = (await readFile(path.resolve(goalPath), "utf8")).trim();
+    if (goal === "") {
+      throw new Error(`Goal file must not be empty: ${goalPath}`);
+    }
+    goals.push(goal);
+  }
+  return goals.join("\n\n");
 }
 
 export const developingArgsOptions = {
@@ -62,7 +70,8 @@ export const developingArgsOptions = {
   },
   "goal-path": {
     type: "string",
-    description: "Goal document path",
+    multiple: true,
+    description: "Goal document path; repeat to concatenate multiple goals in order",
   },
   "achive-dir": {
     type: "string",

@@ -10,13 +10,13 @@ Goal-driven code development pipelines for coding agents, built on `coding-agent
 
 The usual entry point is [`develop.sh`](develop.sh), which calls `npm run developing` with paths for:
 
-- the goal file passed with `--goal-path`
+- the goal file or files passed with `--goal-path`
 - the project progress memory directory passed with `--project-progress-memory-path`
 - the code design memory directory passed with `--code-design-memory-path`
 - the target codebase directory
 - the development archive directory, passed through the current CLI option name `--achive-dir`
 
-The pipeline works in the configured `--target-path`, reads the current high-level objective from `--goal-path`, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts and streamed agent records under the configured archive directory.
+The pipeline works in the configured `--target-path`, reads the current high-level objective from one or more `--goal-path` files, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts and streamed agent records under the configured archive directory.
 
 ## Package Surface
 
@@ -78,9 +78,9 @@ Useful local script entry points:
 
 ## Goal File And Memory Context
 
-`developing` accepts `--goal-path <path>`. The pipeline reads that file once at the start of the run and passes its contents to `coding-manager`, `developer`, and `code-reviewer` as the current high-level objective.
+`developing` accepts one or more `--goal-path <path>` values. The pipeline reads each file once at the start of the run, concatenates them in the same order they were passed, and sends the combined contents to `coding-manager`, `developer`, and `code-reviewer` as the current high-level objective.
 
-Each time you want to execute the next new task, update the file passed to `--goal-path` before rerunning [`develop.sh`](develop.sh). Put any stable project contract, task context paths, constraints, or task focus directly in that goal file.
+Each time you want to execute the next new task, update the file or files passed to `--goal-path` before rerunning [`develop.sh`](develop.sh). Put any stable project contract, task context paths, constraints, or task focus directly in those goal files.
 
 The configured `--project-progress-memory-path` stores project progress memory used by `coding-manager` for task selection and project continuity. The configured `--code-design-memory-path` stores code design memory used by `developer` while completing the selected task. If old context is no longer useful, delete or edit the memory files under the relevant directory before rerunning the pipeline.
 
@@ -109,18 +109,18 @@ When using the published package bin directly, replace `npm run developing --` w
 
 ## Options Reference
 
-| Option                           | Description                                                           |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `--config`                       | One or more YAML config files loaded with `coding-agent-forge`.       |
-| `--target-path`                  | Target codebase directory.                                            |
-| `--achive-dir`                   | Project development archive directory.                                |
-| `--project-progress-memory-path` | Memory directory used for project progress continuity.                |
-| `--code-design-memory-path`      | Memory directory used for code design continuity.                     |
-| `--goal-path`                    | Markdown file containing the current objective and task context.      |
-| `--max-iterations`               | Stops the outer loop if `coding-manager` has not returned `FINISHED`. |
-| `--max-task-devloop-iterations`  | Limits developer/reviewer attempts for each selected task.            |
-| `--max-memory-rounds`            | Limits memory recall and remember refinement rounds.                  |
-| `--memory-clean-interval`        | Project iterations between automatic memory clean runs; `0` disables. |
+| Option                           | Description                                                                  |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `--config`                       | One or more YAML config files loaded with `coding-agent-forge`.              |
+| `--target-path`                  | Target codebase directory.                                                   |
+| `--achive-dir`                   | Project development archive directory.                                       |
+| `--project-progress-memory-path` | Memory directory used for project progress continuity.                       |
+| `--code-design-memory-path`      | Memory directory used for code design continuity.                            |
+| `--goal-path`                    | Markdown file containing the current objective and task context; repeatable. |
+| `--max-iterations`               | Stops the outer loop if `coding-manager` has not returned `FINISHED`.        |
+| `--max-task-devloop-iterations`  | Limits developer/reviewer attempts for each selected task.                   |
+| `--max-memory-rounds`            | Limits memory recall and remember refinement rounds.                         |
+| `--memory-clean-interval`        | Project iterations between automatic memory clean runs; `0` disables.        |
 
 ## Main Flow
 

@@ -10,13 +10,13 @@
 
 常用入口是 [`develop.sh`](develop.sh)，它会调用 `npm run developing`，并传入以下路径：
 
-- 通过 `--goal-path` 传入的目标文件
+- 通过 `--goal-path` 传入的一个或多个目标文件
 - 通过 `--project-progress-memory-path` 传入的项目进度 memory 目录
 - 通过 `--code-design-memory-path` 传入的代码设计 memory 目录
 - 目标代码库目录
 - development archive 目录；当前 CLI 参数名仍是 `--achive-dir`
 
-pipeline 会在配置的 `--target-path` 中继续写代码，从 `--goal-path` 读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物和 streamed agent records 归档到 archive 目录。
+pipeline 会在配置的 `--target-path` 中继续写代码，从一个或多个 `--goal-path` 文件读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物和 streamed agent records 归档到 archive 目录。
 
 ## 包公开面
 
@@ -78,9 +78,9 @@ npm run build
 
 ## Goal 文件和 Memory 上下文
 
-`developing` 接受 `--goal-path <path>`。pipeline 会在运行开始时读取这个文件，并把其中内容作为当前 high-level objective 传给 `coding-manager`、`developer` 和 `code-reviewer`。
+`developing` 接受一个或多个 `--goal-path <path>`。pipeline 会在运行开始时按传参顺序读取这些文件，拼接后作为当前 high-level objective 传给 `coding-manager`、`developer` 和 `code-reviewer`。
 
-每次想执行下一个新任务时，先更新 `--goal-path` 指向的文件，再重新运行 [`develop.sh`](develop.sh)。稳定的项目 contract、任务上下文路径、约束和这一次的任务重点都直接写进这个 goal 文件。
+每次想执行下一个新任务时，先更新 `--goal-path` 指向的一个或多个文件，再重新运行 [`develop.sh`](develop.sh)。稳定的项目 contract、任务上下文路径、约束和这一次的任务重点都直接写进这些 goal 文件。
 
 配置的 `--project-progress-memory-path` 存放给 `coding-manager` 做任务选择和项目连续性判断的项目进度记忆。配置的 `--code-design-memory-path` 存放给 `developer` 完成当前任务时使用的代码设计记忆。如果旧上下文不再有用，可以在下一次运行前删除或编辑对应目录下的 memory 文件。
 
@@ -109,18 +109,18 @@ npm run developing -- \
 
 ## 参数参考
 
-| 参数                             | 说明                                                               |
-| -------------------------------- | ------------------------------------------------------------------ |
-| `--config`                       | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。        |
-| `--target-path`                  | 目标代码库目录。                                                   |
-| `--achive-dir`                   | Project development archive 目录。                                 |
-| `--project-progress-memory-path` | 用于保持项目进度连续性的 memory 目录。                             |
-| `--code-design-memory-path`      | 用于保持代码设计连续性的 memory 目录。                             |
-| `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件。   |
-| `--max-iterations`               | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。           |
-| `--max-task-devloop-iterations`  | 限制每个 selected task 的 developer/reviewer 尝试次数。            |
-| `--max-memory-rounds`            | 限制 memory recall 和 remember 的 refinement 轮数。                |
-| `--memory-clean-interval`        | 每隔多少轮 project iteration 自动清理 memory；`0` 表示不自动清理。 |
+| 参数                             | 说明                                                                         |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `--config`                       | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。                  |
+| `--target-path`                  | 目标代码库目录。                                                             |
+| `--achive-dir`                   | Project development archive 目录。                                           |
+| `--project-progress-memory-path` | 用于保持项目进度连续性的 memory 目录。                                       |
+| `--code-design-memory-path`      | 用于保持代码设计连续性的 memory 目录。                                       |
+| `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件；可重复传入。 |
+| `--max-iterations`               | 当 `coding-manager` 尚未返回 `FINISHED` 时限制外层循环。                     |
+| `--max-task-devloop-iterations`  | 限制每个 selected task 的 developer/reviewer 尝试次数。                      |
+| `--max-memory-rounds`            | 限制 memory recall 和 remember 的 refinement 轮数。                          |
+| `--memory-clean-interval`        | 每隔多少轮 project iteration 自动清理 memory；`0` 表示不自动清理。           |
 
 ## 主流程
 
