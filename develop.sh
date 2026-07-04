@@ -4,11 +4,11 @@ set -euo pipefail
 npm run developing -- \
   --config "developing-forge.yaml" \
   --config "secret.yaml" \
-  --target-path "output/codebase" \
-  --achive-dir "output/developing-archives" \
-  --project-progress-memory-path "output/developing/project-progress-memory" \
-  --code-design-memory-path "output/developing/code-design-memory" \
-  --goal-path "output/goal.md" \
+  --target-path "workspace/codebase" \
+  --archive-root "workspace/archives" \
+  --project-progress-memory-path "workspace/memory/project-progress" \
+  --code-design-memory-path "workspace/memory/code-design" \
+  --goal-path "workspace/plan/goal.md" \
   --max-iterations "100" \
   --max-task-devloop-iterations "10" \
   --max-memory-rounds "3"

@@ -44,7 +44,7 @@ export class ProjectDevLoop {
     team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
     targetPath: string,
     goal: string,
-    achiveDir: string,
+    archiveRoot: string,
     maxIterations: number,
     maxTaskDevLoopIterations: number,
     projectProgressMemoryPath: string,
@@ -58,7 +58,7 @@ export class ProjectDevLoop {
       goal,
     };
 
-    await mkdir(achiveDir, { recursive: true });
+    await mkdir(archiveRoot, { recursive: true });
 
     const memoryStore = new Memory(defaultMemoryAgentNames);
     const taskDevLoop = new TaskDevLoop();
@@ -66,7 +66,7 @@ export class ProjectDevLoop {
 
     for (let iteration = 1; iteration <= maxIterations; iteration++) {
       console.log(`\n# Project dev loop iteration ${String(iteration)}\n`);
-      const archiveDir = path.join(achiveDir, new Date().toISOString().replace(/[:.]/g, "-"));
+      const archiveDir = path.join(archiveRoot, new Date().toISOString().replace(/[:.]/g, "-"));
       await mkdir(archiveDir, { recursive: true });
       const logRecord: RecordCallback = (thread, record) => {
         appendFileSync(

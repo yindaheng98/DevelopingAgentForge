@@ -16,7 +16,7 @@ import { agentFactories } from "./factory.js";
 export type DevelopingOptions = {
   targetPath: string;
   goalPath: string[];
-  achiveDir: string;
+  archiveRoot: string;
   maxIterations: number;
   maxTaskDevLoopIterations: number;
   projectProgressMemoryPath: string;
@@ -36,7 +36,7 @@ export async function developing(
     team,
     options.targetPath,
     goal,
-    options.achiveDir,
+    options.archiveRoot,
     options.maxIterations,
     options.maxTaskDevLoopIterations,
     options.projectProgressMemoryPath,
@@ -73,9 +73,9 @@ export const developingArgsOptions = {
     multiple: true,
     description: "Goal document path; repeat to concatenate multiple goals in order",
   },
-  "achive-dir": {
+  "archive-root": {
     type: "string",
-    description: "Archive folder for per-iteration reports",
+    description: "Archive root folder for per-iteration reports",
   },
   "max-iterations": {
     type: "string",
@@ -119,7 +119,7 @@ export const developingPipeline = definePipeline({
     const {
       "target-path": targetPath,
       "goal-path": goalPath,
-      "achive-dir": achiveDir,
+      "archive-root": archiveRoot,
       "max-iterations": maxIterations,
       "max-task-devloop-iterations": maxTaskDevLoopIterations,
       "project-progress-memory-path": projectProgressMemoryPath,
@@ -131,7 +131,7 @@ export const developingPipeline = definePipeline({
     if (
       targetPath === undefined ||
       goalPath === undefined ||
-      achiveDir === undefined ||
+      archiveRoot === undefined ||
       projectProgressMemoryPath === undefined ||
       codeDesignMemoryPath === undefined
     ) {
@@ -139,7 +139,7 @@ export const developingPipeline = definePipeline({
         [
           "--target-path",
           "--goal-path",
-          "--achive-dir",
+          "--archive-root",
           "--project-progress-memory-path",
           "--code-design-memory-path",
         ].join(", ") + " are required",
@@ -149,7 +149,7 @@ export const developingPipeline = definePipeline({
     await developing(team, {
       targetPath,
       goalPath,
-      achiveDir,
+      archiveRoot,
       maxIterations: Number(maxIterations),
       maxTaskDevLoopIterations: Number(maxTaskDevLoopIterations),
       projectProgressMemoryPath,

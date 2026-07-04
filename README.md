@@ -14,7 +14,7 @@ The usual entry point is [`develop.sh`](develop.sh), which calls `npm run develo
 - the project progress memory directory passed with `--project-progress-memory-path`
 - the code design memory directory passed with `--code-design-memory-path`
 - the target codebase directory
-- the development archive directory, passed through the current CLI option name `--achive-dir`
+- the development archive root directory passed with `--archive-root`
 
 The pipeline works in the configured `--target-path`, reads the current high-level objective from one or more `--goal-path` files, recalls and updates project progress memory under `--project-progress-memory-path`, recalls and updates code design memory under `--code-design-memory-path`, and archives per-iteration task/review artifacts and streamed agent records under the configured archive directory.
 
@@ -93,7 +93,7 @@ npm run developing -- \
   --config "developing-forge.yaml" \
   --config "secret.yaml" \
   --target-path "output/codebase" \
-  --achive-dir "output/developing-archives" \
+  --archive-root "output/developing-archives" \
   --project-progress-memory-path "output/developing/project-progress-memory" \
   --code-design-memory-path "output/developing/code-design-memory" \
   --goal-path "output/goal.md" \
@@ -103,8 +103,6 @@ npm run developing -- \
   --memory-clean-interval "0"
 ```
 
-The current CLI option name is `--achive-dir`.
-
 When using the published package bin directly, replace `npm run developing --` with `developing-agent-forge developing` and keep the same pipeline options.
 
 ## Options Reference
@@ -113,7 +111,7 @@ When using the published package bin directly, replace `npm run developing --` w
 | -------------------------------- | ---------------------------------------------------------------------------- |
 | `--config`                       | One or more YAML config files loaded with `coding-agent-forge`.              |
 | `--target-path`                  | Target codebase directory.                                                   |
-| `--achive-dir`                   | Project development archive directory.                                       |
+| `--archive-root`                 | Project development archive root directory.                                  |
 | `--project-progress-memory-path` | Memory directory used for project progress continuity.                       |
 | `--code-design-memory-path`      | Memory directory used for code design continuity.                            |
 | `--goal-path`                    | Markdown file containing the current objective and task context; repeatable. |
@@ -168,4 +166,3 @@ The pipeline maintains:
 | A task keeps returning `REVISE`         | The inner developer/reviewer loop has not reached `ACCEPT`.       | Read the Developer reports and Reviewer feedback in the timestamped archive folder.              |
 | A task returns `REDIRECT`               | The reviewer decided the task direction or premise should change. | Inspect `task_round_summary.md`; its contents are passed into the next manager selection round.  |
 | A new goal keeps inheriting old context | One of the memory directories still contains old task state.      | Update `--goal-path`; if needed, edit or delete stale memory files before rerunning the wrapper. |
-| The archive option looks misspelled     | The current CLI option name is `--achive-dir`.                    | Use the current option name until the CLI changes.                                               |

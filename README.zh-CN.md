@@ -14,7 +14,7 @@
 - 通过 `--project-progress-memory-path` 传入的项目进度 memory 目录
 - 通过 `--code-design-memory-path` 传入的代码设计 memory 目录
 - 目标代码库目录
-- development archive 目录；当前 CLI 参数名仍是 `--achive-dir`
+- 通过 `--archive-root` 传入的 development archive 根目录
 
 pipeline 会在配置的 `--target-path` 中继续写代码，从一个或多个 `--goal-path` 文件读取当前高层任务目标，召回并更新 `--project-progress-memory-path` 下的项目进度记忆，召回并更新 `--code-design-memory-path` 下的代码设计记忆，并把每轮 task/review 产物和 streamed agent records 归档到 archive 目录。
 
@@ -93,7 +93,7 @@ npm run developing -- \
   --config "developing-forge.yaml" \
   --config "secret.yaml" \
   --target-path "output/codebase" \
-  --achive-dir "output/developing-archives" \
+  --archive-root "output/developing-archives" \
   --project-progress-memory-path "output/developing/project-progress-memory" \
   --code-design-memory-path "output/developing/code-design-memory" \
   --goal-path "output/goal.md" \
@@ -103,8 +103,6 @@ npm run developing -- \
   --memory-clean-interval "0"
 ```
 
-当前 CLI 参数名是 `--achive-dir`。
-
 如果直接使用发布后的 package bin，把 `npm run developing --` 替换成 `developing-agent-forge developing`，其余 pipeline 参数保持不变。
 
 ## 参数参考
@@ -113,7 +111,7 @@ npm run developing -- \
 | -------------------------------- | ---------------------------------------------------------------------------- |
 | `--config`                       | 用 `coding-agent-forge` 加载的一个或多个 YAML config 文件。                  |
 | `--target-path`                  | 目标代码库目录。                                                             |
-| `--achive-dir`                   | Project development archive 目录。                                           |
+| `--archive-root`                 | Project development archive 根目录。                                         |
 | `--project-progress-memory-path` | 用于保持项目进度连续性的 memory 目录。                                       |
 | `--code-design-memory-path`      | 用于保持代码设计连续性的 memory 目录。                                       |
 | `--goal-path`                    | 包含当前 high-level objective 和 task context 的 Markdown 文件；可重复传入。 |
@@ -168,4 +166,3 @@ pipeline 会维护：
 | 某个任务持续返回 `REVISE` | 内层 developer/reviewer 循环尚未达到 `ACCEPT`。       | 阅读按时间戳归档的 Developer reports 和 Reviewer feedback。                |
 | 某个任务返回 `REDIRECT`   | reviewer 判断当前任务方向或前提需要改变。             | 查看 `task_round_summary.md`；它的正文会传入下一轮 manager 任务选择。      |
 | 新 goal 仍然继承旧上下文  | 某个 memory 目录里还保留旧任务状态。                  | 更新 `--goal-path`；必要时编辑或删除过时 memory 文件，再重新运行 wrapper。 |
-| Archive 参数看起来拼错    | 当前 CLI 参数名就是 `--achive-dir`。                  | 在 CLI 改名前继续使用当前参数名。                                          |
