@@ -178,8 +178,6 @@ export class ProjectDevLoop {
         logRecord,
       );
 
-      await callbacks?.onTaskFinish?.(agentVariables, taskBrief, taskResult, thingsToRemember);
-
       if (cleanMemory) {
         console.log(
           `\n# Cleaning project progress memory after project dev loop iteration ${String(iteration)}\n`,
@@ -191,6 +189,8 @@ export class ProjectDevLoop {
           logRecord,
         );
       }
+
+      await callbacks?.onTaskFinish?.(agentVariables, taskBrief, taskResult, thingsToRemember);
     }
 
     throw new Error(
