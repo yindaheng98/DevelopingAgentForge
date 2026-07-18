@@ -101,7 +101,7 @@ ${ponytailSkillPrompt}
 
 ${goalInstructionText}
 
-Project root: ${targetPath}/.
+Project root: ${targetPath}
 
 Task:
 ${quoteBlock(taskBrief)}
@@ -139,7 +139,7 @@ function buildUpdatePrompt(
   return `
 ${goalInstructionText}
 
-Project root: ${targetPath}/.
+Project root: ${targetPath}
 
 Task:
 ${quoteBlock(taskBrief)}

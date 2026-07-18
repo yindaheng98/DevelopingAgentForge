@@ -32,6 +32,6 @@ export abstract class DevelopingAgent<Variables extends DevelopingAgentVariables
   }
 
   protected workspaceRelativePath(filePath: string): string {
-    return path.relative(this.workspacePath, path.resolve(filePath)) || ".";
+    return `./${path.relative(this.workspacePath, path.resolve(filePath))}`;
   }
 }

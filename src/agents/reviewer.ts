@@ -74,7 +74,8 @@ ${ponytailReviewSkillPrompt}
 
 ${goalInstructionText}
 
-Project root: ${targetPath}/. Read only.
+Project root: ${targetPath}
+Read only.
 
 Task:
 ${quoteBlock(variables.taskBrief)}
