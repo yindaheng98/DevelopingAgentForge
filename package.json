@@ -1,6 +1,6 @@
 {
   "name": "developing-agent-forge",
-  "version": "2.10.6",
+  "version": "2.10.7",
   "description": "Goal-driven code development pipelines for coding agents, built on coding-agent-forge.",
   "repository": {
     "type": "git",
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "coding-agent-forge": ">=1.5.3",
-    "memory-agent-forge": ">=1.2.11"
+    "memory-agent-forge": ">=1.2.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
