@@ -1,5 +1,4 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { ponytailSkillPrompt } from "./ponytail.js";
 import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -53,6 +52,7 @@ ${quoteBlock(variables.reviewerReport)}`
         return buildRecallPrompt(goalInstructionText, variables.taskBrief);
       case "develop": {
         return buildDevelopPrompt(
+          this.constantsPromptText,
           goalInstructionText,
           targetPath,
           variables.taskBrief,
@@ -88,6 +88,7 @@ Recall code/design memory relevant to the task:
 }
 
 function buildDevelopPrompt(
+  constantsPromptText: string,
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
@@ -97,7 +98,7 @@ function buildDevelopPrompt(
   const reviewerInstruction = reviewerReport ? " Address reviewer concerns." : "";
 
   return `
-${ponytailSkillPrompt}
+${constantsPromptText}
 
 ${goalInstructionText}
 

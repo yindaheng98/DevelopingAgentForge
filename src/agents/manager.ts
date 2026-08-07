@@ -106,6 +106,7 @@ ${quoteBlock(variables.lastTaskRoundSummary)}`
         return buildRecallPrompt(goalInstructionText);
       case "select":
         return buildSelectPrompt(
+          this.constantsPromptText,
           goalInstructionText,
           targetPath,
           variables.projectProgressMemory,
@@ -113,6 +114,7 @@ ${quoteBlock(variables.lastTaskRoundSummary)}`
         );
       case "update":
         return buildUpdatePrompt(
+          this.constantsPromptText,
           goalInstructionText,
           targetPath,
           variables.taskBrief,
@@ -134,12 +136,15 @@ Recall project progress relevant to the current goal:
 }
 
 function buildSelectPrompt(
+  constantsPromptText: string,
   goalInstructionText: string,
   targetPath: string,
   projectProgressMemory: string,
   lastTaskRoundSummary: string,
 ): string {
   return `
+${constantsPromptText}
+
 ${goalInstructionText}
 
 Project root: ${targetPath}
@@ -168,12 +173,15 @@ Return only: FINISHED | Markdown starting with "# Task Brief".
 }
 
 function buildUpdatePrompt(
+  constantsPromptText: string,
   goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
   taskRoundSummary: string,
 ): string {
   return `
+${constantsPromptText}
+
 ${goalInstructionText}
 
 Project root: ${targetPath}

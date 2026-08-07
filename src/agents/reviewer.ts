@@ -1,5 +1,4 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { ponytailReviewSkillPrompt } from "./ponytail.js";
 import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
@@ -70,7 +69,7 @@ Correct it.
     const goalInstructionText = goalInstruction(variables.goal);
 
     return `
-${ponytailReviewSkillPrompt}
+${this.constantsPromptText}
 
 ${goalInstructionText}
 
