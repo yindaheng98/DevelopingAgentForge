@@ -20,9 +20,6 @@ export type TaskDevLoopAgentVariablesByName = {
   "code-reviewer": CodeReviewerVariables;
 } & MemoryAgentVariablesByName;
 
-const CODE_DESIGN_MEMORY_DOMAIN_HINT =
-  "Durable code/design memory: interfaces, constraints, invariants, repo conventions, and implementation decisions.";
-
 type TaskRoundFinalDecision = "ACCEPT" | "REDIRECT" | "FAILED";
 
 export type TaskDevLoopResult = {
@@ -31,6 +28,9 @@ export type TaskDevLoopResult = {
 };
 
 export class TaskDevLoop {
+  private static readonly CODE_DESIGN_MEMORY_DOMAIN_HINT =
+    "Durable code/design memory: interfaces, constraints, invariants, repo conventions, and implementation decisions.";
+
   async develop(
     team: AgentTeam<TaskDevLoopAgentVariablesByName>,
     targetPath: string,
@@ -71,7 +71,7 @@ export class TaskDevLoop {
     const codeDesignMemory = (
       await memoryStore.recall(
         team,
-        CODE_DESIGN_MEMORY_DOMAIN_HINT,
+        TaskDevLoop.CODE_DESIGN_MEMORY_DOMAIN_HINT,
         codeDesignMemoryPath,
         maxMemoryRounds,
         codeDesignMemoryGuidance,
@@ -188,7 +188,7 @@ ${quoteBlock(taskDevReport)}
     );
     await memoryStore.remember(
       team,
-      CODE_DESIGN_MEMORY_DOMAIN_HINT,
+      TaskDevLoop.CODE_DESIGN_MEMORY_DOMAIN_HINT,
       codeDesignMemoryPath,
       maxMemoryRounds,
       thingsToRemember,
@@ -198,7 +198,7 @@ ${quoteBlock(taskDevReport)}
       console.log("\n# Cleaning code design memory\n");
       await memoryStore.clean(
         team,
-        CODE_DESIGN_MEMORY_DOMAIN_HINT,
+        TaskDevLoop.CODE_DESIGN_MEMORY_DOMAIN_HINT,
         codeDesignMemoryPath,
         logRecord,
       );
