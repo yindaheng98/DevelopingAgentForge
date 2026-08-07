@@ -1,6 +1,6 @@
 {
   "name": "developing-agent-forge",
-  "version": "2.10.5",
+  "version": "2.10.6",
   "description": "Goal-driven code development pipelines for coding agents, built on coding-agent-forge.",
   "repository": {
     "type": "git",
@@ -45,7 +45,7 @@
     "developing": "tsx src/cli.ts developing"
   },
   "dependencies": {
-    "coding-agent-forge": ">=1.5.2",
+    "coding-agent-forge": ">=1.5.3",
     "memory-agent-forge": ">=1.2.11"
   },
   "devDependencies": {

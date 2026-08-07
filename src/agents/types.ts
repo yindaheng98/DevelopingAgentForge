@@ -1,4 +1,4 @@
-import type { PromptConstants, RecordCallback, Thread } from "coding-agent-forge";
+import type { AgentConstants, RecordCallback, Thread } from "coding-agent-forge";
 import { Agent } from "coding-agent-forge/agent";
 import { readFileSync, statSync } from "node:fs";
 import path from "node:path";
@@ -10,7 +10,7 @@ export type DevelopingAgentVariables = {
   goal: string;
 };
 
-export type DevelopingAgentConstants = PromptConstants & {
+export type DevelopingAgentConstants = AgentConstants & {
   workspacePath: string;
   prompts?: DevelopingConstantPrompt[];
 };
