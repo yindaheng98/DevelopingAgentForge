@@ -34,7 +34,6 @@ export class TaskDevLoop {
   async develop(
     team: AgentTeam<TaskDevLoopAgentVariablesByName>,
     targetPath: string,
-    goal: string,
     archiveDir: string,
     maxIterations: number,
     taskBrief: string,
@@ -45,7 +44,6 @@ export class TaskDevLoop {
   ): Promise<TaskDevLoopResult> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath,
-      goal,
     };
 
     await mkdir(archiveDir, { recursive: true });

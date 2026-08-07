@@ -55,7 +55,6 @@ export class ProjectDevLoop {
   ): Promise<void> {
     const agentVariables: DevelopingAgentVariables = {
       targetPath: path.resolve(targetPath),
-      goal,
     };
 
     await mkdir(archiveRoot, { recursive: true });
@@ -82,6 +81,7 @@ export class ProjectDevLoop {
         await codingManager.runStreamed(
           {
             ...agentVariables,
+            goal,
             phase: "recall",
             ...(lastTaskRoundSummary === undefined ? {} : { lastTaskRoundSummary }),
           },
@@ -116,6 +116,7 @@ export class ProjectDevLoop {
         await codingManager.runStreamed(
           {
             ...agentVariables,
+            goal,
             projectProgressMemory,
             phase: "select",
             ...(lastTaskRoundSummary === undefined ? {} : { lastTaskRoundSummary }),
@@ -137,7 +138,6 @@ export class ProjectDevLoop {
       const taskResult = await taskDevLoop.develop(
         team,
         agentVariables.targetPath,
-        agentVariables.goal,
         archiveDir,
         maxTaskDevLoopIterations,
         taskBrief,
@@ -156,6 +156,7 @@ export class ProjectDevLoop {
         await codingManager.runStreamed(
           {
             ...agentVariables,
+            goal,
             projectProgressMemory,
             phase: "update",
             taskBrief,

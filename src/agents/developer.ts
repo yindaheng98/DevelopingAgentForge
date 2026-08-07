@@ -1,5 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { goalInstruction, quoteBlock } from "./prompts.js";
+import { quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallDeveloperVariables = DevelopingAgentVariables & {
@@ -40,7 +40,6 @@ export class DeveloperAgent extends DevelopingAgent<DeveloperVariables> {
 
   protected buildPrompt(variables: Readonly<DeveloperVariables>): string {
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const goalInstructionText = goalInstruction(variables.goal);
     const reviewerReport =
       "reviewerReport" in variables && variables.reviewerReport
         ? `Reviewer report:
@@ -49,11 +48,10 @@ ${quoteBlock(variables.reviewerReport)}`
 
     switch (variables.phase) {
       case "recall":
-        return buildRecallPrompt(goalInstructionText, variables.taskBrief);
+        return buildRecallPrompt(variables.taskBrief);
       case "develop": {
         return buildDevelopPrompt(
           this.constantsPromptText,
-          goalInstructionText,
           targetPath,
           variables.taskBrief,
           variables.codeDesignMemory,
@@ -61,20 +59,13 @@ ${quoteBlock(variables.reviewerReport)}`
         );
       }
       case "update":
-        return buildUpdatePrompt(
-          goalInstructionText,
-          targetPath,
-          variables.taskBrief,
-          variables.taskRoundSummary,
-        );
+        return buildUpdatePrompt(targetPath, variables.taskBrief, variables.taskRoundSummary);
     }
   }
 }
 
-function buildRecallPrompt(goalInstructionText: string, taskBrief: string): string {
+function buildRecallPrompt(taskBrief: string): string {
   return `
-${goalInstructionText}
-
 Task:
 ${quoteBlock(taskBrief)}
 
@@ -89,7 +80,6 @@ Recall code/design memory relevant to the task:
 
 function buildDevelopPrompt(
   constantsPromptText: string,
-  goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
   codeDesignMemory: string,
@@ -99,8 +89,6 @@ function buildDevelopPrompt(
 
   return `
 ${constantsPromptText}
-
-${goalInstructionText}
 
 Project root: ${targetPath}
 
@@ -132,14 +120,11 @@ Return only: Markdown starting with "# Developer Report".
 }
 
 function buildUpdatePrompt(
-  goalInstructionText: string,
   targetPath: string,
   taskBrief: string,
   taskRoundSummary: string,
 ): string {
   return `
-${goalInstructionText}
-
 Project root: ${targetPath}
 
 Task:

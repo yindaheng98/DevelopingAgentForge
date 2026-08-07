@@ -1,5 +1,5 @@
 import type { RecordCallback } from "coding-agent-forge";
-import { goalInstruction, quoteBlock } from "./prompts.js";
+import { quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 export type CodeReviewerVariables = DevelopingAgentVariables & {
@@ -66,12 +66,9 @@ Correct it.
 
   protected buildPrompt(variables: Readonly<CodeReviewerVariables>): string {
     const targetPath = this.workspaceRelativePath(variables.targetPath);
-    const goalInstructionText = goalInstruction(variables.goal);
 
     return `
 ${this.constantsPromptText}
-
-${goalInstructionText}
 
 Project root: ${targetPath}
 Read only.
