@@ -25,16 +25,24 @@ threads:
       workingDirectory: &memoryWorkingDir output/developing
 
 agents:
-  coding-manager: &managerAgentConfig
+  coding-manager:
     thread: develop-manager
-    constants: &developAgentConstants
+    constants:
       workspacePath: *developerWorkspacePath
 
   developer:
     thread: develop-coding
-    constants: *developAgentConstants
+    constants:
+      workspacePath: *developerWorkspacePath
+      prompts:
+        - url: https://raw.githubusercontent.com/DietrichGebert/ponytail/HEAD/skills/ponytail/SKILL.md
 
-  code-reviewer: *managerAgentConfig
+  code-reviewer:
+    thread: develop-manager
+    constants:
+      workspacePath: *developerWorkspacePath
+      prompts:
+        - url: https://raw.githubusercontent.com/DietrichGebert/ponytail/HEAD/skills/ponytail-review/SKILL.md
 
   memory-reader: &memoryAgentConfig
     thread: memory
