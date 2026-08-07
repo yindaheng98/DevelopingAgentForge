@@ -9,7 +9,7 @@ export type CodeReviewerVariables = DevelopingAgentVariables & {
 };
 
 export type ReviewDecision = "ACCEPT" | "REVISE" | "REDIRECT";
-const REVIEW_DECISION_PATTERN = /^(ACCEPT|REVISE|REDIRECT)\b/;
+const REVIEW_DECISION_PATTERN = /^[^A-Za-z0-9]*(ACCEPT|REVISE|REDIRECT)(?=$|[^A-Za-z0-9])/;
 const MAX_FORMAT_CORRECTION_ATTEMPTS = 3;
 
 export class CodeReviewerAgent extends DevelopingAgent<CodeReviewerVariables> {

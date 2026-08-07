@@ -29,7 +29,7 @@ export type CodingManagerVariables =
   | UpdateCodingManagerVariables;
 
 export type CodingManagerDecision = "FINISHED" | "TASK_BRIEF";
-const MANAGER_DECISION_PATTERN = /^(FINISHED|# Task Brief)\b/;
+const MANAGER_DECISION_PATTERN = /^[^A-Za-z0-9]*(FINISHED|Task\s+Brief)(?=$|[^A-Za-z0-9])/;
 const MAX_FORMAT_CORRECTION_ATTEMPTS = 3;
 
 export class CodingManagerAgent extends DevelopingAgent<CodingManagerVariables> {
