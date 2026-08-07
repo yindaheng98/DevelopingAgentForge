@@ -12,6 +12,7 @@ import {
   type ProjectDevLoopCallbacks,
 } from "./project-devloop.js";
 import { agentFactories } from "./factory.js";
+import type { DevelopingAgentFactorySpecByKind } from "../agents/index.js";
 
 export type DevelopingOptions = {
   targetPath: string;
@@ -27,7 +28,7 @@ export type DevelopingOptions = {
 };
 
 export async function developing(
-  team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
+  team: AgentTeam<ProjectDevLoopAgentVariablesByName, DevelopingAgentFactorySpecByKind>,
   options: DevelopingOptions,
 ): Promise<void> {
   const goal = await readGoal(options.goalPath);
@@ -113,7 +114,7 @@ export const developingPipeline = definePipeline({
   argsOptions: developingArgsOptions,
   agentFactories,
   async run(
-    team: AgentTeam<ProjectDevLoopAgentVariablesByName>,
+    team: AgentTeam<ProjectDevLoopAgentVariablesByName, DevelopingAgentFactorySpecByKind>,
     options: PipelineOptions<typeof developingArgsOptions> & Pick<DevelopingOptions, "callbacks">,
   ) {
     const {

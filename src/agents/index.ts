@@ -8,6 +8,7 @@ export { CodeReviewerAgent, type CodeReviewerVariables, type ReviewDecision } fr
 export {
   DevelopingAgent,
   type DevelopingAgentConstants,
+  type DevelopingConstantPrompt,
   type DevelopingAgentVariables,
 } from "./types.js";
-export { agentFactories } from "./factory.js";
+export { agentFactories, type DevelopingAgentFactorySpecByKind } from "./factory.js";

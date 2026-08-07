@@ -45,7 +45,7 @@
     "developing": "tsx src/cli.ts developing"
   },
   "dependencies": {
-    "coding-agent-forge": ">=1.5.0",
+    "coding-agent-forge": ">=1.5.2",
     "memory-agent-forge": ">=1.2.9"
   },
   "devDependencies": {
