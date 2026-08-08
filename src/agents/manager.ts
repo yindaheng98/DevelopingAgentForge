@@ -151,6 +151,7 @@ ${constantsPromptText}
 ${goalInstructionText}
 
 Project root: ${targetPath}
+Read only.
 
 Project progress memory:
 ${quoteBlock(projectProgressMemory)}
