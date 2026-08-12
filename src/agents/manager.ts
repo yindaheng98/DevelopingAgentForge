@@ -3,20 +3,17 @@ import { goalInstruction, quoteBlock } from "./prompts.js";
 import { DevelopingAgent, type DevelopingAgentVariables } from "./types.js";
 
 type RecallCodingManagerVariables = DevelopingAgentVariables & {
-  goal: string;
   phase: "recall";
   lastTaskRoundSummary?: string;
 };
 
 type SelectCodingManagerVariables = DevelopingAgentVariables & {
-  goal: string;
   projectProgressMemory: string;
   phase: "select";
   lastTaskRoundSummary?: string;
 };
 
 type UpdateCodingManagerVariables = DevelopingAgentVariables & {
-  goal: string;
   projectProgressMemory: string;
   phase: "update";
   taskBrief: string;

@@ -7,6 +7,7 @@ export type DevelopingConstantPrompt = { url: string } | { path: string } | { te
 
 export type DevelopingAgentVariables = {
   targetPath: string;
+  goal: string;
 };
 
 export type DevelopingAgentConstants = AgentConstants & {
